@@ -1,75 +1,23 @@
-# Nuxt Minimal Starter
+# WikWok
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+一个简易的仿制 TikTok 的视频播放网站
 
-## Setup
+## 技术栈
 
-Make sure to install dependencies:
+Nuxt + Vue3 + Typescript + TailwindCSS
+
+## 项目亮点
+
+**响应式布局**:
+**搜索框样式**:
+
+## 快速开始
 
 ```bash
-# npm
+# 安装依赖
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
+# 启动前端项目
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+前端运行在 `http://localhost:3000`:
