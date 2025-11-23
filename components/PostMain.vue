@@ -5,14 +5,14 @@
     </div>
 
     <div class="pl-3 w-full px-4">
-      <div class="flex items-center justify-between pb-0.5">
+      <div class="flex items-center justify-between">
         <button>
           <span class="font-bold hover:underline cursor-pointer"> User name </span>
           <span class="text-[13px] text-light text-gray-500 pl-1 cursor-pointer"> User name </span>
         </button>
 
         <button
-          class="border text-[15px] px-[21px] py-0.5 border-[#F02C56] text-[#F02C56] hover:bg-[#ffeef2] font-semibold rounded-md"
+          class="border text-[15px] px-[21px] py-0.5 border-[#F02C56] text-[#F02C56] hover:bg-[#ffeef2] font-semibold rounded-md cursor-pointer"
         >
           关注
         </button>
@@ -22,11 +22,11 @@
       <div class="text-[14px] text-gray-500 pb-0.5">#fun #cool #SuperAwesome</div>
       <div class="text-[14px] pb-0.5 flex items-center font-semibold">
         <Icon name="mdi:music" size="17" />
-        <div class="px-1">original sound - AWESOME</div>
+        <div class="px-1">鬼刀 - MP4</div>
         <Icon name="mdi:heart" size="20" />
       </div>
 
-      <div class="mt-2.5 flex">
+      <div class="mt-1 flex">
         <div
           class="relative min-h-[480px] max-h-[580px] max-w-[260px] flex items-center bg-black rounded-xl cursor-pointer"
         >
@@ -34,31 +34,49 @@
             ref="video"
             loop
             muted
-            class="rounded-xl object-cover mx-auto h-full"
+            class="rounded-xl object-cover h-full"
             src="../public/test.mp4"
           />
-          <img class="absolute right-2 bottom-14" width="90" src="../assets/images/logo.jpg" />
+          <img
+            class="absolute -right-4 bottom-14 round"
+            width="110"
+            src="../assets/images/tiktok_float.png"
+          />
         </div>
         <div class="relative mr-[75px]">
-          <div class="absolute bottom-0 pl-2">
-            <div class="pb-4 text-center">
-              <button class="rounded-full bg-gray-200 p-2 cursor-pointer">
-                <Icon name="mdi:heart" size="25" />
+          <div class="absolute bottom-0 ml-2">
+            <div class="pb-2 text-center">
+              <button
+                class="rounded-full bg-gray-600 hover:bg-gray-700 cursor-pointer p-2 flex group"
+              >
+                <Icon name="mdi:heart" class="text-red-400 group-hover:text-red-600" size="25" />
               </button>
               <span class="text-xs text-gray-800 font-semibold">点赞数</span>
             </div>
 
-            <div class="pb-4 text-center">
-              <div class="rounded-full bg-gray-200 p-2 cursor-pointer">
-                <Icon name="bx:bxs-message-rounded-dots" size="25" />
-              </div>
+            <div class="pb-2 text-center">
+              <button
+                class="rounded-full bg-gray-600 hover:bg-gray-700 p-2 cursor-pointer flex group"
+              >
+                <Icon
+                  name="bx:bxs-message-rounded-dots"
+                  class="text-white group-hover:text-red-500"
+                  size="25"
+                />
+              </button>
               <span class="text-xs text-gray-800 font-semibold">43</span>
             </div>
 
             <div class="text-center">
-              <div class="rounded-full bg-gray-200 p-2 cursor-pointer">
-                <Icon name="ri:share-forward-fill" size="25" />
-              </div>
+              <button
+                class="rounded-full bg-gray-600 hover:bg-gray-700 p-2 cursor-pointer flex group"
+              >
+                <Icon
+                  name="ri:share-forward-fill"
+                  class="text-white group-hover:text-red-500"
+                  size="25"
+                />
+              </button>
               <span class="text-xs text-gray-800 font-semibold">55</span>
             </div>
           </div>
