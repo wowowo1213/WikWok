@@ -6,10 +6,10 @@
           <img
             src="../assets/images/logo.jpg"
             alt="WIKWOK Logo"
-            class="rounded-full shadow-lg ml-4 w-[50px] md:w-[54px]"
+            class="rounded-full shadow-lg ml-4 w-[44px] lg:w-[54px]"
           />
           <h1
-            class="ml-2 font-sans font-bold text-xl md:text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-purple-500 tracking-tight drop-shadow-lg"
+            class="ml-2 font-sans font-bold md:text-xl lg:text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-purple-500 tracking-tight drop-shadow-lg"
           >
             WIKWOK
           </h1>
@@ -64,7 +64,7 @@
           />
           <div class="relative">
             <button class="mt-1 cursor-pointer" @click="showMenu = !showMenu">
-              <img class="rounded-full" width="33" src="../assets/images/logo.jpg" />
+              <img class="rounded-full" width="33" src="~/assets/images/logo.jpg" />
             </button>
 
             <div

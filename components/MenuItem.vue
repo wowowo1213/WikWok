@@ -9,7 +9,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 const props = defineProps(['iconName', 'colorString', 'sizeString']);
 const { iconName, colorString, sizeString } = toRefs(props);
 
@@ -21,9 +21,12 @@ const iconNames = {
   Following: 'ci:group',
   LIVE: 'mdi:video-outline',
 };
+
+type iconKey = keyof typeof iconNames;
+
 for (const key in iconNames) {
-  if (key === iconName.value) {
-    icon.value = iconNames[key];
+  if (key === iconName?.value) {
+    icon.value = iconNames[key as iconKey];
   }
 }
 
@@ -31,10 +34,13 @@ const TAB_NAMES = {
   'For You': '为您推荐',
   Following: '你的关注',
   LIVE: '生活',
-};
+} as const;
+
+type TabKey = keyof typeof TAB_NAMES;
+
 for (const key in TAB_NAMES) {
-  if (key === iconName.value) {
-    name.value = TAB_NAMES[key];
+  if (key === iconName?.value) {
+    name.value = TAB_NAMES[key as TabKey];
   }
 }
 </script>

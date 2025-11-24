@@ -19,6 +19,6 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 defineProps(['user']);
 </script>

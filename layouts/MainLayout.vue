@@ -1,6 +1,6 @@
 <template>
   <TopNav />
-  <div :class="route.fullPath === '/' ? 'max-w-[1140px]' : ''" class="flex justify-between w-full">
+  <div class="flex justify-between w-full">
     <div>
       <SideNavMain />
     </div>
@@ -8,6 +8,4 @@
   </div>
 </template>
 
-<script setup lang="ts">
-const route = useRoute();
-</script>
+<script setup lang="ts"></script>

@@ -1,7 +1,7 @@
 <template>
-  <div id="PostMain" class="flex border-b py-6">
+  <div id="MainView" class="flex border-b py-6">
     <div class="cursor-pointer">
-      <img class="rounded-full max-h-[60px]" width="60" src="../assets/images/logo.jpg" />
+      <img class="rounded-full max-h-[60px]" width="60" src="~/assets/images/logo.jpg" />
     </div>
 
     <div class="pl-3 w-full px-4">
@@ -40,7 +40,7 @@
           <img
             class="absolute -right-4 bottom-14 round"
             width="110"
-            src="../assets/images/tiktok_float.png"
+            src="~/assets/images/tiktok_float.png"
           />
         </div>
         <div class="relative mr-[75px]">
@@ -86,12 +86,14 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 const props = defineProps(['post']);
 
-let video = ref(null);
+let video = ref<null | HTMLVideoElement>(null);
 
 onMounted(() => {
-  video.value.play();
+  if (video.value) {
+    video.value.play();
+  }
 });
 </script>

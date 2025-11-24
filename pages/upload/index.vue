@@ -35,14 +35,11 @@
           class="mx-auto mt-4 md:mb-12 mb-16 flex items-center justify-center w-full max-w-[260px] h-[550px] p-3 rounded-2xl cursor-pointer relative"
         >
           <div class="bg-white h-full w-full" />
-          <img
-            class="absolute z-20 pointer-events-none"
-            src="../../assets/images/mobile-case.png"
-          />
+          <img class="absolute z-20 pointer-events-none" src="~/assets/images/mobile-case.png" />
           <img
             class="absolute right-1 bottom-6 z-20"
             width="100"
-            src="../../assets/images/tiktok_float.png"
+            src="~/assets/images/tiktok_float.png"
           />
           <video
             autoplay
@@ -58,7 +55,7 @@
             <div class="flex items-center truncate">
               <Icon name="clarity:success-standard-line" size="16" class="min-w-[16px]" />
               <div class="text-[11px] pl-1 mr-1 truncate text-ellipsis">
-                {{ fileData.name }}
+                {{ fileData?.name }}
               </div>
             </div>
             <button class="w-[70px] text-[11px] font-bold cursor-pointer" @click="changeVideo">
@@ -119,46 +116,53 @@
   </UploadLayout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import UploadLayout from '~/layouts/UploadLayout.vue';
 
-let file = ref(null);
-let fileData = ref(null);
-let fileDisplay = ref(null);
-let caption = ref('');
-let isUploading = ref(false);
-let errorType = ref(null);
-let errors = ref(null);
+const file = ref<HTMLInputElement | null>(null);
+const fileData = ref<File | null>(null);
+const fileDisplay = ref<string | null>(null);
+const caption = ref('');
+const isUploading = ref(false);
+const errorType = ref<'caption' | 'file' | null>(null);
+const errors = ref<unknown>(null);
 
 watch(
-  () => caption.value,
+  () => caption,
   caption => {
-    if (caption.length >= 150) {
-      errorType.value = 'caption';
-      return;
-    }
-    errorType.value = '';
+    errorType.value = caption.value.length >= 150 ? 'caption' : null;
   }
 );
 
-const onDrop = e => {
-  errorType.value = '';
-  file.value = e.target.files[0];
-  fileData.value = e.target.files[0];
+const onDrop = (e: DragEvent) => {
+  errorType.value = null;
 
-  let extention = file.value.name.substring(file.value.name.lastIndexOf('.') + 1);
+  if (!e.dataTransfer?.files?.length) {
+    errorType.value = 'file';
+    return;
+  }
 
+  if (!e.dataTransfer.files[0]) {
+    errorType.value = 'file';
+    return;
+  }
+
+  const extention = e.dataTransfer.files[0]?.name.split('.').pop()?.toLowerCase();
   if (extention !== 'mp4') {
     errorType.value = 'file';
     return;
   }
 
-  fileDisplay.value = URL.createObjectURL(e.target.files[0]);
+  fileData.value = e.dataTransfer.files[0];
+  fileDisplay.value = URL.createObjectURL(e.dataTransfer.files[0]);
 };
 
-const onChange = () => {
-  fileData.value = file.value.files[0];
-  fileDisplay.value = URL.createObjectURL(file.value.files[0]);
+const onChange = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  if (target.files?.[0]) {
+    fileData.value = target.files[0];
+    fileDisplay.value = URL.createObjectURL(target.files[0]);
+  }
 };
 
 const discard = () => {
@@ -169,6 +173,6 @@ const discard = () => {
 };
 
 const changeVideo = () => {
-  file.value.click();
+  file.value?.click();
 };
 </script>

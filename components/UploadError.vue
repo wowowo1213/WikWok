@@ -9,20 +9,20 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 const props = defineProps(['errorType']);
 const { errorType } = toRefs(props);
 
 let error = ref('');
 
 watch(
-  () => errorType.value,
+  () => errorType?.value,
   () => {
-    if (errorType.value == 'caption') {
+    if (errorType?.value == 'caption') {
       error.value = '字母最长长度为150个字符!';
-    } else if (errorType.value == 'bio') {
+    } else if (errorType?.value == 'bio') {
       error.value = 'Maximum 80 characters.';
-    } else if (errorType.value == 'file') {
+    } else if (errorType?.value == 'file') {
       error.value = '仅支持MP4文件格式';
     } else {
       error.value = '';
