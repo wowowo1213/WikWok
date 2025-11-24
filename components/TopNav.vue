@@ -42,19 +42,20 @@
           class="flex items-center border border-white rounded-xl px-3 py-[6px] h-10 bg-gray-100 cursor-pointer"
         >
           <Icon name="mdi:plus" color="#000000" size="22" />
-          <span class="px-2 font-medium text-[15px]">Upload</span>
+          <span class="px-1 font-medium text-[15px] w-[40px]">上传</span>
         </button>
 
-        <div v-if="false" class="flex items-center">
+        <div v-if="!$userStore.id" class="flex items-center">
           <button
-            class="min-w-26 flex items-center bg-[#F02C56] text-white rounded-xl px-3 py-[6px] h-10 cursor-pointer"
+            @click="$generalStore.isLoginOpen = true"
+            class="min-w-22 flex items-center bg-[#F02C56] text-white rounded-xl px-3 py-[6px] h-10 cursor-pointer"
           >
-            <span class="mx-4 font-medium text-[15px]">Log in</span>
+            <span class="mx-4 font-medium text-[15px]">登录</span>
           </button>
           <Icon name="mdi:dots-vertical" class="text-white cursor-pointer" size="25" />
         </div>
 
-        <div class="flex items-center text-white">
+        <div v-else class="flex items-center text-white">
           <Icon class="ml-1 mr-4 cursor-pointer" name="carbon:send-alt" color="#161724" size="30" />
           <Icon
             class="mr-5 cursor-pointer"

@@ -11,6 +11,7 @@
           <div>
             <button
               v-if="true"
+              @click="$generalStore.isEditProfileOpen = true"
               class="w-[100px] lg:w-[114px] flex item-center rounded-md py-1.5 px-3.5 ml-2 mt-3 text-[12px] lg:text-[15px] font-semibold border hover:bg-gray-100 cursor-pointer"
             >
               <Icon class="mt-0.5 mr-1" name="mdi:pencil" size="14" />
@@ -73,4 +74,6 @@
 
 <script setup lang="ts">
 import MainLayout from '~/layouts/MainLayout.vue';
+import { storeToRefs } from 'pinia';
+const { $userStore, $profileStore, $generalStore } = useNuxtApp();
 </script>

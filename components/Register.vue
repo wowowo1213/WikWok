@@ -13,7 +13,7 @@
 
   <div class="px-6 pb-3">
     <TextInput
-      placeholder="邮箱地址"
+      placeholder="邮箱"
       v-model="email"
       inputType="email"
       :error="errors && errors.email ? errors.email[0] : ''"
