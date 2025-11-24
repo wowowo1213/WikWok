@@ -9,7 +9,7 @@
             class="rounded-full shadow-lg ml-4 w-[44px] lg:w-[54px]"
           />
           <h1
-            class="ml-2 font-sans font-bold md:text-xl lg:text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-purple-500 tracking-tight drop-shadow-lg"
+            class="ml-2 font-sans font-bold text-[0px] md:text-xl lg:text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-purple-500 tracking-tight"
           >
             WIKWOK
           </h1>
@@ -17,7 +17,7 @@
       </div>
 
       <div
-        class="hidden md:flex items-center group bg-gray-700 hover:bg-gray-800 focus-within:bg-gray-800 border border-gray-600 hover:border-gray-200 focus-within:border-gray-200 hover:ring-2 focus-within:ring-2 hover:ring-gray-200 focus-within:ring-gray-200 rounded-2xl h-12 absolute left-1/2 -translate-x-1/2 max-w-[40%] w-full"
+        class="hidden md:flex max-w-[380px] h-11 lg:max-w-[480px] xl:max-w-[580px] w-full items-center group bg-gray-700 hover:bg-gray-800 focus-within:bg-gray-800 border border-gray-600 hover:border-gray-200 focus-within:border-gray-200 hover:ring-2 focus-within:ring-2 hover:ring-gray-200 focus-within:ring-gray-200 rounded-full"
       >
         <input
           type="text"

@@ -1,6 +1,6 @@
 <template>
   <MainLayout>
-    <div class="pt-[61px] w-[calc(100%-90px)] max-w-[690px]">
+    <div class="pt-[61px] w-full ml-[60px] lg:ml-[270px]">
       <MainView />
     </div>
   </MainLayout>

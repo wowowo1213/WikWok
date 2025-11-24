@@ -2,10 +2,7 @@
   <MainLayout>
     <div class="mt-[81px] lg:ml-[210px] ml-[65px] pr-2 w-full">
       <div class="flex">
-        <img
-          class="max-w-[54px] lg:max-w-[120px] rounded-full"
-          src="../../assets/images/logo.jpg"
-        />
+        <img class="max-w-[54px] lg:max-w-[120px] rounded-full" src="~/assets/images/logo.jpg" />
         <div class="ml-2 lg:ml-5 w-full h-[54px] lg:h-full flex justify-between lg:flex-col">
           <div>
             <div class="text-[22px] lg:text-[30px] font-bold truncate">User name</div>
@@ -14,7 +11,7 @@
           <div>
             <button
               v-if="true"
-              class="w-[100px] lg:w-[114px] flex item-center rounded-md py-1.5 px-3.5 ml-2 mt-3 text-[12px] lg:text-[15px] font-semibold border hover:bg-gray-100"
+              class="w-[100px] lg:w-[114px] flex item-center rounded-md py-1.5 px-3.5 ml-2 mt-3 text-[12px] lg:text-[15px] font-semibold border hover:bg-gray-100 cursor-pointer"
             >
               <Icon class="mt-0.5 mr-1" name="mdi:pencil" size="14" />
               <div>编辑信息</div>
@@ -33,15 +30,15 @@
       <div class="flex items-center pt-4">
         <div class="mr-4">
           <span class="font-bold">10K</span>
-          <span class="text-gray-500 font-light text-[15px] pl-1.5">关注列表</span>
+          <span class="text-gray-500 font-light text-[15px] pl-1.5 cursor-pointer">关注列表</span>
         </div>
         <div class="mr-4">
           <span class="font-bold">44K</span>
-          <span class="text-gray-500 font-light text-[15px] pl-1.5">粉丝</span>
+          <span class="text-gray-500 font-light text-[15px] pl-1.5 cursor-pointer">粉丝</span>
         </div>
         <div class="mr-4">
           <span class="font-bold">3K</span>
-          <span class="text-gray-500 font-light text-[15px] pl-1.5">赞过</span>
+          <span class="text-gray-500 font-light text-[15px] pl-1.5 cursor-pointer">赞过</span>
         </div>
       </div>
 
@@ -61,7 +58,14 @@
       <div
         class="mt-4 grid 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 grid-cols-2 gap-3"
       >
-        <PostUser />
+        <UserVideo />
+        <UserVideo />
+        <UserVideo />
+        <UserVideo />
+        <UserVideo />
+        <UserVideo />
+        <UserVideo />
+        <UserVideo />
       </div>
     </div>
   </MainLayout>

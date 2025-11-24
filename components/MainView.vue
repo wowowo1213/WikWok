@@ -18,7 +18,7 @@
         </button>
       </div>
 
-      <div class="text-[15px] pb-0.5 break-words md:max-w-[400px] max-w-[300px]">上传文本</div>
+      <div class="text-[15px] pb-0.5 break-words md:max-w-[400px] max-w-[300px]">标题</div>
       <div class="text-[14px] text-gray-500 pb-0.5">#fun #cool #SuperAwesome</div>
       <div class="text-[14px] pb-0.5 flex items-center font-semibold">
         <Icon name="mdi:music" size="17" />
@@ -28,7 +28,7 @@
 
       <div class="mt-1 flex">
         <div
-          class="relative min-h-[480px] max-h-[580px] max-w-[260px] flex items-center bg-black rounded-xl cursor-pointer"
+          class="relative min-h-[480px] max-h-[580px] w-full md:max-w-[260px] flex items-center bg-black rounded-xl cursor-pointer"
         >
           <video
             ref="video"
@@ -38,18 +38,18 @@
             src="../public/test.mp4"
           />
           <img
-            class="absolute -right-4 bottom-14 round"
+            class="absolute -right-4 bottom-100 md:bottom-14 round"
             width="110"
             src="~/assets/images/tiktok_float.png"
           />
         </div>
-        <div class="relative mr-[75px]">
-          <div class="absolute bottom-0 ml-2">
+        <div class="relative">
+          <div class="absolute bottom-0 -ml-12 opacity-70 md:ml-2 md:opacity-100">
             <div class="pb-2 text-center">
               <button
                 class="rounded-full bg-gray-600 hover:bg-gray-700 cursor-pointer p-2 flex group"
               >
-                <Icon name="mdi:heart" class="text-red-400 group-hover:text-red-600" size="25" />
+                <Icon name="mdi:heart" class="text-white group-hover:text-red-600" size="25" />
               </button>
               <span class="text-xs text-gray-800 font-semibold">点赞数</span>
             </div>

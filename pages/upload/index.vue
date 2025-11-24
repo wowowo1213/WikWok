@@ -128,11 +128,28 @@ const errorType = ref<'caption' | 'file' | null>(null);
 const errors = ref<unknown>(null);
 
 watch(
-  () => caption,
-  caption => {
-    errorType.value = caption.value.length >= 150 ? 'caption' : null;
+  () => caption.value,
+  newCaption => {
+    errorType.value = newCaption.length >= 150 ? 'caption' : null;
   }
 );
+
+const handleFile = (file: File | null | undefined) => {
+  if (!file) {
+    errorType.value = 'file';
+    return;
+  }
+
+  const extension = file.name.split('.').pop()?.toLowerCase();
+  if (extension !== 'mp4') {
+    errorType.value = 'file';
+    return;
+  }
+
+  fileData.value = file;
+  fileDisplay.value = URL.createObjectURL(file);
+  return;
+};
 
 const onDrop = (e: DragEvent) => {
   errorType.value = null;
@@ -142,27 +159,13 @@ const onDrop = (e: DragEvent) => {
     return;
   }
 
-  if (!e.dataTransfer.files[0]) {
-    errorType.value = 'file';
-    return;
-  }
-
-  const extention = e.dataTransfer.files[0]?.name.split('.').pop()?.toLowerCase();
-  if (extention !== 'mp4') {
-    errorType.value = 'file';
-    return;
-  }
-
-  fileData.value = e.dataTransfer.files[0];
-  fileDisplay.value = URL.createObjectURL(e.dataTransfer.files[0]);
+  handleFile(e.dataTransfer.files[0]);
 };
 
 const onChange = (e: Event) => {
+  errorType.value = null;
   const target = e.target as HTMLInputElement;
-  if (target.files?.[0]) {
-    fileData.value = target.files[0];
-    fileDisplay.value = URL.createObjectURL(target.files[0]);
-  }
+  handleFile(target.files?.[0]);
 };
 
 const discard = () => {
@@ -175,4 +178,10 @@ const discard = () => {
 const changeVideo = () => {
   file.value?.click();
 };
+
+onUnmounted(() => {
+  if (fileDisplay.value) {
+    URL.revokeObjectURL(fileDisplay.value);
+  }
+});
 </script>
