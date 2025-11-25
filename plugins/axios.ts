@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { defineNuxtPlugin } from '#app';
 
 export default defineNuxtPlugin(NuxtApp => {
   axios.defaults.withCredentials = true;
@@ -6,7 +7,7 @@ export default defineNuxtPlugin(NuxtApp => {
 
   return {
     provide: {
-      axios,
+      axios: axios,
     },
   };
 });

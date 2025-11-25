@@ -39,6 +39,7 @@
 
       <div class="flex items-center justify-end gap-3 min-w-[275px] max-w-[320px] w-full mr-3">
         <button
+          @click="isLoggedIn()"
           class="flex items-center border border-white rounded-xl px-3 py-[6px] h-10 bg-gray-100 cursor-pointer"
         >
           <Icon name="mdi:plus" color="#000000" size="22" />
@@ -65,7 +66,7 @@
           />
           <div class="relative">
             <button class="mt-1 cursor-pointer" @click="showMenu = !showMenu">
-              <img class="rounded-full" width="33" src="~/assets/images/logo.jpg" />
+              <img class="rounded-full" width="33" :src="$userStore.image" />
             </button>
 
             <div
@@ -74,6 +75,7 @@
               class="z-50 absolute bg-white rounded-lg w-[200px] shadow-xl top-[52px] -right-2"
             >
               <NuxtLink
+                :to="`/profile/${$userStore.id}`"
                 @click="showMenu = false"
                 class="rounded-lg flex items-center justify-start text-black py-3 px-2 hover:bg-gray-100 cursor-pointer"
               >
@@ -81,6 +83,7 @@
                 <span class="pl-2 font-semibold">用户信息</span>
               </NuxtLink>
               <div
+                @click="logout()"
                 class="rounded-lg flex items-center justify-start text-black py-3 px-1.5 hover:bg-gray-100 border-t border-gray-300 cursor-pointer"
               >
                 <Icon name="ic:outline-login" size="20" />
@@ -95,6 +98,32 @@
 </template>
 
 <script setup lang="ts">
+const { $userStore, $generalStore } = useNuxtApp();
+
 const route = useRoute();
+const router = useRouter();
+
 let showMenu = ref(false);
+
+onMounted(() => {
+  document.addEventListener('mouseup', function (e) {
+    let popupMenu = document.getElementById('PopupMenu');
+    if (!popupMenu.contains(e.target)) {
+      showMenu.value = false;
+    }
+  });
+});
+
+const isLoggedIn = () => {
+  $userStore.id ? router.push('/upload') : ($generalStore.isLoginOpen = true);
+};
+
+const logout = () => {
+  try {
+    $userStore.logout();
+    router.push('/');
+  } catch (error) {
+    console.log(error);
+  }
+};
 </script>

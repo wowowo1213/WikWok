@@ -55,13 +55,25 @@
 </template>
 
 <script setup lang="ts">
-let name = ref(null);
-let email = ref(null);
-let password = ref(null);
-let confirmPassword = ref(null);
+let name = ref('');
+let email = ref('');
+let password = ref('');
+let confirmPassword = ref('');
 let errors = ref(null);
+
+const { $userStore, $generalStore } = useNuxtApp();
 
 const register = async () => {
   errors.value = null;
+
+  try {
+    await $userStore.getTokens();
+    await $userStore.register(name.value, email.value, password.value, confirmPassword.value);
+    await $userStore.getUser();
+
+    $generalStore.isLoginOpen = false;
+  } catch (error) {
+    errors.value = error.response.data.errors;
+  }
 };
 </script>

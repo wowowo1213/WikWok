@@ -19,14 +19,16 @@
 
 需要先安装 php 和 composer
 
+并且通过 composer 安装依赖时得配置 github 的 ssh 密钥连接才能下载
+
 ```bash
 # 选择仓库
 cd WikWok
 cd WikWok-api
 # 安装依赖
 npm install
-# 启动
 npm run build
+# 启动
 composer run dev
 ```
 

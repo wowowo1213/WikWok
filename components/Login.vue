@@ -3,7 +3,7 @@
 
   <div class="px-6 pb-4">
     <TextInput
-      placeholder="邮箱地址"
+      placeholder="邮箱"
       v-model="email"
       inputType="email"
       :autoFocus="true"
@@ -31,11 +31,24 @@
 </template>
 
 <script setup lang="ts">
+const { $userStore, $generalStore } = useNuxtApp();
 let email = ref('');
 let password = ref('');
 let errors = ref(null);
 
 const login = async () => {
   errors.value = null;
+
+  try {
+    await $userStore.getTokens();
+    await $userStore.login(email.value, password.value);
+    await $userStore.getUser();
+
+    // await $generalStore.getRandomUsers('suggested');
+    // await $generalStore.getRandomUsers('following')
+    $generalStore.isLoginOpen = false;
+  } catch (error) {
+    errors.value = error.response.data.errors;
+  }
 };
 </script>
