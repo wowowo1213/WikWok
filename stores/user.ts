@@ -2,55 +2,65 @@ import { defineStore } from 'pinia';
 import axios from '~/plugins/axios';
 const $axios = axios().provide.axios;
 
+interface Userinfo {
+  id: string;
+  username: string;
+  bio: string;
+  avatar: string;
+}
+
 export const useUserStore = defineStore('user', {
   state: () => ({
     id: '',
-    name: '',
-    email: '',
+    username: '',
     bio: '',
-    image: '',
+    avatar: '',
   }),
+
   actions: {
     async getTokens() {
-      await $axios.get('/sanctum/csrf-cookie');
+      await $axios.get('/auth/csrf-cookie');
     },
 
-    async login(email: string, password: string) {
-      await $axios.post('/login', {
-        email,
+    async register(
+      phoneNumber: string,
+      username: string,
+      password: string,
+      confirmPassword: string
+    ) {
+      let res = await $axios.post('/user/register', {
+        phoneNumber,
+        username,
+        password,
+        confirmPassword,
+      });
+      this.setUser(res.data.data);
+    },
+
+    async login(phoneNumber: string, password: string) {
+      let res = await $axios.post('/user/login', {
+        phoneNumber,
         password,
       });
+      this.setUser(res.data.data);
     },
 
-    async register(name: string, email: string, password: string, confirmPassword: string) {
-      await $axios.post('/register', {
-        name,
-        email,
-        password,
-        password_confirmation: confirmPassword,
-      });
-    },
-
-    async getUser() {
-      let res = await $axios.get('/api/logged-in-user');
-
-      this.id = res.data[0].id;
-      this.name = res.data[0].name;
-      this.bio = res.data[0].bio;
-      this.image = res.data[0].image;
+    setUser(res: Userinfo) {
+      this.id = res.id;
+      this.username = res.username;
+      this.bio = res.bio;
+      this.avatar = res.avatar;
     },
 
     async logout() {
-      await $axios.post('/logout');
       this.resetUser();
     },
 
     resetUser() {
       this.id = '';
-      this.name = '';
-      this.email = '';
+      this.username = '';
       this.bio = '';
-      this.image = '';
+      this.avatar = '';
     },
   },
   persist: true,

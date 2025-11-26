@@ -66,7 +66,7 @@
           />
           <div class="relative">
             <button class="mt-1 cursor-pointer" @click="showMenu = !showMenu">
-              <img class="rounded-full" width="33" :src="$userStore.image" />
+              <img class="rounded-full" width="33" :src="$userStore.avatar" />
             </button>
 
             <div
@@ -106,9 +106,9 @@ const router = useRouter();
 let showMenu = ref(false);
 
 onMounted(() => {
-  document.addEventListener('mouseup', function (e) {
+  document.addEventListener('mouseup', function (e: MouseEvent) {
     let popupMenu = document.getElementById('PopupMenu');
-    if (!popupMenu.contains(e.target)) {
+    if (popupMenu && e.target instanceof Node && !popupMenu.contains(e.target)) {
       showMenu.value = false;
     }
   });
@@ -120,6 +120,7 @@ const isLoggedIn = () => {
 
 const logout = () => {
   try {
+    showMenu.value = false;
     $userStore.logout();
     router.push('/');
   } catch (error) {

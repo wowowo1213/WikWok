@@ -146,14 +146,14 @@ import 'vue-advanced-cropper/dist/style.css';
 
 import { storeToRefs } from 'pinia';
 const { $userStore, $generalStore, $profileStore } = useNuxtApp();
-const { name, bio, image } = storeToRefs($userStore);
+const { username, bio, avatar } = storeToRefs($userStore);
 
 const route = useRoute();
 
 onMounted(() => {
-  userName.value = name.value;
+  userName.value = username.value;
   userBio.value = bio.value;
-  userImage.value = image.value;
+  userImage.value = avatar.value;
 });
 
 let file = ref<File | undefined>(undefined);
@@ -209,7 +209,7 @@ const cropAndUpdateImage = async () => {
 watch(
   () => userName.value,
   () => {
-    if (!userName.value || userName.value === name.value) {
+    if (!userName.value || userName.value === username.value) {
       isUpdated.value = false;
     } else {
       isUpdated.value = true;

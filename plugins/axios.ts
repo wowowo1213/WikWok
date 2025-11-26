@@ -3,7 +3,7 @@ import { defineNuxtPlugin } from '#app';
 
 export default defineNuxtPlugin(NuxtApp => {
   axios.defaults.withCredentials = true;
-  axios.defaults.baseURL = 'http://localhost:8000';
+  axios.defaults.baseURL = 'http://localhost:5000';
 
   return {
     provide: {

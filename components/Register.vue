@@ -2,47 +2,30 @@
   <div class="text-center text-[28px] mb-4 font-bold relative">注册</div>
 
   <div class="px-6 pb-3">
-    <TextInput
-      placeholder="昵称"
-      v-model="name"
-      inputType="text"
-      :autoFocus="true"
-      :error="errors && errors.name ? errors.name[0] : ''"
-    />
+    <TextInput placeholder="手机号码" v-model="phoneNumber" inputType="text" />
   </div>
 
   <div class="px-6 pb-3">
-    <TextInput
-      placeholder="邮箱"
-      v-model="email"
-      inputType="email"
-      :error="errors && errors.email ? errors.email[0] : ''"
-    />
+    <TextInput placeholder="昵称" v-model="username" inputType="text" :autoFocus="true" />
   </div>
 
   <div class="px-6 pb-3">
-    <TextInput
-      placeholder="密码"
-      v-model="password"
-      inputType="password"
-      :error="errors && errors.password ? errors.password[0] : ''"
-    />
+    <TextInput placeholder="密码" v-model="password" inputType="password" />
   </div>
 
   <div class="px-6 pb-3">
-    <TextInput
-      placeholder="确认密码"
-      v-model="confirmPassword"
-      inputType="password"
-      :error="errors && errors.confirmPassword ? errors.confirmPassword[0] : ''"
-    />
+    <TextInput placeholder="确认密码" v-model="confirmPassword" inputType="password" />
+  </div>
+
+  <div v-if="errors" class="flex justify-center text-red-500 text-[15px] font-bold">
+    {{ errors }}
   </div>
 
   <div class="px-6 pb-3 mt-4">
     <button
-      :disabled="!name || !email || !password || !confirmPassword"
+      :disabled="!phoneNumber || !username || !password || !confirmPassword"
       :class="
-        !name || !email || !password || !confirmPassword
+        !phoneNumber || !username || !password || !confirmPassword
           ? 'bg-gray-200 cursor-not-allowed'
           : 'bg-[#F02C56] cursor-pointer'
       "
@@ -55,8 +38,8 @@
 </template>
 
 <script setup lang="ts">
-let name = ref('');
-let email = ref('');
+let phoneNumber = ref('');
+let username = ref('');
 let password = ref('');
 let confirmPassword = ref('');
 let errors = ref(null);
@@ -68,12 +51,16 @@ const register = async () => {
 
   try {
     await $userStore.getTokens();
-    await $userStore.register(name.value, email.value, password.value, confirmPassword.value);
-    await $userStore.getUser();
-
+    await $userStore.register(
+      phoneNumber.value,
+      username.value,
+      password.value,
+      confirmPassword.value
+    );
     $generalStore.isLoginOpen = false;
   } catch (error) {
-    errors.value = error.response.data.errors;
+    let res = error.response.data.message;
+    if (res !== 'invalid csrf token') errors.value = res instanceof Array ? res[0] : res;
   }
 };
 </script>
