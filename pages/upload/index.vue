@@ -3,9 +3,9 @@
 
   <div
     v-if="isUploading"
-    class="fixed flex items-center justify-center top-0 left-0 w-full h-screen bg-black z-50 bg-opacity-50"
+    class="fixed flex items-center justify-center top-0 left-0 w-full h-screen bg-black/50 z-50 text-white"
   >
-    <Icon class="animate-spin ml-1" name="mingcute:loading-line" size="100" color="#FFFFFF" />
+    <Icon class="animate-spin ml-1" name="mingcute:loading-line" size="100" />
   </div>
 
   <UploadLayout>
@@ -181,6 +181,7 @@ const handleFile = (file: File | null | undefined) => {
     return;
   }
 
+  fileData.value = file;
   fileDisplay.value = URL.createObjectURL(file);
 };
 
@@ -199,14 +200,14 @@ const uploadVideo = async () => {
   errors.value = null;
 
   let data = new FormData();
-
   data.append('video', fileData.value || '');
   data.append('text', caption.value || '');
+  data.append('id', $userStore.id || '');
 
   if (fileData.value && caption.value) isUploading.value = true;
 
   try {
-    await $userStore.uploadVideo(data);
+    let res = await $userStore.uploadVideo(data);
     router.push('/profile/' + $userStore.id);
     isUploading.value = false;
   } catch (error) {
