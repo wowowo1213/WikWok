@@ -1,6 +1,13 @@
 <template>
   <UploadError :errorType="errorType" />
 
+  <div
+    v-if="isUploading"
+    class="fixed flex items-center justify-center top-0 left-0 w-full h-screen bg-black z-50 bg-opacity-50"
+  >
+    <Icon class="animate-spin ml-1" name="mingcute:loading-line" size="100" color="#FFFFFF" />
+  </div>
+
   <UploadLayout>
     <div class="w-full mt-[80px] mb-[40px] bg-white shadow-lg rounded-md py-6 md:px-10 px-4">
       <div>
@@ -8,8 +15,8 @@
         <div class="text-gray-400 mt-1">在您的账号中上传一个视频</div>
       </div>
 
-      <input ref="file" type="file" id="fileInput" @input="onChange" hidden accept=".mp4" />
       <div class="mt-8 md:flex gap-6">
+        <input ref="file" type="file" id="fileInput" @input="onChange" hidden accept=".mp4" />
         <label
           v-if="!fileDisplay"
           for="fileInput"
@@ -100,16 +107,26 @@
           <div class="flex gap-3">
             <button
               class="px-10 py-2.5 mt-8 border border-gray-300 text-[16px] cursor-pointer hover:bg-gray-200 rounded-sm"
-              @click="discard"
+              @click="discard()"
             >
               丢弃
             </button>
             <button
+              @click="uploadVideo()"
               class="px-10 py-2.5 mt-8 border text-[16px] text-white bg-[#F02C56] rounded-sm hover:bg-red-600 cursor-pointer"
             >
               发布
             </button>
           </div>
+
+          <!-- <div v-if="errors" class="mt-4">
+            <div class="text-red-600" v-if="errors && errors.video">
+              {{ errors.video[0] }}
+            </div>
+            <div class="text-red-600" v-if="errors && errors.text">
+              {{ errors.text[0] }}
+            </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -119,13 +136,16 @@
 <script setup lang="ts">
 import UploadLayout from '~/layouts/UploadLayout.vue';
 
+const { $userStore } = useNuxtApp();
+const router = useRouter();
+
 const file = ref<HTMLInputElement | null>(null);
 const fileData = ref<File | null>(null);
 const fileDisplay = ref<string | null>(null);
 const caption = ref('');
 const isUploading = ref(false);
 const errorType = ref<'caption' | 'file' | null>(null);
-const errors = ref<unknown>(null);
+const errors = ref(null);
 
 watch(
   () => caption.value,
@@ -133,6 +153,21 @@ watch(
     errorType.value = newCaption.length >= 150 ? 'caption' : null;
   }
 );
+
+const onChange = (e: Event) => {
+  errorType.value = null;
+  const target = e.target as HTMLInputElement;
+  handleFile(target.files?.[0]);
+};
+
+const onDrop = (e: DragEvent) => {
+  errorType.value = null;
+  if (!e.dataTransfer?.files?.length) {
+    errorType.value = 'file';
+    return;
+  }
+  handleFile(e.dataTransfer.files[0]);
+};
 
 const handleFile = (file: File | null | undefined) => {
   if (!file) {
@@ -146,26 +181,11 @@ const handleFile = (file: File | null | undefined) => {
     return;
   }
 
-  fileData.value = file;
   fileDisplay.value = URL.createObjectURL(file);
-  return;
 };
 
-const onDrop = (e: DragEvent) => {
-  errorType.value = null;
-
-  if (!e.dataTransfer?.files?.length) {
-    errorType.value = 'file';
-    return;
-  }
-
-  handleFile(e.dataTransfer.files[0]);
-};
-
-const onChange = (e: Event) => {
-  errorType.value = null;
-  const target = e.target as HTMLInputElement;
-  handleFile(target.files?.[0]);
+const changeVideo = () => {
+  file.value?.click();
 };
 
 const discard = () => {
@@ -175,8 +195,24 @@ const discard = () => {
   caption.value = '';
 };
 
-const changeVideo = () => {
-  file.value?.click();
+const uploadVideo = async () => {
+  errors.value = null;
+
+  let data = new FormData();
+
+  data.append('video', fileData.value || '');
+  data.append('text', caption.value || '');
+
+  if (fileData.value && caption.value) isUploading.value = true;
+
+  try {
+    await $userStore.uploadVideo(data);
+    router.push('/profile/' + $userStore.id);
+    isUploading.value = false;
+  } catch (error) {
+    console.log(error);
+    isUploading.value = false;
+  }
 };
 
 onUnmounted(() => {

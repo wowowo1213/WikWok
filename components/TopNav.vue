@@ -46,7 +46,7 @@
           <span class="px-1 font-medium text-[15px] w-[40px]">上传</span>
         </button>
 
-        <div v-if="!$userStore.id" class="flex items-center">
+        <div v-if="false" class="flex items-center">
           <button
             @click="$generalStore.isLoginOpen = true"
             class="min-w-22 flex items-center bg-[#F02C56] text-white rounded-xl px-3 py-[6px] h-10 cursor-pointer"

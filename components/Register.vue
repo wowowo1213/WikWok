@@ -2,11 +2,11 @@
   <div class="text-center text-[28px] mb-4 font-bold relative">注册</div>
 
   <div class="px-6 pb-3">
-    <TextInput placeholder="手机号码" v-model="phoneNumber" inputType="text" />
+    <TextInput placeholder="手机号码" v-model="phoneNumber" inputType="text" :autoFocus="true" />
   </div>
 
   <div class="px-6 pb-3">
-    <TextInput placeholder="昵称" v-model="username" inputType="text" :autoFocus="true" />
+    <TextInput placeholder="昵称" v-model="username" inputType="text" />
   </div>
 
   <div class="px-6 pb-3">
@@ -57,10 +57,10 @@ const register = async () => {
       password.value,
       confirmPassword.value
     );
+    await $userStore.getUserinfo($userStore.id);
     $generalStore.isLoginOpen = false;
   } catch (error) {
-    let res = error.response.data.message;
-    if (res !== 'invalid csrf token') errors.value = res instanceof Array ? res[0] : res;
+    errors.value = error instanceof Array ? error[0] : error;
   }
 };
 </script>

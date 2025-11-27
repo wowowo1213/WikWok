@@ -30,7 +30,7 @@
 
             <div class="flex items-center justify-center sm:-mt-6">
               <label for="image" class="relative cursor-pointer">
-                <img class="rounded-full" width="95" src="~/assets/images/logo.jpg" />
+                <img class="rounded-full" width="95" :src="$userStore.avatar" />
                 <div
                   class="absolute bottom-0 right-0 rounded-full bg-white shadow-xl border p-1 border-gray-300 inline-block w-[32px]"
                 >
@@ -59,7 +59,7 @@
 
             <div class="flex items-center justify-center sm:-mt-6">
               <div class="sm:w-[60%] w-full max-w-md">
-                <TextInput placeholder="昵称" v-model="userName" inputType="text" max="30" />
+                <TextInput placeholder="昵称" v-model="username" inputType="text" max="30" />
                 <div class="text-[11px] text-gray-500 mt-4">
                   用户名仅可包含字母、数字、下划线和句点。修改用户名后，您的个人资料链接也会随之变更。
                 </div>
@@ -79,11 +79,11 @@
                 <textarea
                   cols="30"
                   rows="4"
-                  v-model="userBio"
+                  v-model="bio"
                   maxlength="80"
                   class="resize-none w-full bg-[#F1F1F2] text-gray-800 border border-gray-300 rounded-md py-2.5 px-3 focus:outline-none"
                 ></textarea>
-                <div v-if="userBio" class="text-[11px] text-gray-500">{{ userBio.length }}/80</div>
+                <div v-if="bio" class="text-[11px] text-gray-500">{{ bio.length }}/80</div>
               </div>
             </div>
           </div>
@@ -114,10 +114,12 @@
           <button
             :disabled="!isUpdated"
             :class="!isUpdated ? 'bg-gray-200 cursor-not-allowed' : 'bg-[#F02C56] cursor-pointer'"
+            @click="updateUserinfo()"
             class="flex items-center bg-[#F02C56] text-white border rounded-md ml-3 px-3 py-[6px]"
           >
             <span class="mx-4 font-medium text-[15px]">保存</span>
           </button>
+          <button @click="testing" class="font-bold text-red-400 border">click !!!</button>
         </div>
 
         <div id="CropperButtons" v-else class="flex items-center justify-end">
@@ -144,30 +146,36 @@
 import { Cropper, CircleStencil } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 
-import { storeToRefs } from 'pinia';
-const { $userStore, $generalStore, $profileStore } = useNuxtApp();
-const { username, bio, avatar } = storeToRefs($userStore);
+const { $userStore, $generalStore } = useNuxtApp();
 
-const route = useRoute();
+const testing = () => {
+  console.log($userStore.username);
+  console.log($userStore.bio);
+};
 
 onMounted(() => {
-  userName.value = username.value;
-  userBio.value = bio.value;
-  userImage.value = avatar.value;
+  username.value = $userStore.username;
+  bio.value = $userStore.bio;
+  avatar.value = $userStore.avatar;
 });
 
-let file = ref<File | undefined>(undefined);
+let username = ref('');
+let bio = ref('');
+let avatar = ref('');
 let uploadedImage = ref('');
 let cropper = ref(null);
-let userName = ref('');
-let userBio = ref('');
-let userImage = ref('');
-let isUpdated = ref(false);
+const isUpdated = computed(() => {
+  const isChanged =
+    username.value !== $userStore.username ||
+    bio.value !== $userStore.bio ||
+    avatar.value !== $userStore.avatar;
+  const isNotEmpty = username.value.trim() && bio.value.trim() && avatar.value.trim();
+  return isChanged && isNotEmpty;
+});
 
 const handleUploadedImage = (e: Event) => {
   const target = e.target as HTMLInputElement;
   if (!target.files?.[0]) return;
-  file.value = target.files[0];
   uploadedImage.value = URL.createObjectURL(target.files[0]);
 };
 
@@ -206,25 +214,8 @@ const cropAndUpdateImage = async () => {
   //   }
 };
 
-watch(
-  () => userName.value,
-  () => {
-    if (!userName.value || userName.value === username.value) {
-      isUpdated.value = false;
-    } else {
-      isUpdated.value = true;
-    }
-  }
-);
-
-watch(
-  () => userBio.value,
-  () => {
-    if (!userBio.value || userBio.value.length < 1) {
-      isUpdated.value = false;
-    } else {
-      isUpdated.value = true;
-    }
-  }
-);
+const updateUserinfo = () => {
+  $userStore.updateUserinfo(username.value, bio.value, avatar.value);
+  $generalStore.isEditProfileOpen = false;
+};
 </script>

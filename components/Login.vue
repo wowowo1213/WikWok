@@ -40,12 +40,13 @@ const login = async () => {
   try {
     await $userStore.getTokens();
     await $userStore.login(phoneNumber.value, password.value);
+    await $userStore.getUserinfo($userStore.id);
     // await $generalStore.getRandomUsers('suggested');
     // await $generalStore.getRandomUsers('following')
     $generalStore.isLoginOpen = false;
   } catch (error) {
-    let res = error.response.data.message;
-    if (res !== 'invalid csrf token') errors.value = res instanceof Array ? res[0] : res;
+    console.log(error);
+    errors.value = error instanceof Array ? error[0] : error;
   }
 };
 </script>

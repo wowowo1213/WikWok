@@ -2,13 +2,6 @@ import { defineStore } from 'pinia';
 import axios from '~/plugins/axios';
 const $axios = axios().provide.axios;
 
-interface Userinfo {
-  id: string;
-  username: string;
-  bio: string;
-  avatar: string;
-}
-
 export const useUserStore = defineStore('user', {
   state: () => ({
     id: '',
@@ -34,7 +27,7 @@ export const useUserStore = defineStore('user', {
         password,
         confirmPassword,
       });
-      this.setUser(res.data.data);
+      this.id = res.data.data.id;
     },
 
     async login(phoneNumber: string, password: string) {
@@ -42,17 +35,32 @@ export const useUserStore = defineStore('user', {
         phoneNumber,
         password,
       });
-      this.setUser(res.data.data);
+      this.id = res.data.data.id;
     },
 
-    setUser(res: Userinfo) {
-      this.id = res.id;
-      this.username = res.username;
-      this.bio = res.bio;
-      this.avatar = res.avatar;
+    async getUserinfo(id: string) {
+      if (!id) throw new Error('请求id不能为空');
+      const res = await $axios.get('/user/get-userinfo', { params: { id } });
+      const { username, bio, avatar } = res.data.data;
+      this.username = username;
+      this.bio = bio;
+      this.avatar = avatar;
     },
 
-    async logout() {
+    async updateUserinfo(username: string, bio: string, avatar: string) {
+      const id = this.id;
+      let res = await $axios.post('/user/update-userinfo', { id, username, bio, avatar });
+      // 这边更新之后 getUserinfo 的接口不会返回更新之后的结果，所以只能到这边写了
+      this.username = res.data.data.username;
+      this.bio = res.data.data.bio;
+      this.avatar = res.data.data.avatar;
+    },
+
+    async uploadVideo(data: FormData) {
+      await $axios.post('/user/post-video', data);
+    },
+
+    logout() {
       this.resetUser();
     },
 
