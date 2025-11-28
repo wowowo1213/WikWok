@@ -4,7 +4,7 @@ import axios from '~/plugins/axios';
 
 const $axios = axios().provide.axios;
 
-interface Post {
+interface Video {
   id: string;
   videoUrl: string;
   caption: string;
@@ -20,7 +20,7 @@ interface UserData {
   avatar: string;
   followers: number;
   followings: number;
-  posts: Post[];
+  videos: Video[];
 }
 
 export const useUserStore = defineStore(
@@ -35,11 +35,11 @@ export const useUserStore = defineStore(
       avatar: '',
       followers: 0,
       followings: 0,
-      posts: [],
+      videos: [],
     });
 
     const allLikes = computed(() =>
-      userData.value.posts.reduce((total, post) => total + post.likes, 0)
+      userData.value.videos.reduce((total, video) => total + video.likes, 0)
     );
 
     async function getTokens() {
@@ -99,7 +99,7 @@ export const useUserStore = defineStore(
         avatar: '',
         followers: 0,
         followings: 0,
-        posts: [],
+        videos: [],
       };
     }
 
@@ -112,7 +112,7 @@ export const useUserStore = defineStore(
         avatar: '',
         followers: 0,
         followings: 0,
-        posts: [],
+        videos: [],
       };
     }
 

@@ -30,7 +30,11 @@
 
             <div class="flex items-center justify-center sm:-mt-6">
               <label for="image" class="relative cursor-pointer">
-                <img class="rounded-full" width="95" :src="userData.avatar" />
+                <img
+                  class="size-24 object-cover rounded-full"
+                  :src="userData.avatar"
+                  alt="用户头像"
+                />
                 <div
                   class="absolute bottom-0 right-0 rounded-full bg-white shadow-xl border p-1 border-gray-300 inline-block w-[32px]"
                 >
@@ -126,7 +130,7 @@
             @click="uploadedImage = ''"
             class="flex items-center border rounded-sm px-3 py-[6px] hover:bg-gray-100 cursor-pointer"
           >
-            <span class="px-2 font-medium text-[15px]">取消</span>
+            <span class="px-2 font-medium text-[15px]">后退</span>
           </button>
 
           <button

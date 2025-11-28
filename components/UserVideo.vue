@@ -1,5 +1,6 @@
 <template>
   <div
+    @click="dispalyVideo()"
     @mouseenter="isHover(true)"
     @mouseleave="isHover(false)"
     class="relative brightness-90 hover:brightness-[1.1] cursor-pointer"
@@ -14,7 +15,7 @@
       <video ref="video" muted loop class="aspect-[3/4] object-cover rounded-md" :src="videoSrc" />
     </div>
     <div class="px-1">
-      <div class="text-gray-700 text-[15px] pt-1 break-words">text</div>
+      <div class="text-gray-700 text-[15px] pt-1 break-words">{{ props.video.caption }}</div>
       <div class="flex items-center -ml-1 text-gray-600 font-bold text-xs">
         <Icon name="gg:loadbar-sound" size="20" />
         3%
@@ -25,15 +26,21 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps(['post']);
+const { $generalStore } = useNuxtApp();
+
+const route = useRoute();
+const router = useRouter();
+
+const props = defineProps(['video']);
 
 let video = ref<HTMLVideoElement | null>(null);
 const videoSrc = computed(() => {
   const baseUrl = 'http://localhost:5000';
-  const videoUrl = props.post.videoUrl;
+  const videoUrl = props.video.videoUrl;
 
   return baseUrl + videoUrl;
 });
+
 let isLoaded = ref(false);
 
 onMounted(() => {
@@ -55,6 +62,14 @@ onBeforeUnmount(() => {
 
 const onLoadedData = () => {
   isLoaded.value = true;
+};
+
+const dispalyVideo = () => {
+  $generalStore.setBackUrl('/profile/' + route.params.id);
+  $generalStore.selectedVideo = null;
+  setTimeout(() => {
+    router.push(`/video/${props.video.id}`);
+  }, 300);
 };
 
 const isHover = (bool: boolean) => {

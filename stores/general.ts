@@ -1,38 +1,34 @@
 import { defineStore } from 'pinia';
 import { useUserStore } from './user';
-import axios from '../plugins/axios';
+import axios from '~/plugins/axios';
 
 const $axios = axios().provide.axios;
 
-export const useGeneralStore = defineStore('general', {
-  state: () => ({
-    isLoginOpen: false,
-    isEditProfileOpen: false,
-    selectedPost: null,
-    ids: null,
-    isBackUrl: '/',
-    posts: null,
-    suggested: null,
-    following: null,
-  }),
-  actions: {
-    bodySwitch(val: boolean) {
+export const useGeneralStore = defineStore(
+  'general',
+  () => {
+    const isLoginOpen = ref(false);
+    const isEditProfileOpen = ref(false);
+    const selectedVideo = ref(null);
+    const ids = ref(null);
+    const isBackUrl = ref('/');
+    const videos = ref(null);
+    const suggested = ref(null);
+    const following = ref(null);
+
+    function bodySwitch(val: boolean) {
       if (val) {
         document.body.style.overflow = 'hidden';
         return;
       }
       document.body.style.overflow = 'visible';
-    },
+    }
 
-    allLowerCaseNoCaps(name: string) {
-      return name.split(' ').join('').toLowerCase();
-    },
+    function setBackUrl(url: string) {
+      isBackUrl.value = url;
+    }
 
-    setBackUrl(url: string) {
-      this.isBackUrl = url;
-    },
-
-    async hasSessionExpired() {
+    async function hasSessionExpired() {
       await $axios.interceptors.response.use(
         response => response,
         error => {
@@ -53,7 +49,22 @@ export const useGeneralStore = defineStore('general', {
           }
         }
       );
-    },
+    }
+    return {
+      isLoginOpen,
+      isEditProfileOpen,
+      selectedVideo,
+      ids,
+      isBackUrl,
+      videos,
+      suggested,
+      following,
+      bodySwitch,
+      setBackUrl,
+      hasSessionExpired,
+    };
   },
-  persist: true,
-});
+  {
+    persist: true,
+  }
+);

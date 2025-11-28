@@ -1,6 +1,6 @@
 <template>
   <div
-    id="PostPage"
+    id="VideoPage"
     class="fixed lg:flex justify-between z-50 top-0 left-0 w-full h-full bg-black lg:overflow-hidden overflow-auto"
   >
     <div class="lg:w-[calc(100%-540px)] h-full relative">
@@ -13,7 +13,7 @@
       <div v-if="true">
         <button
           :disabled="!isLoaded"
-          @click="loopThroughPostsUp()"
+          @click="loopThroughVideosUp()"
           class="absolute z-20 right-4 top-4 flex items-center justify-center rounded-full bg-gray-700 p-1.5 hover:bg-gray-800 cursor-pointer"
         >
           <Icon name="mdi:chevron-up" size="30" color="#FFFFFF" />
@@ -21,7 +21,7 @@
 
         <button
           :disabled="!isLoaded"
-          @click="loopThroughPostsDown()"
+          @click="loopThroughVideosDown()"
           class="absolute z-20 right-4 top-20 flex items-center justify-center rounded-full bg-gray-700 p-1.5 hover:bg-gray-800 cursor-pointer"
         >
           <Icon name="mdi:chevron-down" size="30" color="#FFFFFF" />
@@ -78,7 +78,7 @@
 
         <Icon
           v-if="true"
-          @click="deletePost()"
+          @click="deleteVideo()"
           class="cursor-pointer"
           name="material-symbols:delete-outline-sharp"
           size="25"

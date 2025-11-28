@@ -9,31 +9,36 @@
 
     <div v-if="userData.id" class="mt-[81px] lg:ml-[210px] ml-[65px] mr-20 w-full">
       <div class="flex">
-        <img class="max-w-[54px] lg:max-w-[120px] rounded-full" :src="userData.avatar" />
-        <div class="ml-2 lg:ml-5 w-full h-[54px] lg:h-full flex justify-between lg:flex-col">
-          <div>
-            <div class="text-[22px] lg:text-[30px] font-bold truncate">
-              {{ $generalStore.allLowerCaseNoCaps(userData.username) }}
-            </div>
-            <div class="text-[12px] lg:text-[18px] truncate">
+        <img
+          class="rounded-full size-18 lg:size-24 object-cover bg-white"
+          :src="userData.avatar"
+          alt="用户头像"
+        />
+
+        <div class="flex flex-col justify-between">
+          <div class="pt-1 lg:pt-3 flex justify-between items-center w-50 lg:w-70 rounded-xl">
+            <div class="mr-2 text-[20px] lg:text-[26px] text-black font-bold truncate">
               {{ userData.username }}
             </div>
-          </div>
-          <div>
+
             <button
               v-if="route.params.id === $userStore.currentUserId"
               @click="$generalStore.isEditProfileOpen = true"
-              class="lg:mt-3 text-[15px] flex items-center justify-between rounded-sm py-1 px-2 border hover:bg-gray-100 cursor-pointer"
+              class="flex items-center justify-between rounded-md p-1.5 bg-[#c4cac8] hover:bg-gray-200 cursor-pointer"
             >
-              <div>编辑信息</div>
+              <Icon class="text-[#6a6d85]" name="material-symbols:edit-square-rounded" size="20" />
             </button>
 
             <button
               v-else
-              class="flex item-center rounded-md py-1.5 px-8 mt-3 text-[15px] text-white font-semibold bg-[#F02C56] hover:bg-red-700 cursor-pointer"
+              class="flex item-center rounded-md p-1.5 text-[15px] text-white font-semibold bg-[#F02C56] hover:bg-red-700 cursor-pointer"
             >
               关注
             </button>
+          </div>
+
+          <div class="lg:pb-2 text-[14px] lg:text-[16px] text-black font-semibold truncate">
+            {{ userData.bio }}
           </div>
         </div>
       </div>
@@ -53,24 +58,24 @@
         </div>
       </div>
 
-      <div class="pt-4 mr-4 text-gray-500 font-light text-[15px] pl-1.5 max-w-[500px]">
-        {{ userData.bio }}
-      </div>
-
       <div class="w-full flex items-center pt-4 border-b">
         <div
-          class="w-40 md:w-60 text-center py-2 text-[17px] font-semibold border-b-2 border-b-black"
+          class="w-40 md:w-60 text-center py-2 text-[17px] font-semibold border-b-2 border-b-black cursor-pointer hover:text-blue-300"
         >
           视频
         </div>
-        <div class="w-40 md:w-60 text-gray-500 text-center py-2 text-[17px] font-semibold"></div>
+        <div
+          class="w-40 md:w-60 text-gray-500 text-center py-2 text-[17px] font-semibold cursor-pointer hover:text-blue-300"
+        >
+          赞过
+        </div>
       </div>
 
       <div
         class="mt-4 grid 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-3"
       >
-        <div v-for="post in userData.posts" :key="post.id">
-          <UserVideo :post="post" />
+        <div v-for="video in userData.videos" :key="video.id">
+          <UserVideo :video="video" />
         </div>
       </div>
     </div>
@@ -120,6 +125,11 @@ const fetchUserData = async (userId: string) => {
 };
 
 // definePageMeta({ middleware: 'auth' });
+
+onMounted(() => {
+  // 这边先请求，然后app里面再请求，然后这边下面的监听属性又会请求
+  fetchUserData(route.params.id as string);
+});
 
 watch(isAppLoaded, loaded => {
   if (loaded) fetchUserData(route.params.id as string);

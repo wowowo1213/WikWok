@@ -4,13 +4,11 @@
       <div :class="route.fullPath === '/' ? 'w-[80%] lg:w-auto' : 'lg:w-[20%] w-[70%]'">
         <NuxtLink to="/" class="flex items-center">
           <img
-            src="../assets/images/logo.jpg"
+            src="~/assets/images/logo.jpg"
             alt="WIKWOK Logo"
             class="rounded-full shadow-lg ml-4 w-[44px] lg:w-[54px]"
           />
-          <h1
-            class="ml-2 font-sans font-bold text-[0px] md:text-xl lg:text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-purple-500 tracking-tight"
-          >
+          <h1 class="ml-2 font-sans font-bold text-[0px] md:text-xl lg:text-2xl text-white">
             WIKWOK
           </h1>
         </NuxtLink>
@@ -66,13 +64,17 @@
           />
           <div class="relative">
             <button class="mt-1 cursor-pointer" @click="showMenu = !showMenu">
-              <img class="rounded-full" width="33" :src="$userStore.userData.avatar" />
+              <img
+                class="rounded-full size-8 object-cover bg-white"
+                :src="$userStore.userData.avatar"
+                alt="用户头像"
+              />
             </button>
 
             <div
               v-if="showMenu"
               id="PopupMenu"
-              class="z-50 absolute bg-white rounded-lg w-[200px] shadow-xl top-[52px] -right-2"
+              class="z-40 absolute bg-white rounded-lg w-[200px] shadow-xl top-[52px] -right-2"
             >
               <NuxtLink
                 :to="`/profile/${$userStore.currentUserId}`"
@@ -108,9 +110,8 @@ let showMenu = ref(false);
 onMounted(() => {
   document.addEventListener('mouseup', function (e: MouseEvent) {
     let popupMenu = document.getElementById('PopupMenu');
-    if (popupMenu && e.target instanceof Node && !popupMenu.contains(e.target)) {
+    if (popupMenu && e.target instanceof Node && !popupMenu.contains(e.target))
       showMenu.value = false;
-    }
   });
 });
 

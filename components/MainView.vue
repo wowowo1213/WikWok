@@ -87,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps(['post']);
+const props = defineProps(['video']);
 
 let video = ref<null | HTMLVideoElement>(null);
 

@@ -16,7 +16,7 @@ export class UserService {
   ) {}
 
   async registerUser(registerDto: RegisterUserDto) {
-    const defaultAvatarPath = join(process.cwd(), 'public/images/default-avatar.jpg');
+    const defaultAvatarPath = join(process.cwd(), 'public/images/default-avatar.webp');
     const imageBuffer = readFileSync(defaultAvatarPath);
 
     const {
@@ -48,6 +48,7 @@ export class UserService {
     });
 
     await newUser.save();
+
     return {
       id: newUser._id,
     };
@@ -80,7 +81,7 @@ export class UserService {
 
     if (!user) throw new BadRequestException('用户不存在，请先注册');
 
-    const posts = user.videos.map(video => ({
+    const videos = user.videos.map(video => ({
       id: video._id,
       videoUrl: video.videoUrl,
       caption: video.caption,
@@ -96,7 +97,7 @@ export class UserService {
       avatar: user.avatar,
       followers: user.followers,
       followings: user.followings,
-      posts,
+      videos,
     };
   }
 

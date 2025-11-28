@@ -62,7 +62,7 @@ export class UserController {
           avatar: user.avatar,
           followers: user.followers,
           followings: user.followings,
-          posts: user.posts,
+          videos: user.videos,
         },
         message: '这是一个用户信息获取接口',
       };

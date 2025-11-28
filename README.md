@@ -106,38 +106,38 @@ npm run dev
 
 ### 前端结构 (Nuxt + Vue3)
 
-```
+```bash
 WikWok/
-├── assets/ # 静态资源 (图片/css 样式)
-├── components/ # 可复用组件
-│ ├── AuthOverlay.vue # 登录/注册界面
-│ ├── EditProfileOverlay.vue # 编辑个人信息界面
-│ ├── Login.vue # 登录表单
-│ ├── MainView.vue # 主页的'为你推荐'组件
-│ ├── MenuItem.vue # 侧边栏的菜单组件
-│ ├── MenuItemFollow.vue # 侧边栏的菜单之后内容的组件
-│ ├── Register.vue # 注册表单
-│ ├── SideNavMain.vue # 侧边栏
-│ ├── TextInput.vue # 输入框组件
-│ ├── TopNav.vue # 头部导航栏
-│ ├── UploadError.vue # 上传错误信息弹窗
-│ └── UserVideo.vue # 用户上传视频组件
-├── layouts/ # 布局级组件
-├── pages/ # 页面级组件
-│ ├── post/
-│ │ └── [id].vue
-│ ├── profile/ # 用户主页
-│ │ └── [id].vue # 动态用户页
-│ ├── upload/ # 上传视频界面
-│ │ └── index.vue
-│ └── index.vue # 首页
-├── plugins/ # 插件
-│ ├── axios.ts
-│ └── store.ts
-├── stores/ # Pinia 状态管理
-│ ├── general.ts # 设置响应拦截器/通用方法
-│ └── user.ts # 用户状态
-├── types/ # TypeScript 类型定义
-│ └── app-load-state # 用户类型
+├── assets/                           # 静态资源 (图片/css 样式)
+├── components/                       # 可复用组件
+│   ├── AuthOverlay.vue               # 登录/注册界面
+│   ├── EditProfileOverlay.vue        # 编辑个人信息界面
+│   ├── Login.vue                     # 登录表单
+│   ├── MainView.vue                  # 主页的'为你推荐'组件
+│   ├── MenuItem.vue                  # 侧边栏的菜单组件
+│   ├── MenuItemFollow.vue            # 侧边栏的菜单之后内容的组件
+│   ├── Register.vue                  # 注册表单
+│   ├── SideNavMain.vue               # 侧边栏
+│   ├── TextInput.vue                 # 输入框组件
+│   ├── TopNav.vue                    # 头部导航栏
+│   ├── UploadError.vue               # 上传错误信息弹窗
+│   └── UserVideo.vue                 # 用户上传视频组件
+├── layouts/                          # 布局级组件
+├── pages/                            # 页面级组件
+│   ├── video/                        # 视频详情界面
+│   │   └── [id].vue
+│   ├── profile/                      # 用户主页
+│   │   └── [id].vue                  # 动态用户页
+│   ├── upload/                       # 上传视频界面
+│   │   └── index.vue
+│   └── index.vue                     # 首页
+├── plugins/                          # 插件
+│   ├── axios.ts
+│   └── store.ts
+├── stores/                           # Pinia 状态管理
+│   ├── general.ts                    # 设置响应拦截器/通用方法
+│   └── user.ts                       # 用户状态
+├── types/                            # TypeScript 类型定义
+│   └── app-load-state                # 用户类型
 └── app.vue
 ```
