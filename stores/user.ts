@@ -1,75 +1,134 @@
 import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
 import axios from '~/plugins/axios';
+
 const $axios = axios().provide.axios;
 
-export const useUserStore = defineStore('user', {
-  state: () => ({
-    id: '',
-    username: '',
-    bio: '',
-    avatar: '',
-  }),
+interface Post {
+  id: string;
+  videoUrl: string;
+  caption: string;
+  likes: number;
+  views: number;
+  updatedAt: string;
+}
 
-  actions: {
-    async getTokens() {
+interface UserData {
+  id: string;
+  username: string;
+  bio: string;
+  avatar: string;
+  followers: number;
+  followings: number;
+  posts: Post[];
+}
+
+export const useUserStore = defineStore(
+  'user',
+  () => {
+    const currentUserId = ref<string>('');
+
+    const userData = ref<UserData>({
+      id: '',
+      username: '',
+      bio: '',
+      avatar: '',
+      followers: 0,
+      followings: 0,
+      posts: [],
+    });
+
+    const allLikes = computed(() =>
+      userData.value.posts.reduce((total, post) => total + post.likes, 0)
+    );
+
+    async function getTokens() {
       await $axios.get('/auth/csrf-cookie');
-    },
+    }
 
-    async register(
+    async function register(
       phoneNumber: string,
       username: string,
       password: string,
       confirmPassword: string
     ) {
-      let res = await $axios.post('/user/register', {
+      const res = await $axios.post('/user/register', {
         phoneNumber,
         username,
         password,
         confirmPassword,
       });
-      this.id = res.data.data.id;
-    },
+      currentUserId.value = res.data.data.id;
+    }
 
-    async login(phoneNumber: string, password: string) {
-      let res = await $axios.post('/user/login', {
+    async function login(phoneNumber: string, password: string) {
+      const res = await $axios.post('/user/login', {
         phoneNumber,
         password,
       });
-      this.id = res.data.data.id;
-    },
+      currentUserId.value = res.data.data.id;
+    }
 
-    async getUserinfo(id: string) {
-      if (!id) throw new Error('请求id不能为空');
-      const res = await $axios.get('/user/get-userinfo', { params: { id } });
-      const { username, bio, avatar } = res.data.data;
-      this.username = username;
-      this.bio = bio;
-      this.avatar = avatar;
-    },
+    async function getUserInfo(userId: string) {
+      resetUserData();
+      const res = await $axios.get('/user/get-userinfo', { params: { id: userId } });
+      userData.value = res.data.data;
+    }
 
-    async updateUserinfo(username: string, bio: string, avatar: string) {
-      const id = this.id;
-      let res = await $axios.post('/user/update-userinfo', { id, username, bio, avatar });
-      // 这边更新之后 getUserinfo 的接口不会返回更新之后的结果，所以只能到这边写了
-      this.username = res.data.data.username;
-      this.bio = res.data.data.bio;
-      this.avatar = res.data.data.avatar;
-    },
+    // 这边还可以更新关注数和粉丝数
+    async function updateUserInfo(newUsername: string, newBio: string, newAvatar: string) {
+      const res = await $axios.post('/user/update-userinfo', {
+        id: currentUserId.value,
+        username: newUsername,
+        bio: newBio,
+        avatar: newAvatar,
+      });
 
-    async uploadVideo(data: FormData) {
-      await $axios.post('/user/post-video', data);
-    },
+      userData.value = { ...userData.value, ...res.data.data };
+    }
 
-    logout() {
-      this.resetUser();
-    },
+    async function uploadVideo(data: FormData) {
+      return await $axios.post('/user/upload-video', data);
+    }
 
-    resetUser() {
-      this.id = '';
-      this.username = '';
-      this.bio = '';
-      this.avatar = '';
-    },
+    function resetUserData() {
+      userData.value = {
+        id: '',
+        username: '',
+        bio: '',
+        avatar: '',
+        followers: 0,
+        followings: 0,
+        posts: [],
+      };
+    }
+
+    function resetUser() {
+      currentUserId.value = '';
+      userData.value = {
+        id: '',
+        username: '',
+        bio: '',
+        avatar: '',
+        followers: 0,
+        followings: 0,
+        posts: [],
+      };
+    }
+
+    return {
+      currentUserId,
+      userData,
+      allLikes,
+      getTokens,
+      register,
+      login,
+      getUserInfo,
+      updateUserInfo,
+      uploadVideo,
+      resetUserData,
+      resetUser,
+    };
   },
-  persist: true,
-});
+  { persist: true }
+);

@@ -24,11 +24,21 @@ export const useGeneralStore = defineStore('general', {
       document.body.style.overflow = 'visible';
     },
 
+    allLowerCaseNoCaps(name: string) {
+      return name.split(' ').join('').toLowerCase();
+    },
+
+    setBackUrl(url: string) {
+      this.isBackUrl = url;
+    },
+
     async hasSessionExpired() {
       await $axios.interceptors.response.use(
         response => response,
         error => {
           switch (error.response.status) {
+            case 400: // 请求出错
+              return Promise.reject(error.response.data.message);
             case 401: // 未登录
             case 419: // cookie过期
             case 503: // 服务器暂不可用

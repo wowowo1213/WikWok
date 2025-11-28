@@ -19,9 +19,9 @@ watch(
   () => errorType?.value,
   () => {
     if (errorType?.value == 'caption') {
-      error.value = '字母最长长度为150个字符!';
+      error.value = '视频简介最长150个字符!';
     } else if (errorType?.value == 'bio') {
-      error.value = 'Maximum 80 characters.';
+      error.value = '个人简介最长80个字符!';
     } else if (errorType?.value == 'file') {
       error.value = '仅支持MP4文件格式';
     } else {

@@ -40,12 +40,11 @@ const login = async () => {
   try {
     await $userStore.getTokens();
     await $userStore.login(phoneNumber.value, password.value);
-    await $userStore.getUserinfo($userStore.id);
+    await $userStore.getUserInfo($userStore.currentUserId);
     // await $generalStore.getRandomUsers('suggested');
     // await $generalStore.getRandomUsers('following')
     $generalStore.isLoginOpen = false;
   } catch (error) {
-    console.log(error);
     errors.value = error instanceof Array ? error[0] : error;
   }
 };

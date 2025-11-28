@@ -34,6 +34,12 @@ export class RegisterUserDto {
   @IsOptional()
   @IsString()
   avatar?: string;
+
+  @IsOptional()
+  followers?: number;
+
+  @IsOptional()
+  followings?: number;
 }
 
 export class LoginUserDto {
@@ -69,4 +75,10 @@ export class UpdateUserDto {
 
   @IsOptional()
   avatar?: string;
+
+  @IsOptional()
+  followers?: number;
+
+  @IsOptional()
+  followings?: number;
 }

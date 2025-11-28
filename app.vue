@@ -7,9 +7,15 @@
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
+import { AppLoadStateKey } from '~/types/app-load-state';
 const { $userStore, $generalStore } = useNuxtApp();
 const { isLoginOpen, isEditProfileOpen } = storeToRefs($generalStore);
+
+const isAppLoaded = ref(false);
+
+provide(AppLoadStateKey, {
+  isAppLoaded,
+});
 
 onMounted(async () => {
   $generalStore.bodySwitch(false);
@@ -20,10 +26,11 @@ onMounted(async () => {
     await $generalStore.hasSessionExpired();
     // await $generalStore.getRandomUsers('suggested');
     // await $generalStore.getRandomUsers('following');
-
-    if ($userStore.id) $userStore.getUserinfo($userStore.id);
+    if ($userStore.currentUserId) await $userStore.getUserInfo($userStore.currentUserId);
   } catch (error) {
     console.log(error);
+  } finally {
+    isAppLoaded.value = true;
   }
 });
 

@@ -11,13 +11,7 @@
       <Icon class="animate-spin ml-1 text-white" name="eos-icons:bubble-loading" size="100" />
     </div>
     <div>
-      <video
-        ref="video"
-        muted
-        loop
-        class="aspect-[3/4] object-cover rounded-md"
-        src="../public/test.mp4"
-      />
+      <video ref="video" muted loop class="aspect-[3/4] object-cover rounded-md" :src="videoSrc" />
     </div>
     <div class="px-1">
       <div class="text-gray-700 text-[15px] pt-1 break-words">text</div>
@@ -31,12 +25,15 @@
 </template>
 
 <script setup lang="ts">
-defineProps(['post']);
-
-const route = useRoute();
-const router = useRouter();
+const props = defineProps(['post']);
 
 let video = ref<HTMLVideoElement | null>(null);
+const videoSrc = computed(() => {
+  const baseUrl = 'http://localhost:5000';
+  const videoUrl = props.post.videoUrl;
+
+  return baseUrl + videoUrl;
+});
 let isLoaded = ref(false);
 
 onMounted(() => {

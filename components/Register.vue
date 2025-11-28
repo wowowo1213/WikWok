@@ -57,7 +57,7 @@ const register = async () => {
       password.value,
       confirmPassword.value
     );
-    await $userStore.getUserinfo($userStore.id);
+    await $userStore.getUserInfo($userStore.currentUserId);
     $generalStore.isLoginOpen = false;
   } catch (error) {
     errors.value = error instanceof Array ? error[0] : error;

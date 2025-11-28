@@ -10,7 +10,7 @@ export class Video extends Document {
   videoUrl: string;
 
   @Prop({ required: true })
-  text: string;
+  caption: string;
 
   @Prop({ default: 0 })
   likes: number;

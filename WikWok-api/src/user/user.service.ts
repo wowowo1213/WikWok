@@ -26,6 +26,8 @@ export class UserService {
       confirmPassword,
       bio = '这个人很懒，什么都没有留下~',
       avatar = `data:image/jpeg;base64,${imageBuffer.toString('base64')}`,
+      followers = 0,
+      followings = 0,
     } = registerDto;
 
     if (password !== confirmPassword) throw new BadRequestException('两次输入的密码不一致');
@@ -41,6 +43,8 @@ export class UserService {
       password: hashedPassword,
       bio,
       avatar,
+      followers,
+      followings,
     });
 
     await newUser.save();
@@ -64,33 +68,51 @@ export class UserService {
   }
 
   async getUserinfo(id: string) {
-    const query = { _id: id };
-    const user = await this.userModel.findOne(query).select('username bio avatar');
+    const user = await this.userModel
+      .findOne({ _id: id })
+      .select('username bio avatar followers followings videos')
+      .populate({
+        path: 'videos',
+        model: 'Video',
+        select: '_id videoUrl caption likes views updatedAt',
+        options: { sort: { updatedAt: -1 } },
+      });
+
     if (!user) throw new BadRequestException('用户不存在，请先注册');
+
+    const posts = user.videos.map(video => ({
+      id: video._id,
+      videoUrl: video.videoUrl,
+      caption: video.caption,
+      likes: video.likes,
+      views: video.views,
+      updatedAt: video.updatedAt,
+    }));
+
     return {
+      id: user._id,
       username: user.username,
       bio: user.bio,
       avatar: user.avatar,
+      followers: user.followers,
+      followings: user.followings,
+      posts,
     };
   }
 
   async updateUser(updateDto: UpdateUserDto) {
-    const { id, username, bio, avatar } = updateDto;
+    const { id, username, bio, avatar, followers, followings } = updateDto;
+
     const updatedUser = await this.userModel.findOneAndUpdate(
       { _id: id },
-      { username, bio, avatar },
+      { username, bio, avatar, followers, followings },
       { new: true }
     );
     if (!updatedUser) throw new BadRequestException('用户更新失败');
-    return {
-      username: updatedUser.username,
-      bio: updatedUser.bio,
-      avatar: updatedUser.avatar,
-    };
   }
 
-  async uploadVideo(payload: { id: string; text: string; file: Express.Multer.File }) {
-    const { id, text, file } = payload;
+  async uploadVideo(payload: { id: string; caption: string; file: Express.Multer.File }) {
+    const { id, caption, file } = payload;
 
     try {
       const user = await this.userModel.findOne({ _id: id });
@@ -109,7 +131,7 @@ export class UserService {
       const newVideo = new this.videoModel({
         userId: user._id,
         videoUrl,
-        text,
+        caption,
       });
       const savedVideo = await newVideo.save();
       await this.userModel.updateOne({ _id: user._id }, { $push: { videos: savedVideo._id } });

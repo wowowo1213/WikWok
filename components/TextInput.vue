@@ -9,7 +9,6 @@
       autocomplete="off"
       :maxlength="max"
     />
-    <!-- error这边可以删掉 -->
     <span v-if="error" class="text-red-500 text-[14px] font-semibold">
       {{ error }}
     </span>

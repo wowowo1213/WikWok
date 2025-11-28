@@ -56,9 +56,13 @@ export class UserController {
       const user = await this.userService.getUserinfo(id);
       return {
         result: {
+          id: user.id,
           username: user.username,
           bio: user.bio,
           avatar: user.avatar,
+          followers: user.followers,
+          followings: user.followings,
+          posts: user.posts,
         },
         message: '这是一个用户信息获取接口',
       };
@@ -70,13 +74,9 @@ export class UserController {
   @Post('update-userinfo')
   async updateUserinfo(@Body() updateUserDto: UpdateUserDto) {
     try {
-      const user = await this.userService.updateUser(updateUserDto);
+      await this.userService.updateUser(updateUserDto);
       return {
-        result: {
-          username: user.username,
-          bio: user.bio,
-          avatar: user.avatar,
-        },
+        result: {},
         message: '这是一个用户信息更新接口',
       };
     } catch (error) {
@@ -84,7 +84,7 @@ export class UserController {
     }
   }
 
-  @Post('post-video')
+  @Post('upload-video')
   @UseInterceptors(
     FileInterceptor('video', {
       storage: diskStorage({
@@ -110,19 +110,22 @@ export class UserController {
   )
   async uploadVideo(@UploadedFile() videoFile: Express.Multer.File, @Body() body: any) {
     try {
-      const { id, text } = body;
-      if (!id || !text || !videoFile) throw new BadRequestException('文件上传失败，参数不正确');
+      const { id, caption } = body;
+
+      if (!id) throw new BadRequestException('视频上传失败，用户未注册');
+      if (!caption) throw new BadRequestException('视频上传失败，视频简介不能为空');
+      if (!videoFile) throw new BadRequestException('视频不能为空');
+
       const video = await this.userService.uploadVideo({
         id,
-        text,
+        caption,
         file: videoFile,
       });
 
       return {
         result: {
-          videoId: video._id,
           videoUrl: video.videoUrl,
-          caption: video.text,
+          caption: video.caption,
         },
         message: '视频上传成功',
       };

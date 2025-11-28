@@ -19,6 +19,12 @@ export class User extends Document {
   @Prop({ default: '' })
   avatar: string;
 
+  @Prop({ default: 0 })
+  followers: number;
+
+  @Prop({ default: 0 })
+  followings: number;
+
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Video' }], default: [] })
   videos: Types.ObjectId[] | Video[];
 }

@@ -30,7 +30,7 @@
 
             <div class="flex items-center justify-center sm:-mt-6">
               <label for="image" class="relative cursor-pointer">
-                <img class="rounded-full" width="95" :src="$userStore.avatar" />
+                <img class="rounded-full" width="95" :src="userData.avatar" />
                 <div
                   class="absolute bottom-0 right-0 rounded-full bg-white shadow-xl border p-1 border-gray-300 inline-block w-[32px]"
                 >
@@ -119,7 +119,6 @@
           >
             <span class="mx-4 font-medium text-[15px]">保存</span>
           </button>
-          <button @click="testing" class="font-bold text-red-400 border">click !!!</button>
         </div>
 
         <div id="CropperButtons" v-else class="flex items-center justify-end">
@@ -143,20 +142,17 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { Cropper, CircleStencil } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 
 const { $userStore, $generalStore } = useNuxtApp();
-
-const testing = () => {
-  console.log($userStore.username);
-  console.log($userStore.bio);
-};
+const { userData } = storeToRefs($userStore);
 
 onMounted(() => {
-  username.value = $userStore.username;
-  bio.value = $userStore.bio;
-  avatar.value = $userStore.avatar;
+  username.value = userData.value.username;
+  bio.value = userData.value.bio;
+  avatar.value = userData.value.avatar;
 });
 
 let username = ref('');
@@ -164,11 +160,12 @@ let bio = ref('');
 let avatar = ref('');
 let uploadedImage = ref('');
 let cropper = ref(null);
+
 const isUpdated = computed(() => {
   const isChanged =
-    username.value !== $userStore.username ||
-    bio.value !== $userStore.bio ||
-    avatar.value !== $userStore.avatar;
+    username.value !== userData.value.username ||
+    bio.value !== userData.value.bio ||
+    avatar.value !== userData.value.avatar;
   const isNotEmpty = username.value.trim() && bio.value.trim() && avatar.value.trim();
   return isChanged && isNotEmpty;
 });
@@ -199,23 +196,11 @@ const cropAndUpdateImage = async () => {
   //     console.log(error);
   //   }
   // };
-  // const updateUserInfo = async () => {
-  //   try {
-  //     await $userStore.updateUser(userName.value, userBio.value);
-  //     await $userStore.getUser();
-  //     await $profileStore.getProfile(route.params.id);
-  //     userName.value = name.value;
-  //     userBio.value = bio.value;
-  //     setTimeout(() => {
-  //       $generalStore.isEditProfileOpen = false;
-  //     }, 100);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
 };
 
-const updateUserinfo = () => {
-  $userStore.updateUserinfo(username.value, bio.value, avatar.value);
+const updateUserinfo = async () => {
+  await $userStore.updateUserInfo(username.value, bio.value, avatar.value);
+  await $userStore.getUserInfo($userStore.currentUserId);
   $generalStore.isEditProfileOpen = false;
 };
 </script>

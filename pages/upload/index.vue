@@ -3,7 +3,7 @@
 
   <div
     v-if="isUploading"
-    class="fixed flex items-center justify-center top-0 left-0 w-full h-screen bg-black/50 z-50 text-white"
+    class="fixed flex items-center justify-center top-0 left-0 w-full h-screen bg-black/50 z-100 text-white"
   >
     <Icon class="animate-spin ml-1" name="mingcute:loading-line" size="100" />
   </div>
@@ -93,7 +93,7 @@
 
           <div class="mt-5">
             <div class="flex items-center justify-between">
-              <div class="mb-1 text-[15px]">字幕</div>
+              <div class="mb-1 text-[15px]">视频简介</div>
               <div class="text-gray-400 text-[12px]">{{ caption.length }}/150</div>
             </div>
             <input
@@ -109,7 +109,7 @@
               class="px-10 py-2.5 mt-8 border border-gray-300 text-[16px] cursor-pointer hover:bg-gray-200 rounded-sm"
               @click="discard()"
             >
-              丢弃
+              取消
             </button>
             <button
               @click="uploadVideo()"
@@ -118,15 +118,7 @@
               发布
             </button>
           </div>
-
-          <!-- <div v-if="errors" class="mt-4">
-            <div class="text-red-600" v-if="errors && errors.video">
-              {{ errors.video[0] }}
-            </div>
-            <div class="text-red-600" v-if="errors && errors.text">
-              {{ errors.text[0] }}
-            </div>
-          </div> -->
+          <div class="mt-10 text-red-500 font-semibold">{{ errors }}</div>
         </div>
       </div>
     </div>
@@ -145,7 +137,7 @@ const fileDisplay = ref<string | null>(null);
 const caption = ref('');
 const isUploading = ref(false);
 const errorType = ref<'caption' | 'file' | null>(null);
-const errors = ref(null);
+const errors = ref<string | Array<string> | null>(null);
 
 watch(
   () => caption.value,
@@ -194,6 +186,7 @@ const discard = () => {
   fileData.value = null;
   fileDisplay.value = null;
   caption.value = '';
+  errors.value = null;
 };
 
 const uploadVideo = async () => {
@@ -201,17 +194,20 @@ const uploadVideo = async () => {
 
   let data = new FormData();
   data.append('video', fileData.value || '');
-  data.append('text', caption.value || '');
-  data.append('id', $userStore.id || '');
+  data.append('caption', caption.value || '');
+  data.append('id', $userStore.currentUserId || '');
 
   if (fileData.value && caption.value) isUploading.value = true;
 
   try {
     let res = await $userStore.uploadVideo(data);
-    router.push('/profile/' + $userStore.id);
+    console.log(res);
+    if (res.status === 200) {
+      router.push('/profile/' + $userStore.currentUserId);
+    }
     isUploading.value = false;
-  } catch (error) {
-    console.log(error);
+  } catch (error: string | Array<string>) {
+    errors.value = error;
     isUploading.value = false;
   }
 };
