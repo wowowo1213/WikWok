@@ -192,12 +192,15 @@ const discard = () => {
 const uploadVideo = async () => {
   errors.value = null;
 
+  if (!fileData.value) return (errors.value = '上传视频不能为空');
+  if (!caption.value) return (errors.value = '视频简介不能为空');
+
+  isUploading.value = true;
+
   let data = new FormData();
   data.append('video', fileData.value || '');
   data.append('caption', caption.value || '');
   data.append('id', $userStore.currentUserId || '');
-
-  if (fileData.value && caption.value) isUploading.value = true;
 
   try {
     let res = await $userStore.uploadVideo(data);

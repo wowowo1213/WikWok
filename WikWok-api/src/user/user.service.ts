@@ -1,7 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Video } from './schemas/video.model';
 import { User } from './schemas/user.schema';
 import { LoginUserDto, RegisterUserDto, UpdateUserDto } from './dto/userinfo.dto';
 import * as bcrypt from 'bcrypt';
@@ -10,10 +9,7 @@ import { join } from 'path';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(Video.name) private videoModel: Model<Video>
-  ) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async registerUser(registerDto: RegisterUserDto) {
     const defaultAvatarPath = join(process.cwd(), 'public/images/default-avatar.webp');
@@ -110,42 +106,5 @@ export class UserService {
       { new: true }
     );
     if (!updatedUser) throw new BadRequestException('用户更新失败');
-  }
-
-  async uploadVideo(payload: { id: string; caption: string; file: Express.Multer.File }) {
-    const { id, caption, file } = payload;
-
-    try {
-      const user = await this.userModel.findOne({ _id: id });
-      if (!user) {
-        if (file && file.path) {
-          try {
-            unlinkSync(file.path);
-          } catch (e) {
-            console.error('删除临时文件失败:', e);
-          }
-        }
-        throw new BadRequestException('用户不存在');
-      }
-
-      const videoUrl = `/uploads/videos/${file.filename}`;
-      const newVideo = new this.videoModel({
-        userId: user._id,
-        videoUrl,
-        caption,
-      });
-      const savedVideo = await newVideo.save();
-      await this.userModel.updateOne({ _id: user._id }, { $push: { videos: savedVideo._id } });
-      return savedVideo;
-    } catch (error) {
-      if (file && file.path) {
-        try {
-          unlinkSync(file.path);
-        } catch (e) {
-          console.error('删除临时文件失败:', e);
-        }
-      }
-      throw new BadRequestException(error.message || '视频上传失败');
-    }
   }
 }
