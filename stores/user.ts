@@ -1,8 +1,5 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import axios from '~/plugins/axios';
-
-const $axios = axios().provide.axios;
 
 interface Video {
   id: string;
@@ -14,7 +11,7 @@ interface Video {
 }
 
 interface UserData {
-  id: string;
+  userId: string;
   username: string;
   bio: string;
   avatar: string;
@@ -26,10 +23,11 @@ interface UserData {
 export const useUserStore = defineStore(
   'user',
   () => {
-    const currentUserId = ref<string>('');
+    const { $axios } = useNuxtApp();
 
+    const currentUserId = ref<string>('');
     const userData = ref<UserData>({
-      id: '',
+      userId: '',
       username: '',
       bio: '',
       avatar: '',
@@ -42,23 +40,20 @@ export const useUserStore = defineStore(
       userData.value.videos.reduce((total, video) => total + video.likes, 0)
     );
 
-    async function getTokens() {
-      await $axios.get('/auth/csrf-cookie');
-    }
-
     async function register(
       phoneNumber: string,
       username: string,
       password: string,
       confirmPassword: string
     ) {
-      const res = await $axios.post('/user/register', {
+      const res = await $axios.post('/auth/register', {
         phoneNumber,
         username,
         password,
         confirmPassword,
       });
-      currentUserId.value = res.data.data.id;
+      currentUserId.value = res.data.data.userId;
+      localStorage.setItem('jwtToken', res.data.data.jwtToken); // 这边可以检验jwttoken是否过期
     }
 
     async function login(phoneNumber: string, password: string) {
@@ -66,7 +61,8 @@ export const useUserStore = defineStore(
         phoneNumber,
         password,
       });
-      currentUserId.value = res.data.data.id;
+      currentUserId.value = res.data.data.userId;
+      localStorage.setItem('jwtToken', res.data.data.jwtToken); // 这边可以检验jwttoken是否过期
     }
 
     async function getUserInfo(userId: string) {
@@ -93,7 +89,7 @@ export const useUserStore = defineStore(
 
     function resetUserData() {
       userData.value = {
-        id: '',
+        userId: '',
         username: '',
         bio: '',
         avatar: '',
@@ -106,7 +102,7 @@ export const useUserStore = defineStore(
     function resetUser() {
       currentUserId.value = '';
       userData.value = {
-        id: '',
+        userId: '',
         username: '',
         bio: '',
         avatar: '',
@@ -114,13 +110,13 @@ export const useUserStore = defineStore(
         followings: 0,
         videos: [],
       };
+      localStorage.removeItem('jwtToken'); // 这边移除？？
     }
 
     return {
       currentUserId,
       userData,
       allLikes,
-      getTokens,
       register,
       login,
       getUserInfo,

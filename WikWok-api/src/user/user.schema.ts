@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Video } from '../../upload/schemas/video.model';
+import { Video } from '../upload/video.model';
 
 @Schema()
 export class User extends Document {
@@ -13,7 +13,7 @@ export class User extends Document {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ default: '' })
+  @Prop({ default: '这个人很懒，什么都没有留下~' })
   bio: string;
 
   @Prop({ default: '' })

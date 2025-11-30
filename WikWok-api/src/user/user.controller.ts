@@ -1,40 +1,12 @@
-import { BadRequestException, Controller, Get, Post, Query, Body } from '@nestjs/common';
-import { RegisterUserDto, LoginUserDto, UpdateUserDto } from './dto/userinfo.dto';
+import { Controller, Get, Post, Query, Body, BadRequestException, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
+import { UpdateUserDto } from './userinfo.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('user')
+@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Post('register')
-  async registerUser(@Body() registerDto: RegisterUserDto) {
-    try {
-      const user = await this.userService.registerUser(registerDto);
-      return {
-        result: {
-          id: user.id,
-        },
-        message: '这是一个用户注册接口',
-      };
-    } catch (error) {
-      throw new BadRequestException(error.message || '注册失败');
-    }
-  }
-
-  @Post('login')
-  async loginUser(@Body() loginDto: LoginUserDto) {
-    try {
-      const user = await this.userService.loginUser(loginDto);
-      return {
-        result: {
-          id: user.id,
-        },
-        message: '这是一个用户登录接口',
-      };
-    } catch (error) {
-      throw new BadRequestException(error.message || '登录失败');
-    }
-  }
 
   @Get('get-userinfo')
   async getUserinfo(@Query('id') id: string) {
@@ -42,9 +14,10 @@ export class UserController {
 
     try {
       const user = await this.userService.getUserinfo(id);
+
       return {
         result: {
-          id: user.id,
+          userId: user.userId,
           username: user.username,
           bio: user.bio,
           avatar: user.avatar,
@@ -52,7 +25,7 @@ export class UserController {
           followings: user.followings,
           videos: user.videos,
         },
-        message: '这是一个用户信息获取接口',
+        message: '获取用户信息成功',
       };
     } catch (error) {
       throw new BadRequestException(error.message || '获取用户信息失败');
@@ -65,7 +38,7 @@ export class UserController {
       await this.userService.updateUser(updateUserDto);
       return {
         result: {},
-        message: '这是一个用户信息更新接口',
+        message: '更新用户信息成功',
       };
     } catch (error) {
       throw new BadRequestException(error.message || '更新用户信息失败');

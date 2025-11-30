@@ -7,10 +7,16 @@ export class Video extends Document {
   userId: Types.ObjectId;
 
   @Prop({ required: true })
+  fileHash: string;
+
+  @Prop({ required: true })
   videoUrl: string;
 
   @Prop({ required: true })
   caption: string;
+
+  @Prop({ default: '' })
+  filename: string;
 
   @Prop({ default: 0 })
   likes: number;

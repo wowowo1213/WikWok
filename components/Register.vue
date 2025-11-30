@@ -50,7 +50,7 @@ const register = async () => {
   errors.value = null;
 
   try {
-    await $userStore.getTokens();
+    await $generalStore.getCsrfToken();
     await $userStore.register(
       phoneNumber.value,
       username.value,

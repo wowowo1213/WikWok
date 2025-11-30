@@ -1,12 +1,10 @@
 import { defineStore } from 'pinia';
-import { useUserStore } from './user';
-import axios from '~/plugins/axios';
-
-const $axios = axios().provide.axios;
 
 export const useGeneralStore = defineStore(
   'general',
   () => {
+    const { $axios } = useNuxtApp();
+
     const isLoginOpen = ref(false);
     const isEditProfileOpen = ref(false);
     const selectedVideo = ref(null);
@@ -15,6 +13,16 @@ export const useGeneralStore = defineStore(
     const videos = ref(null);
     const suggested = ref(null);
     const following = ref(null);
+
+    async function getCsrfToken() {
+      let res1 = await $axios.get('/auth/wowowo1'); // 测试
+      console.log(res1);
+
+      await $axios.get('/auth/csrf-token');
+
+      let res2 = await $axios.post('/auth/wowowo2', { number: 2222 }); // 测试
+      console.log(res2);
+    }
 
     function bodySwitch(val: boolean) {
       if (val) {
@@ -28,28 +36,6 @@ export const useGeneralStore = defineStore(
       isBackUrl.value = url;
     }
 
-    async function hasSessionExpired() {
-      await $axios.interceptors.response.use(
-        response => response,
-        error => {
-          switch (error.response.status) {
-            case 400: // 请求出错
-              return Promise.reject(error.response.data.message);
-            case 401: // 未登录
-            case 419: // cookie过期
-            case 503: // 服务器暂不可用
-              useUserStore().resetUser();
-              window.location.href = '/';
-              break;
-            case 500:
-              alert('服务器内部出错');
-              break;
-            default:
-              return Promise.reject(error);
-          }
-        }
-      );
-    }
     return {
       isLoginOpen,
       isEditProfileOpen,
@@ -59,9 +45,9 @@ export const useGeneralStore = defineStore(
       videos,
       suggested,
       following,
+      getCsrfToken,
       bodySwitch,
       setBackUrl,
-      hasSessionExpired,
     };
   },
   {

@@ -1,17 +1,18 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User } from './schemas/user.schema';
-import { LoginUserDto, RegisterUserDto, UpdateUserDto } from './dto/userinfo.dto';
+import { User } from './user.schema';
+import { UpdateUserDto } from './userinfo.dto';
+import { RegisterUserDto, LoginUserDto } from 'src/auth/auth.dto';
 import * as bcrypt from 'bcrypt';
-import { readFileSync, unlinkSync } from 'fs';
+import { readFileSync } from 'fs';
 import { join } from 'path';
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async registerUser(registerDto: RegisterUserDto) {
+  async registerUser(registerUserDto: RegisterUserDto) {
     const defaultAvatarPath = join(process.cwd(), 'public/images/default-avatar.webp');
     const imageBuffer = readFileSync(defaultAvatarPath);
 
@@ -24,7 +25,7 @@ export class UserService {
       avatar = `data:image/jpeg;base64,${imageBuffer.toString('base64')}`,
       followers = 0,
       followings = 0,
-    } = registerDto;
+    } = registerUserDto;
 
     if (password !== confirmPassword) throw new BadRequestException('两次输入的密码不一致');
 
@@ -32,7 +33,6 @@ export class UserService {
     if (user) throw new BadRequestException('该手机号已注册');
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const newUser = new this.userModel({
       phoneNumber,
       username,
@@ -45,13 +45,11 @@ export class UserService {
 
     await newUser.save();
 
-    return {
-      id: newUser._id,
-    };
+    return { user: newUser };
   }
 
-  async loginUser(loginDto: LoginUserDto) {
-    const { phoneNumber, password } = loginDto;
+  async loginUser(loginUserDto: LoginUserDto) {
+    const { phoneNumber, password } = loginUserDto;
 
     const user = await this.userModel.findOne({ phoneNumber });
     if (!user) throw new BadRequestException('用户不存在，请先注册');
@@ -59,9 +57,7 @@ export class UserService {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) throw new BadRequestException('密码错误');
 
-    return {
-      id: user._id,
-    };
+    return { user };
   }
 
   async getUserinfo(id: string) {
@@ -71,23 +67,24 @@ export class UserService {
       .populate({
         path: 'videos',
         model: 'Video',
-        select: '_id videoUrl caption likes views updatedAt',
+        select: '_id videoUrl caption filename likes views updatedAt',
         options: { sort: { updatedAt: -1 } },
       });
 
-    if (!user) throw new BadRequestException('用户不存在，请先注册');
+    if (!user) throw new BadRequestException('用户不存在');
 
     const videos = user.videos.map(video => ({
-      id: video._id,
+      videoId: video._id,
       videoUrl: video.videoUrl,
       caption: video.caption,
+      filename: video.filename,
       likes: video.likes,
       views: video.views,
       updatedAt: video.updatedAt,
     }));
 
     return {
-      id: user._id,
+      userId: user._id,
       username: user.username,
       bio: user.bio,
       avatar: user.avatar,
@@ -105,6 +102,7 @@ export class UserService {
       { username, bio, avatar, followers, followings },
       { new: true }
     );
+
     if (!updatedUser) throw new BadRequestException('用户更新失败');
   }
 }

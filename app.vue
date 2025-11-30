@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { AppLoadStateKey } from '~/types/app-load-state';
-const { $userStore, $generalStore } = useNuxtApp();
+const { $axios, $userStore, $generalStore } = useNuxtApp();
 const { isLoginOpen, isEditProfileOpen } = storeToRefs($generalStore);
 
 const isAppLoaded = ref(false);
@@ -23,7 +23,8 @@ onMounted(async () => {
   isEditProfileOpen.value = false;
 
   try {
-    await $generalStore.hasSessionExpired();
+    await $generalStore.getCsrfToken();
+    // await $generalStore.hasSessionExpired();
     // await $generalStore.getRandomUsers('suggested');
     // await $generalStore.getRandomUsers('following');
     if ($userStore.currentUserId) await $userStore.getUserInfo($userStore.currentUserId);

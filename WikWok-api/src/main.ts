@@ -5,7 +5,8 @@ import { AllExceptionsFilter } from './common/filters/all-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { MyLogger } from './common/logger/no-timestamp-logger';
 import cookieParser from 'cookie-parser';
-import csurf from 'csurf';
+import { DoubleCsrfMiddleware } from './common/middleware/double-csrf.middleware';
+import session from 'express-session';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
@@ -19,6 +20,25 @@ async function bootstrap() {
     logger: new MyLogger(),
   });
 
+  app.enableCors({
+    origin: ['http://localhost:3000'],
+    methods: 'GET,POST,PUT',
+    allowedHeaders: 'Content-Type, Authorization, x-csrf-token',
+    credentials: true,
+  });
+
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET!, // 生产环境使用环境变量
+      resave: false, // 避免重复保存未修改的 Session
+      saveUninitialized: false, // 不保存空 Session
+      cookie: { secure: false, httpOnly: true, sameSite: 'lax' },
+    })
+  );
+
+  app.use(cookieParser());
+  app.use(new DoubleCsrfMiddleware().use.bind(new DoubleCsrfMiddleware()));
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -27,25 +47,6 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new TransformInterceptor());
-
-  app.enableCors({
-    origin: ['http://localhost:3000'],
-    methods: 'GET,POST,PUT',
-    allowedHeaders: 'Content-Type, Authorization',
-    credentials: true,
-  });
-
-  // scrf-token的验证有问题，生成了token，且前端也已经获得了，且请求也携带了，但是验证不过
-  // app.use(cookieParser());
-  // app.use(
-  //   csurf({
-  //     cookie: {
-  //       key: 'XSRF-TOKEN',
-  //       path: '/',
-  //       httpOnly: true,
-  //     },
-  //   })
-  // );
 
   await app.listen(process.env.PORT ?? 5000);
 }

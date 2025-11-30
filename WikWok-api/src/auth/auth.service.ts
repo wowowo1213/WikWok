@@ -1,0 +1,30 @@
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { UserService } from '../user/user.service';
+import { RegisterUserDto, LoginUserDto } from './auth.dto';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService
+  ) {}
+
+  async registerUser(registerUserDto: RegisterUserDto) {
+    const { user } = await this.userService.registerUser(registerUserDto);
+    const payload = { sub: user._id };
+    return {
+      userId: user._id,
+      jwtToken: this.jwtService.sign(payload),
+    };
+  }
+
+  async login(loginUsersDto: LoginUserDto) {
+    const { user } = await this.userService.loginUser(loginUsersDto);
+    const payload = { sub: user._id };
+    return {
+      userId: user._id,
+      jwtToken: this.jwtService.sign(payload),
+    };
+  }
+}

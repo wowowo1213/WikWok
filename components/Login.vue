@@ -38,7 +38,7 @@ const login = async () => {
   errors.value = null;
 
   try {
-    await $userStore.getTokens();
+    await $generalStore.getCsrfToken();
     await $userStore.login(phoneNumber.value, password.value);
     await $userStore.getUserInfo($userStore.currentUserId);
     // await $generalStore.getRandomUsers('suggested');
