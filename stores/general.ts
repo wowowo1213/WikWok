@@ -15,13 +15,8 @@ export const useGeneralStore = defineStore(
     const following = ref(null);
 
     async function getCsrfToken() {
-      let res1 = await $axios.get('/auth/wowowo1'); // 测试
-      console.log(res1);
-
-      await $axios.get('/auth/csrf-token');
-
-      let res2 = await $axios.post('/auth/wowowo2', { number: 2222 }); // 测试
-      console.log(res2);
+      let res = await $axios.get('/auth/csrf-token');
+      localStorage.setItem('x-csrf-token', res.data.csrfToken);
     }
 
     function bodySwitch(val: boolean) {

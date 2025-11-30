@@ -5,7 +5,7 @@ import { AllExceptionsFilter } from './common/filters/all-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { MyLogger } from './common/logger/no-timestamp-logger';
 import cookieParser from 'cookie-parser';
-import { DoubleCsrfMiddleware } from './common/middleware/double-csrf.middleware';
+import { DoubleCsrfMiddleware } from 'src/common/middleware/double-csrf.middleware';
 import session from 'express-session';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
@@ -29,10 +29,14 @@ async function bootstrap() {
 
   app.use(
     session({
-      secret: process.env.SESSION_SECRET!, // 生产环境使用环境变量
-      resave: false, // 避免重复保存未修改的 Session
-      saveUninitialized: false, // 不保存空 Session
-      cookie: { secure: false, httpOnly: true, sameSite: 'lax' },
+      secret: process.env.SESSION_SECRET!,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: false, // 这边设置true使用https协议
+        httpOnly: true,
+        sameSite: 'lax',
+      },
     })
   );
 

@@ -3,7 +3,6 @@ import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { DoubleCsrfMiddleware } from 'src/common/middleware/double-csrf.middleware';
 import { RegisterUserDto, LoginUserDto } from './auth.dto';
-import { rmSync } from 'fs';
 
 @Controller('auth')
 export class AuthController {
@@ -11,23 +10,6 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly doubleCsrfMiddleware: DoubleCsrfMiddleware
   ) {}
-
-  @Get('wowowo1')
-  tesing1() {
-    return {
-      message: '你好啊，testing1',
-    };
-  }
-
-  @Post('wowowo2')
-  tesing2(@Body() number: number) {
-    return {
-      result: {
-        number,
-      },
-      message: '你好啊',
-    };
-  }
 
   @Get('csrf-token')
   getCsrfToken(@Req() req: Request, @Res() res: Response) {

@@ -62,8 +62,8 @@
             color="#161724"
             size="27"
           />
-          <div class="relative">
-            <button class="mt-1 cursor-pointer" @click="showMenu = !showMenu">
+          <div class="relative flex items-center">
+            <button class="cursor-pointer" @click="showMenu = !showMenu">
               <img
                 class="rounded-full size-8 object-cover bg-white"
                 :src="$userStore.userData.avatar"

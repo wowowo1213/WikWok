@@ -12,15 +12,15 @@
 - **状态管理**: Pinia
 - **其他库**:
   - `vue-advanced-cropper` (头像裁剪)
-  - `axios` (HTTP 请求)
+  - `axios`
 
 ### 后端
 
-- **框架**: Next.js (API Routes)
+- **框架**: Next.js
 - **语言**: TypeScript
 - **数据库**: MongoDB
 - **安全**:
-  - CSRF 防护 (`csrf-token`)
+  - CSRF 防护 (`csrf-csrf`)
   - CORS 配置 (限制域名、方法、请求头)
 - **文件存储**: 本地存储 (支持大文件上传，限制 2GB)
 
@@ -56,17 +56,20 @@
 
 - **前端**：
   - 使用 `FormData` 上传视频文件
-  - 显示上传进度条
-  - 支持大文件分片上传（断点续传）
+  - 支持大文件分片上传 + 秒传 + WebWorker 计算大文件 hash + 断点续传 + 显示上传进度
 - **后端**：
-  - 解析上传数据并存储到本地 (`/uploads/videos/`)
+  - 解析上传数据并存储到本地 (`WikWok-api/uploads/videos/`)
   - 返回可访问的 URL 路径 (`http://localhost:5000/uploads/videos/xxx.mp4`)
 
-### 5. 安全机制
+### 5. loading 动画
+
+### 6. 安全机制
 
 - **CSRF 防护**：
-  - 后端生成并验证 `csrf-token`
-  - 前端在登录/注册前调用 `getToken()` 获取令牌
+  - 后端生成 cookie 并验证请求头 `x-csrf-token`
+  - 前端在登录/注册前调用 `getCsrfToken()` 获取令牌，检验请求合法性
+- **JWT 防护**:
+  - 后端设置 JWT 防护，进行身份验证
 - **CORS 配置**：
   - 限制允许的请求域名(`http://localhost:3000`)
   - 限制允许的 HTTP 方法 (`GET`, `POST`, `PUT`)
@@ -140,4 +143,29 @@ WikWok/
 ├── types/                            # TypeScript 类型定义
 │   └── app-load-state                # 用户类型
 └── app.vue
+```
+
+### 后端结构 (Nest)
+
+```bash
+WikWok-api/
+├── logs/                             # 日志文件夹
+├── public/                           # 静态资源(如默认头像)
+├── src/
+│   ├── auth/
+│   │   ├── auth.controller.ts        # 注册/登录接口，获取csrf-token接口
+│   │   ├── auth.dto.ts               # 注册/登录用户信息数据类型
+│   │   ├── auth.module.ts
+│   │   ├── auth.service.ts
+│   │   └── jwt.strategy.ts           # JWT的设置
+│   ├── user/
+│   │   ├── user.controller.ts        #
+│   │   ├── user.module.ts
+│   │   ├── user.schema.ts
+│   │   ├── user.service.ts           #
+│   │   └── user.dto.ts               #
+│   ├── app.module.ts                 #
+│   └── main.ts                       #
+├── uploads/                          # 视频上传文件夹
+└── .env                              # 环境变量(设置JWT_SECRET、SESSION_SECRET)
 ```

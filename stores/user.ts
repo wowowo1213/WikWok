@@ -57,7 +57,7 @@ export const useUserStore = defineStore(
     }
 
     async function login(phoneNumber: string, password: string) {
-      const res = await $axios.post('/user/login', {
+      const res = await $axios.post('/auth/login', {
         phoneNumber,
         password,
       });

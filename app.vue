@@ -24,7 +24,6 @@ onMounted(async () => {
 
   try {
     await $generalStore.getCsrfToken();
-    // await $generalStore.hasSessionExpired();
     // await $generalStore.getRandomUsers('suggested');
     // await $generalStore.getRandomUsers('following');
     if ($userStore.currentUserId) await $userStore.getUserInfo($userStore.currentUserId);
