@@ -53,7 +53,7 @@ export const useUserStore = defineStore(
         confirmPassword,
       });
       currentUserId.value = res.data.data.userId;
-      localStorage.setItem('jwtToken', res.data.data.jwtToken); // 这边可以检验jwttoken是否过期
+      localStorage.setItem('jwtToken', res.data.data.jwtToken);
     }
 
     async function login(phoneNumber: string, password: string) {
@@ -62,7 +62,7 @@ export const useUserStore = defineStore(
         password,
       });
       currentUserId.value = res.data.data.userId;
-      localStorage.setItem('jwtToken', res.data.data.jwtToken); // 这边可以检验jwttoken是否过期
+      localStorage.setItem('jwtToken', res.data.data.jwtToken);
     }
 
     async function getUserInfo(userId: string) {

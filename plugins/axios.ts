@@ -12,9 +12,8 @@ export default defineNuxtPlugin(NuxtApp => {
       const csrfToken = localStorage.getItem('x-csrf-token');
       if (csrfToken) config.headers['x-csrf-token'] = csrfToken;
 
-      // 这边 jwttoken 使用 localstorage，通过 Authorization: Bearer <token> 请求头传递
       const jwtToken = localStorage.getItem('jwtToken');
-      if (jwtToken) config.headers.Authorization = `Bearer ${jwtToken}`; // 后端设置了使用bear的方式验证，同时设置了有效期为1h
+      if (jwtToken) config.headers.Authorization = `Bearer ${jwtToken}`;
 
       return config;
     },
