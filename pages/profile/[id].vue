@@ -48,15 +48,15 @@
 
       <div class="flex items-center pt-4">
         <div class="mr-4">
-          <span class="font-bold"> {{ $userStore.profileData.followings }}</span>
+          <span class="font-bold">{{ formatNumber($userStore.profileData.followings) }}</span>
           <span class="text-gray-500 font-light text-[15px] pl-1.5 cursor-pointer">关注列表</span>
         </div>
         <div class="mr-4">
-          <span class="font-bold"> {{ $userStore.profileData.followers }}</span>
+          <span class="font-bold"> {{ formatNumber($userStore.profileData.followers) }}</span>
           <span class="text-gray-500 font-light text-[15px] pl-1.5 cursor-pointer">粉丝数</span>
         </div>
         <div class="mr-4">
-          <span class="font-bold">{{ $userStore.profileTotalLikes }}</span>
+          <span class="font-bold">{{ formatNumber($userStore.profileTotalLikes) }}</span>
           <span class="text-gray-500 font-light text-[15px] pl-1.5 cursor-pointer">总获赞数</span>
         </div>
       </div>
@@ -104,19 +104,31 @@ const route = useRoute();
 let isLoading = ref(false);
 let errorMessage = ref('');
 
+const formatNumber = (num: number) => {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+  return num.toString();
+};
+
 onMounted(async () => {
   try {
     isLoading.value = true;
     errorMessage.value = '';
 
+    $userStore.resetProfileData();
     await $userStore.getProfileInfo(route.params.id as string);
   } catch (error) {
     console.error('获取用户信息失败:', error);
-    // if (error.includes('Cast to ObjectId failed')) {
-    //   errorMessage.value = '请求用户不存在';
-    // } else {
-    //   errorMessage.value = error || '获取用户信息失败';
-    // }
+    if (error instanceof Error) {
+      if (error.message.includes('Cast to ObjectId failed')) errorMessage.value = '请求用户不存在';
+
+      errorMessage.value = error.message;
+    } else {
+      errorMessage.value = '获取用户信息失败';
+    }
   } finally {
     isLoading.value = false;
   }

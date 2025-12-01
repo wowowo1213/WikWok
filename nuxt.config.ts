@@ -1,13 +1,16 @@
-import tailwindcss from "@tailwindcss/vite";
+import tailwindcss from '@tailwindcss/vite';
 export default defineNuxtConfig({
-  compatibilityDate: "2025-07-15",
+  compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  css: ["./assets/css/main.css"],
+  css: ['./assets/css/main.css'],
   postcss: {
     plugins: {},
   },
   vite: {
     plugins: [tailwindcss()],
+    worker: {
+      format: 'es',
+    },
   },
-  modules: ["@nuxt/icon", "@pinia/nuxt", "pinia-plugin-persistedstate/nuxt"],
+  modules: ['@nuxt/icon', '@pinia/nuxt', 'pinia-plugin-persistedstate/nuxt'],
 });

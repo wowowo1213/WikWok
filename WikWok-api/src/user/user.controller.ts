@@ -9,11 +9,11 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('get-userinfo')
-  async getUserinfo(@Query('id') id: string) {
-    if (!id) throw new BadRequestException('用户ID不能为空');
+  async getUserinfo(@Query('userId') userId: string) {
+    if (!userId) throw new BadRequestException('用户ID不能为空');
 
     try {
-      const user = await this.userService.getUserinfo(id);
+      const user = await this.userService.getUserinfo(userId);
 
       return {
         result: {

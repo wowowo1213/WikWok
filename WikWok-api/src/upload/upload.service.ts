@@ -22,7 +22,7 @@ export class UploadService {
 
     if (existsSync(finalPath)) return { exist: true };
 
-    if (!existsSync(tempDir)) return { exist: false };
+    if (!existsSync(tempDir)) return { exist: false, uploadedChunks: [] };
 
     const chunks = await fs.readdir(tempDir);
     const uploadedChunks = chunks
@@ -30,6 +30,57 @@ export class UploadService {
       .map(filename => parseInt(filename.split('-')[1]));
 
     return { exist: false, uploadedChunks };
+  }
+
+  async submitMeta(
+    userId: string,
+    fileHash: string,
+    filename: string,
+    caption: string,
+    views?: number,
+    likes?: number
+  ) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new BadRequestException('用户不存在');
+
+    const finalDir = join(__dirname, '..', '..', 'uploads', 'videos');
+    const finalFilename = `${fileHash}.mp4`;
+    const finalPath = join(finalDir, finalFilename);
+
+    if (!existsSync(finalPath)) throw new BadRequestException('文件不存在');
+
+    const videoUrl = `/uploads/videos/${finalFilename}`;
+
+    const existingVideo = await this.videoModel.findOne({ fileHash, userId });
+    if (existingVideo) {
+      await this.videoModel.updateOne({ _id: existingVideo._id }, { $set: { filename, caption } });
+
+      return {
+        videoUrl: existingVideo.videoUrl,
+        caption,
+        filename,
+        message: '视频元数据已更新',
+      };
+    }
+
+    const newVideo = new this.videoModel({
+      userId: user._id,
+      videoUrl,
+      caption,
+      filename,
+      fileHash,
+      views: views || 0,
+      likes: likes || 0,
+    });
+
+    const savedVideo = await newVideo.save();
+    await this.userModel.updateOne({ _id: user._id }, { $push: { videos: savedVideo._id } });
+
+    return {
+      videoUrl,
+      caption,
+      filename,
+    };
   }
 
   async mergeChunks(
@@ -64,9 +115,9 @@ export class UploadService {
 
       writeStream.end();
 
-      await new Promise((resolve, reject) => {
-        // writeStream.on('finish', resolve);
-        writeStream.on('error', reject);
+      await new Promise<void>((resolve, reject) => {
+        writeStream.on('finish', () => resolve());
+        writeStream.on('error', err => reject(err));
       });
 
       await this.cleanTempChunks(fileHash, chunkCount, tempDir);
@@ -91,58 +142,8 @@ export class UploadService {
     } catch (error) {
       writeStream.destroy();
       await fs.unlink(finalPath).catch(() => {});
-      await this.cleanTempChunks(fileHash, chunkCount, tempDir);
       throw new BadRequestException(error.message || '合并分片失败');
     }
-  }
-
-  async submitMeta(
-    userId: string,
-    fileHash: string,
-    filename: string,
-    caption: string,
-    views?: number,
-    likes?: number
-  ) {
-    const user = await this.userModel.findById(userId);
-    if (!user) throw new BadRequestException('用户不存在');
-
-    const finalDir = join(__dirname, '..', '..', 'uploads', 'videos');
-    const finalFilename = `${fileHash}.mp4`;
-    const finalPath = join(finalDir, finalFilename);
-
-    if (!existsSync(finalPath)) throw new BadRequestException('文件不存在');
-
-    const videoUrl = `/uploads/videos/${finalFilename}`;
-
-    const existingVideo = await this.videoModel.findOne({ fileHash, userId });
-    if (existingVideo) {
-      return {
-        videoUrl: existingVideo.videoUrl,
-        caption: existingVideo.caption,
-        filename: existingVideo.filename,
-        message: '视频已存在',
-      };
-    }
-
-    const newVideo = new this.videoModel({
-      userId: user._id,
-      videoUrl,
-      caption,
-      originalFilename: filename,
-      fileHash,
-      views: views || 0,
-      likes: likes || 0,
-    });
-
-    const savedVideo = await newVideo.save();
-    await this.userModel.updateOne({ _id: user._id }, { $push: { videos: savedVideo._id } });
-
-    return {
-      videoUrl,
-      caption,
-      filename,
-    };
   }
 
   private async cleanTempChunks(fileHash: string, chunkCount: number, tempDir: string) {

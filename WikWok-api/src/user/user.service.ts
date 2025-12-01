@@ -60,9 +60,9 @@ export class UserService {
     return { user };
   }
 
-  async getUserinfo(id: string) {
+  async getUserinfo(userId: string) {
     const user = await this.userModel
-      .findOne({ _id: id })
+      .findOne({ _id: userId })
       .select('username bio avatar followers followings videos')
       .populate({
         path: 'videos',
@@ -95,10 +95,10 @@ export class UserService {
   }
 
   async updateUser(updateDto: UpdateUserDto) {
-    const { id, username, bio, avatar, followers, followings } = updateDto;
+    const { userId, username, bio, avatar, followers, followings } = updateDto;
 
     const updatedUser = await this.userModel.findOneAndUpdate(
-      { _id: id },
+      { _id: userId },
       { username, bio, avatar, followers, followings },
       { new: true }
     );

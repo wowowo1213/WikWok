@@ -2,8 +2,8 @@ import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UpdateUserDto {
   @IsString()
-  @IsNotEmpty({ message: 'id不能为空' })
-  id: string;
+  @IsNotEmpty({ message: 'userId不能为空' })
+  userId: string;
 
   @IsOptional()
   @IsString()

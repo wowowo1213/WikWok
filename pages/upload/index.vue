@@ -127,6 +127,7 @@
 
 <script setup lang="ts">
 import UploadLayout from '~/layouts/UploadLayout.vue';
+import { uploadVideoUtil } from '~/utils/upload';
 
 const { $userStore } = useNuxtApp();
 const router = useRouter();
@@ -197,15 +198,11 @@ const uploadVideo = async () => {
 
   isUploading.value = true;
 
-  let data = new FormData();
-  data.append('video', fileData.value || '');
-  data.append('caption', caption.value || '');
-  data.append('id', $userStore.userData.userId || '');
-
   try {
-    let res = await $userStore.uploadVideo(data);
-    if (res.status === 200) router.push('/profile/' + $userStore.userData.userId);
+    let res = await uploadVideoUtil(fileData.value, caption.value);
+    if (res.statusCode === 200) router.push('/profile/' + $userStore.userData.userId);
   } catch (error: string | Array<string>) {
+    // 这边error为Array<string>怎么设置errors好呢
     errors.value = error;
   } finally {
     isUploading.value = false;
@@ -213,8 +210,6 @@ const uploadVideo = async () => {
 };
 
 onUnmounted(() => {
-  if (fileDisplay.value) {
-    URL.revokeObjectURL(fileDisplay.value);
-  }
+  if (fileDisplay.value) URL.revokeObjectURL(fileDisplay.value);
 });
 </script>

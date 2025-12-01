@@ -110,15 +110,13 @@ export const useUserStore = defineStore(
     }
 
     async function getUserInfo(userId: string) {
-      resetUserData();
       const res = await $axios.get('/user/get-userinfo', { params: { userId } });
-      userData.value = res.data.data;
+      userData.value = res?.data?.data;
     }
 
     async function getProfileInfo(userId: string) {
-      resetProfileData();
       const res = await $axios.get('/user/get-userinfo', { params: { userId } });
-      profileData.value = res.data.data;
+      profileData.value = res?.data?.data;
     }
 
     // 这边还可以更新关注数和粉丝数
@@ -133,10 +131,6 @@ export const useUserStore = defineStore(
       userData.value = { ...userData.value, ...res.data.data };
     }
 
-    async function uploadVideo(data: FormData) {
-      return await $axios.post('/user/upload-video', data);
-    }
-
     return {
       userData,
       profileData,
@@ -144,13 +138,14 @@ export const useUserStore = defineStore(
       userTotalViews: totalViews(userData),
       profileTotalLikes: totalLikes(profileData),
       profileTotalViews: totalViews(profileData),
+      resetUserData,
+      resetProfileData,
       resetUserStore,
       register,
       login,
       getUserInfo,
       getProfileInfo,
       updateUserInfo,
-      uploadVideo,
     };
   },
   { persist: true }
