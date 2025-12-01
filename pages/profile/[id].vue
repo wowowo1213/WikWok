@@ -7,22 +7,25 @@
       <Icon class="animate-spin ml-1" name="mingcute:loading-line" size="100" />
     </div>
 
-    <div v-if="userData.id" class="mt-[81px] lg:ml-[210px] ml-[65px] mr-20 w-full">
+    <div
+      v-if="$userStore.profileData.userId"
+      class="mt-[81px] lg:ml-[210px] ml-[65px] mr-20 w-full"
+    >
       <div class="flex">
         <img
           class="rounded-full size-18 lg:size-24 object-cover bg-white"
-          :src="userData.avatar"
+          :src="$userStore.profileData.avatar"
           alt="用户头像"
         />
 
         <div class="flex flex-col justify-between">
           <div class="pt-1 lg:pt-3 flex justify-between items-center w-50 lg:w-70 rounded-xl">
             <div class="mr-2 text-[20px] lg:text-[26px] text-black font-bold truncate">
-              {{ userData.username }}
+              {{ $userStore.profileData.username }}
             </div>
 
             <button
-              v-if="route.params.id === $userStore.currentUserId"
+              v-if="route.params.id === $userStore.userData.userId"
               @click="$generalStore.isEditProfileOpen = true"
               class="flex items-center justify-between rounded-md p-1.5 bg-[#c4cac8] hover:bg-gray-200 cursor-pointer"
             >
@@ -38,22 +41,22 @@
           </div>
 
           <div class="lg:pb-2 text-[14px] lg:text-[16px] text-black font-semibold truncate">
-            {{ userData.bio }}
+            {{ $userStore.profileData.bio }}
           </div>
         </div>
       </div>
 
       <div class="flex items-center pt-4">
         <div class="mr-4">
-          <span class="font-bold"> {{ userData.followings }}K</span>
+          <span class="font-bold"> {{ $userStore.profileData.followings }}</span>
           <span class="text-gray-500 font-light text-[15px] pl-1.5 cursor-pointer">关注列表</span>
         </div>
         <div class="mr-4">
-          <span class="font-bold"> {{ userData.followers }}K</span>
+          <span class="font-bold"> {{ $userStore.profileData.followers }}</span>
           <span class="text-gray-500 font-light text-[15px] pl-1.5 cursor-pointer">粉丝数</span>
         </div>
         <div class="mr-4">
-          <span class="font-bold">{{ allLikes }}</span>
+          <span class="font-bold">{{ $userStore.profileTotalLikes }}</span>
           <span class="text-gray-500 font-light text-[15px] pl-1.5 cursor-pointer">总获赞数</span>
         </div>
       </div>
@@ -74,7 +77,7 @@
       <div
         class="mt-4 grid 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-3"
       >
-        <div v-for="video in userData.videos" :key="video.id">
+        <div v-for="video in $userStore.profileData.videos" :key="video.id">
           <UserVideo :video="video" />
         </div>
       </div>
@@ -94,45 +97,29 @@
 
 <script setup lang="ts">
 import MainLayout from '~/layouts/MainLayout.vue';
-import { AppLoadStateKey } from '~/types/app-load-state';
 const { $userStore, $generalStore } = useNuxtApp();
-const { userData, allLikes } = storeToRefs($userStore);
 
 const route = useRoute();
 
 let isLoading = ref(false);
 let errorMessage = ref('');
 
-const { isAppLoaded } = inject(AppLoadStateKey, {
-  isAppLoaded: ref(false),
-});
-
-const fetchUserData = async (userId: string) => {
+onMounted(async () => {
   try {
     isLoading.value = true;
     errorMessage.value = '';
-    await $userStore.getUserInfo(userId);
+
+    await $userStore.getProfileInfo(route.params.id as string);
   } catch (error) {
     console.error('获取用户信息失败:', error);
-    if (error.includes('Cast to ObjectId failed')) {
-      errorMessage.value = '请求用户不存在';
-    } else {
-      errorMessage.value = error || '获取用户信息失败';
-    }
+    // if (error.includes('Cast to ObjectId failed')) {
+    //   errorMessage.value = '请求用户不存在';
+    // } else {
+    //   errorMessage.value = error || '获取用户信息失败';
+    // }
   } finally {
     isLoading.value = false;
   }
-};
-
-// definePageMeta({ middleware: 'auth' });
-
-onMounted(() => {
-  // 这边先请求，然后app里面再请求，然后这边下面的监听属性又会请求
-  fetchUserData(route.params.id as string);
-});
-
-watch(isAppLoaded, loaded => {
-  if (loaded) fetchUserData(route.params.id as string);
 });
 
 watch(

@@ -44,7 +44,7 @@
           <span class="px-1 font-medium text-[15px] w-[40px]">上传</span>
         </button>
 
-        <div v-if="!$userStore.currentUserId" class="flex items-center">
+        <div v-if="!$userStore.userData.userId" class="flex items-center">
           <button
             @click="$generalStore.isLoginOpen = true"
             class="min-w-22 flex items-center bg-[#F02C56] text-white rounded-xl px-3 py-[6px] h-10 cursor-pointer"
@@ -77,7 +77,7 @@
               class="z-40 absolute bg-white rounded-lg w-[200px] shadow-xl top-[52px] -right-2"
             >
               <NuxtLink
-                :to="`/profile/${$userStore.currentUserId}`"
+                :to="`/profile/${$userStore.userData.userId}`"
                 @click="showMenu = false"
                 class="rounded-lg flex items-center justify-start text-black py-3 px-2 hover:bg-gray-100 cursor-pointer"
               >
@@ -116,13 +116,13 @@ onMounted(() => {
 });
 
 const isLoggedIn = () => {
-  $userStore.currentUserId ? router.push('/upload') : ($generalStore.isLoginOpen = true);
+  $userStore.userData.userId ? router.push('/upload') : ($generalStore.isLoginOpen = true);
 };
 
 const logout = () => {
   try {
     showMenu.value = false;
-    $userStore.resetUser();
+    $userStore.resetUserStore();
     router.push('/');
   } catch (error) {
     console.log(error);

@@ -200,11 +200,11 @@ const uploadVideo = async () => {
   let data = new FormData();
   data.append('video', fileData.value || '');
   data.append('caption', caption.value || '');
-  data.append('id', $userStore.currentUserId || '');
+  data.append('id', $userStore.userData.userId || '');
 
   try {
     let res = await $userStore.uploadVideo(data);
-    if (res.status === 200) router.push('/profile/' + $userStore.currentUserId);
+    if (res.status === 200) router.push('/profile/' + $userStore.userData.userId);
   } catch (error: string | Array<string>) {
     errors.value = error;
   } finally {

@@ -50,14 +50,13 @@ const register = async () => {
   errors.value = null;
 
   try {
-    await $generalStore.getCsrfToken();
     await $userStore.register(
       phoneNumber.value,
       username.value,
       password.value,
       confirmPassword.value
     );
-    await $userStore.getUserInfo($userStore.currentUserId);
+    await $userStore.getUserInfo($userStore.userData.userId);
     $generalStore.isLoginOpen = false;
   } catch (error) {
     errors.value = error instanceof Array ? error[0] : error;

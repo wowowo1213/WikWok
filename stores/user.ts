@@ -25,7 +25,6 @@ export const useUserStore = defineStore(
   () => {
     const { $axios } = useNuxtApp();
 
-    const currentUserId = ref<string>('');
     const userData = ref<UserData>({
       userId: '',
       username: '',
@@ -36,9 +35,54 @@ export const useUserStore = defineStore(
       videos: [],
     });
 
-    const allLikes = computed(() =>
-      userData.value.videos.reduce((total, video) => total + video.likes, 0)
-    );
+    const profileData = ref<UserData>({
+      userId: '',
+      username: '',
+      bio: '',
+      avatar: '',
+      followers: 0,
+      followings: 0,
+      videos: [],
+    });
+
+    const totalLikes = (userDataRef: Ref<UserData>) =>
+      computed(() => userDataRef.value.videos.reduce((sum, video) => sum + video.likes, 0));
+
+    const totalViews = (userDataRef: Ref<UserData>) =>
+      computed(() => userDataRef.value.videos.reduce((sum, video) => sum + video.views, 0));
+
+    const resetUserData = () => {
+      userData.value = {
+        userId: '',
+        username: '',
+        bio: '',
+        avatar: '',
+        followers: 0,
+        followings: 0,
+        videos: [],
+      };
+    };
+
+    const resetProfileData = () => {
+      profileData.value = {
+        userId: '',
+        username: '',
+        bio: '',
+        avatar: '',
+        followers: 0,
+        followings: 0,
+        videos: [],
+      };
+    };
+
+    const resetUserStore = () => {
+      resetUserData();
+      resetProfileData();
+    };
+
+    const saveJwtToken = (token: string) => {
+      localStorage.setItem('jwtToken', token);
+    };
 
     async function register(
       phoneNumber: string,
@@ -52,8 +96,8 @@ export const useUserStore = defineStore(
         password,
         confirmPassword,
       });
-      currentUserId.value = res.data.data.userId;
-      localStorage.setItem('jwtToken', res.data.data.jwtToken);
+      userData.value.userId = res.data.data.userId;
+      saveJwtToken(res.data.data.jwtToken);
     }
 
     async function login(phoneNumber: string, password: string) {
@@ -61,23 +105,29 @@ export const useUserStore = defineStore(
         phoneNumber,
         password,
       });
-      currentUserId.value = res.data.data.userId;
-      localStorage.setItem('jwtToken', res.data.data.jwtToken);
+      userData.value.userId = res.data.data.userId;
+      saveJwtToken(res.data.data.jwtToken);
     }
 
     async function getUserInfo(userId: string) {
       resetUserData();
-      const res = await $axios.get('/user/get-userinfo', { params: { id: userId } });
+      const res = await $axios.get('/user/get-userinfo', { params: { userId } });
       userData.value = res.data.data;
     }
 
+    async function getProfileInfo(userId: string) {
+      resetProfileData();
+      const res = await $axios.get('/user/get-userinfo', { params: { userId } });
+      profileData.value = res.data.data;
+    }
+
     // 这边还可以更新关注数和粉丝数
-    async function updateUserInfo(newUsername: string, newBio: string, newAvatar: string) {
+    async function updateUserInfo(username?: string, bio?: string, avatar?: string) {
       const res = await $axios.post('/user/update-userinfo', {
-        id: currentUserId.value,
-        username: newUsername,
-        bio: newBio,
-        avatar: newAvatar,
+        userId: userData.value.userId,
+        username,
+        bio,
+        avatar,
       });
 
       userData.value = { ...userData.value, ...res.data.data };
@@ -87,43 +137,20 @@ export const useUserStore = defineStore(
       return await $axios.post('/user/upload-video', data);
     }
 
-    function resetUserData() {
-      userData.value = {
-        userId: '',
-        username: '',
-        bio: '',
-        avatar: '',
-        followers: 0,
-        followings: 0,
-        videos: [],
-      };
-    }
-
-    function resetUser() {
-      currentUserId.value = '';
-      userData.value = {
-        userId: '',
-        username: '',
-        bio: '',
-        avatar: '',
-        followers: 0,
-        followings: 0,
-        videos: [],
-      };
-      localStorage.removeItem('jwtToken'); // 这边移除？？
-    }
-
     return {
-      currentUserId,
       userData,
-      allLikes,
+      profileData,
+      userTotalLikes: totalLikes(userData),
+      userTotalViews: totalViews(userData),
+      profileTotalLikes: totalLikes(profileData),
+      profileTotalViews: totalViews(profileData),
+      resetUserStore,
       register,
       login,
       getUserInfo,
+      getProfileInfo,
       updateUserInfo,
       uploadVideo,
-      resetUserData,
-      resetUser,
     };
   },
   { persist: true }

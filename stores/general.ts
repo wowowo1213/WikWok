@@ -16,7 +16,7 @@ export const useGeneralStore = defineStore(
 
     async function getCsrfToken() {
       let res = await $axios.get('/auth/csrf-token');
-      localStorage.setItem('x-csrf-token', res.data.csrfToken);
+      sessionStorage.setItem('x-csrf-token', res.data.csrfToken);
     }
 
     function bodySwitch(val: boolean) {

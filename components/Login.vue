@@ -38,11 +38,8 @@ const login = async () => {
   errors.value = null;
 
   try {
-    await $generalStore.getCsrfToken();
     await $userStore.login(phoneNumber.value, password.value);
-    await $userStore.getUserInfo($userStore.currentUserId);
-    // await $generalStore.getRandomUsers('suggested');
-    // await $generalStore.getRandomUsers('following')
+    await $userStore.getUserInfo($userStore.userData.userId);
     $generalStore.isLoginOpen = false;
   } catch (error) {
     errors.value = error instanceof Array ? error[0] : error;

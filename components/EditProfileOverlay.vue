@@ -204,7 +204,7 @@ const cropAndUpdateImage = async () => {
 
 const updateUserinfo = async () => {
   await $userStore.updateUserInfo(username.value, bio.value, avatar.value);
-  await $userStore.getUserInfo($userStore.currentUserId);
+  await $userStore.getUserInfo($userStore.userData.userId);
   $generalStore.isEditProfileOpen = false;
 };
 </script>

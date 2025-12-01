@@ -7,15 +7,8 @@
 </template>
 
 <script setup lang="ts">
-import { AppLoadStateKey } from '~/types/app-load-state';
-const { $axios, $userStore, $generalStore } = useNuxtApp();
+const { $userStore, $generalStore } = useNuxtApp();
 const { isLoginOpen, isEditProfileOpen } = storeToRefs($generalStore);
-
-const isAppLoaded = ref(false);
-
-provide(AppLoadStateKey, {
-  isAppLoaded,
-});
 
 onMounted(async () => {
   $generalStore.bodySwitch(false);
@@ -24,13 +17,9 @@ onMounted(async () => {
 
   try {
     await $generalStore.getCsrfToken();
-    // await $generalStore.getRandomUsers('suggested');
-    // await $generalStore.getRandomUsers('following');
-    if ($userStore.currentUserId) await $userStore.getUserInfo($userStore.currentUserId);
+    if ($userStore.userData.userId) await $userStore.getUserInfo($userStore.userData.userId);
   } catch (error) {
     console.log(error);
-  } finally {
-    isAppLoaded.value = true;
   }
 });
 
