@@ -5,8 +5,9 @@ import { User } from './user.schema';
 import { UpdateUserDto } from './userinfo.dto';
 import { RegisterUserDto, LoginUserDto } from 'src/auth/auth.dto';
 import * as bcrypt from 'bcrypt';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
+import sharp from 'sharp';
 
 @Injectable()
 export class UserService {
@@ -15,6 +16,16 @@ export class UserService {
   async registerUser(registerUserDto: RegisterUserDto) {
     const defaultAvatarPath = join(process.cwd(), 'public/images/default-avatar.webp');
     const imageBuffer = readFileSync(defaultAvatarPath);
+    const processedBuffer = await sharp(imageBuffer).resize(200, 200).toFormat('jpeg').toBuffer();
+
+    const uploadDir = join(__dirname, '..', '..', 'uploads', 'avatars');
+    if (!existsSync(uploadDir)) {
+      mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const filename = `default-${Date.now()}.jpg`;
+    const filepath = join(uploadDir, filename);
+    await writeFileSync(filepath, processedBuffer);
 
     const {
       phoneNumber,
@@ -22,7 +33,7 @@ export class UserService {
       password,
       confirmPassword,
       bio = '这个人很懒，什么都没有留下~',
-      avatar = `data:image/jpeg;base64,${imageBuffer.toString('base64')}`,
+      avatarUrl = `/uploads/avatars/${filename}`,
       followers = 0,
       followings = 0,
     } = registerUserDto;
@@ -38,7 +49,7 @@ export class UserService {
       username,
       password: hashedPassword,
       bio,
-      avatar,
+      avatarUrl,
       followers,
       followings,
     });
@@ -60,10 +71,10 @@ export class UserService {
     return { user };
   }
 
-  async getUserinfo(userId: string) {
+  async getUserInfo(userId: string) {
     const user = await this.userModel
       .findOne({ _id: userId })
-      .select('username bio avatar followers followings videos')
+      .select('username bio avatarUrl followers followings videos')
       .populate({
         path: 'videos',
         model: 'Video',
@@ -87,19 +98,50 @@ export class UserService {
       userId: user._id,
       username: user.username,
       bio: user.bio,
-      avatar: user.avatar,
+      avatarUrl: user.avatarUrl,
       followers: user.followers,
       followings: user.followings,
       videos,
     };
   }
 
-  async updateUser(updateDto: UpdateUserDto) {
-    const { userId, username, bio, avatar, followers, followings } = updateDto;
+  async updateUserInfo(updateDto: UpdateUserDto) {
+    const { userId, username, bio, image, height, width, top, left, followers, followings } =
+      updateDto;
+
+    let avatarUrl;
+    if (image) {
+      try {
+        const uploadDir = join(__dirname, '..', '..', 'uploads', 'avatars');
+        if (!existsSync(uploadDir)) {
+          await mkdirSync(uploadDir, { recursive: true });
+        }
+
+        const imageBuffer = await sharp(image.buffer)
+          .extract({
+            left: Number(left),
+            top: Number(top),
+            width: Number(width),
+            height: Number(height),
+          })
+          .resize(200, 200)
+          .toFormat('jpeg')
+          .toBuffer();
+
+        const filename = `${userId}-${Date.now()}.jpg`;
+        const filepath = join(uploadDir, filename);
+
+        await writeFileSync(filepath, imageBuffer);
+
+        avatarUrl = `/uploads/avatars/${filename}`;
+      } catch (error) {
+        throw new BadRequestException('头像处理失败');
+      }
+    }
 
     const updatedUser = await this.userModel.findOneAndUpdate(
       { _id: userId },
-      { username, bio, avatar, followers, followings },
+      { username, bio, avatarUrl, followers, followings },
       { new: true }
     );
 

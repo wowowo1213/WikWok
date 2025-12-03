@@ -37,12 +37,7 @@ const router = useRouter();
 const props = defineProps(['video']);
 
 let video = ref<HTMLVideoElement | null>(null);
-const videoSrc = computed(() => {
-  const baseUrl = 'http://localhost:5000';
-  const videoUrl = props.video.videoUrl;
-
-  return baseUrl + videoUrl;
-});
+const videoSrc = computed(() => `http://localhost:5000${props.video.videoUrl}`);
 
 let isLoaded = ref(false);
 
@@ -69,7 +64,6 @@ const onLoadedData = () => {
 
 const dispalyVideo = () => {
   $generalStore.setBackUrl('/profile/' + route.params.id);
-  $generalStore.selectedVideo = null;
   setTimeout(() => {
     router.push(`/video/${props.video.id}`);
   }, 300);

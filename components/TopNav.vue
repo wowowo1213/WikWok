@@ -6,7 +6,7 @@
           <img
             src="~/assets/images/logo.jpg"
             alt="WIKWOK Logo"
-            class="rounded-full shadow-lg ml-4 w-[44px] lg:w-[54px]"
+            class="rounded-full shadow-lg ml-4 w-11 lg:w-[54px]"
           />
           <h1 class="ml-2 font-sans font-bold text-[0px] md:text-xl lg:text-2xl text-white">
             WIKWOK
@@ -38,16 +38,16 @@
       <div class="flex items-center justify-end gap-3 min-w-[275px] max-w-[320px] w-full mr-3">
         <button
           @click="isLoggedIn()"
-          class="flex items-center border border-white rounded-xl px-3 py-[6px] h-10 bg-gray-100 cursor-pointer"
+          class="flex items-center border border-white rounded-xl px-3 py-1.5 h-10 bg-gray-100 cursor-pointer"
         >
           <Icon name="mdi:plus" color="#000000" size="22" />
-          <span class="px-1 font-medium text-[15px] w-[40px]">上传</span>
+          <span class="px-1 font-medium text-[15px] w-10">上传</span>
         </button>
 
         <div v-if="!$userStore.userData.userId" class="flex items-center">
           <button
             @click="$generalStore.isLoginOpen = true"
-            class="min-w-22 flex items-center bg-[#F02C56] text-white rounded-xl px-3 py-[6px] h-10 cursor-pointer"
+            class="min-w-22 flex items-center bg-[#F02C56] text-white rounded-xl px-3 py-1.5 h-10 cursor-pointer"
           >
             <span class="mx-4 font-medium text-[15px]">登录</span>
           </button>
@@ -65,8 +65,9 @@
           <div class="relative flex items-center">
             <button class="cursor-pointer" @click="showMenu = !showMenu">
               <img
+                v-if="imgSrc"
                 class="rounded-full size-8 object-cover bg-white"
-                :src="$userStore.userData.avatar"
+                :src="imgSrc"
                 alt="用户头像"
               />
             </button>
@@ -106,6 +107,8 @@ const route = useRoute();
 const router = useRouter();
 
 let showMenu = ref(false);
+
+const imgSrc = computed(() => `http://localhost:5000${$userStore.userData.avatarUrl}`);
 
 onMounted(() => {
   document.addEventListener('mouseup', function (e: MouseEvent) {

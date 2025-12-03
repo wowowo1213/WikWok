@@ -32,7 +32,7 @@
               <label for="image" class="relative cursor-pointer">
                 <img
                   class="size-24 object-cover rounded-full"
-                  :src="croppedImage || userData.avatar"
+                  :src="croppedImage || imgSrc"
                   alt="用户头像"
                 />
                 <div
@@ -155,10 +155,11 @@ const { userData } = storeToRefs($userStore);
 
 const route = useRoute();
 
+const imgSrc = computed(() => `http://localhost:5000${$userStore.userData.avatarUrl}`);
+
 onMounted(() => {
   username.value = userData.value.username;
   bio.value = userData.value.bio;
-  avatar.value = userData.value.avatar;
 });
 
 interface AvatarData {
@@ -174,7 +175,6 @@ interface AvatarData {
 const cropper = ref<InstanceType<typeof Cropper> | null>(null);
 const username = ref('');
 const bio = ref('');
-const avatar = ref('');
 const imageFile = ref<File | null>(null);
 const uploadedImage = ref<string | null>(null);
 const croppedImage = ref<string | null>(null);
@@ -185,7 +185,7 @@ const isUpdated = computed(() => {
     username.value !== userData.value.username ||
     bio.value !== userData.value.bio ||
     croppedImage.value !== null;
-  const isNotEmpty = username.value.trim() && bio.value.trim() && avatar.value.trim();
+  const isNotEmpty = username.value.trim() && bio.value.trim();
   return isChanged && isNotEmpty;
 });
 
@@ -215,23 +215,29 @@ const handleCropAvatar = async () => {
 };
 
 const updateUserinfo = async () => {
-  if (avatarData.imageFile && avatarData.coordinates) {
-    const data = new FormData();
-    data.append('image', avatarData.imageFile);
-    data.append('height', avatarData.coordinates.height.toString());
-    data.append('width', avatarData.coordinates.width.toString());
-    data.append('top', avatarData.coordinates.top.toString());
-    data.append('left', avatarData.coordinates.left.toString());
+  const formData = new FormData();
 
-    await $userStore.updateAvatar(data);
-    await $generalStore.updateSideMenuImage();
-    avatarData = { imageFile: undefined, coordinates: undefined };
+  formData.append('userId', $userStore.userData.userId);
+  formData.append('username', username.value);
+  formData.append('bio', bio.value);
+
+  if (avatarData.imageFile && avatarData.coordinates) {
+    formData.append('image', avatarData.imageFile);
+    formData.append('height', avatarData.coordinates.height.toString());
+    formData.append('width', avatarData.coordinates.width.toString());
+    formData.append('top', avatarData.coordinates.top.toString());
+    formData.append('left', avatarData.coordinates.left.toString());
   }
 
-  await $userStore.updateUserInfo(username.value, bio.value);
+  await $userStore.updateUserInfo(formData);
   await $userStore.getUserInfo($userStore.userData.userId);
   await $userStore.getProfileInfo($userStore.userData.userId);
+
+  // $generalStore.updateSideMenuImage($generalStore.suggested, $userStore.userData);
+  // $generalStore.updateSideMenuImage($generalStore.following, $userStore.userData);
+
   croppedImage.value = null;
+  avatarData = { imageFile: undefined, coordinates: undefined };
   $generalStore.isEditProfileOpen = false;
 };
 </script>

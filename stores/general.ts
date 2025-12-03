@@ -8,8 +8,8 @@ export const useGeneralStore = defineStore(
     const isLoginOpen = ref(false);
     const isEditProfileOpen = ref(false);
     const isBackUrl = ref('/');
-    const suggested = ref(null);
-    const following = ref(null);
+    const suggested = ref([]);
+    const following = ref([]);
 
     async function getCsrfToken() {
       let res = await $axios.get('/auth/csrf-token');
@@ -28,6 +28,16 @@ export const useGeneralStore = defineStore(
       isBackUrl.value = url;
     }
 
+    // 这边得修改一下
+    function updateSideMenuImage(array, userData) {
+      for (let i = 0; i < array.length; i++) {
+        const res = array[i];
+        if (res.id == userData.id) {
+          res.image = userData.avatarUrl;
+        }
+      }
+    }
+
     return {
       isLoginOpen,
       isEditProfileOpen,
@@ -37,6 +47,7 @@ export const useGeneralStore = defineStore(
       getCsrfToken,
       bodySwitch,
       setBackUrl,
+      updateSideMenuImage,
     };
   },
   {

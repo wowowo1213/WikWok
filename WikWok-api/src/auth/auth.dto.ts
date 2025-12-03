@@ -27,7 +27,7 @@ export class RegisterUserDto {
 
   @IsOptional()
   @IsString()
-  avatar?: string;
+  avatarUrl?: string;
 
   @IsOptional()
   followers?: number;

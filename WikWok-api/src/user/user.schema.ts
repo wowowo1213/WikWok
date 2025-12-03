@@ -17,7 +17,7 @@ export class User extends Document {
   bio: string;
 
   @Prop({ default: '' })
-  avatar: string;
+  avatarUrl: string;
 
   @Prop({ default: 0 })
   followers: number;

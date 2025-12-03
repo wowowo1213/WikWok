@@ -1,6 +1,17 @@
-import { Controller, Get, Post, Query, Body, BadRequestException, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Query,
+  Body,
+  BadRequestException,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
-import { UpdateUserDto } from './userinfo.dto';
+import { UpdateUserInfoRequestDto, UpdateUserDto } from './userinfo.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('user')
@@ -9,18 +20,18 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('get-userinfo')
-  async getUserinfo(@Query('userId') userId: string) {
+  async getUserInfo(@Query('userId') userId: string) {
     if (!userId) throw new BadRequestException('用户ID不能为空');
 
     try {
-      const user = await this.userService.getUserinfo(userId);
+      const user = await this.userService.getUserInfo(userId);
 
       return {
         result: {
           userId: user.userId,
           username: user.username,
           bio: user.bio,
-          avatar: user.avatar,
+          avatarUrl: user.avatarUrl,
           followers: user.followers,
           followings: user.followings,
           videos: user.videos,
@@ -33,11 +44,25 @@ export class UserController {
   }
 
   @Post('update-userinfo')
-  async updateUserinfo(@Body() updateUserDto: UpdateUserDto) {
+  @UseInterceptors(FileInterceptor('image'))
+  async updateUserInfo(
+    @UploadedFile() image: Express.Multer.File,
+    @Body() body: UpdateUserInfoRequestDto
+  ) {
     try {
-      await this.userService.updateUser(updateUserDto);
+      const updateUserDto: UpdateUserDto = {
+        userId: body.userId,
+        username: body.username,
+        bio: body.bio,
+        image,
+        height: body.height,
+        width: body.width,
+        top: body.top,
+        left: body.left,
+      };
+
+      await this.userService.updateUserInfo(updateUserDto);
       return {
-        result: {},
         message: '更新用户信息成功',
       };
     } catch (error) {

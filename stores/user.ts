@@ -14,7 +14,7 @@ interface UserData {
   userId: string;
   username: string;
   bio: string;
-  avatar: string;
+  avatarUrl: string;
   followers: number;
   followings: number;
   videos: Video[];
@@ -29,7 +29,7 @@ export const useUserStore = defineStore(
       userId: '',
       username: '',
       bio: '',
-      avatar: '',
+      avatarUrl: '',
       followers: 0,
       followings: 0,
       videos: [],
@@ -39,7 +39,7 @@ export const useUserStore = defineStore(
       userId: '',
       username: '',
       bio: '',
-      avatar: '',
+      avatarUrl: '',
       followers: 0,
       followings: 0,
       videos: [],
@@ -56,7 +56,7 @@ export const useUserStore = defineStore(
         userId: '',
         username: '',
         bio: '',
-        avatar: '',
+        avatarUrl: '',
         followers: 0,
         followings: 0,
         videos: [],
@@ -68,7 +68,7 @@ export const useUserStore = defineStore(
         userId: '',
         username: '',
         bio: '',
-        avatar: '',
+        avatarUrl: '',
         followers: 0,
         followings: 0,
         videos: [],
@@ -120,22 +120,8 @@ export const useUserStore = defineStore(
     }
 
     // 这边还可以更新关注数和粉丝数
-    async function updateUserInfo(username?: string, bio?: string) {
-      const res = await $axios.post('/user/update-userinfo', {
-        userId: userData.value.userId,
-        username,
-        bio,
-      });
-
-      userData.value = { ...userData.value, ...res.data.data };
-    }
-
-    async function updateAvatar(data: FormData) {
-      await $axios.post('/user/update-avatar', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+    async function updateUserInfo(formData: FormData) {
+      await $axios.post('/user/update-userinfo', formData);
     }
 
     return {
@@ -153,7 +139,6 @@ export const useUserStore = defineStore(
       getUserInfo,
       getProfileInfo,
       updateUserInfo,
-      updateAvatar,
     };
   },
   { persist: true }
