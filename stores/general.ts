@@ -7,10 +7,7 @@ export const useGeneralStore = defineStore(
 
     const isLoginOpen = ref(false);
     const isEditProfileOpen = ref(false);
-    const selectedVideo = ref(null);
-    const ids = ref(null);
     const isBackUrl = ref('/');
-    const videos = ref(null);
     const suggested = ref(null);
     const following = ref(null);
 
@@ -34,10 +31,7 @@ export const useGeneralStore = defineStore(
     return {
       isLoginOpen,
       isEditProfileOpen,
-      selectedVideo,
-      ids,
       isBackUrl,
-      videos,
       suggested,
       following,
       getCsrfToken,

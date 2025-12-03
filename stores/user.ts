@@ -120,15 +120,22 @@ export const useUserStore = defineStore(
     }
 
     // 这边还可以更新关注数和粉丝数
-    async function updateUserInfo(username?: string, bio?: string, avatar?: string) {
+    async function updateUserInfo(username?: string, bio?: string) {
       const res = await $axios.post('/user/update-userinfo', {
         userId: userData.value.userId,
         username,
         bio,
-        avatar,
       });
 
       userData.value = { ...userData.value, ...res.data.data };
+    }
+
+    async function updateAvatar(data: FormData) {
+      await $axios.post('/user/update-avatar', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
     }
 
     return {
@@ -146,6 +153,7 @@ export const useUserStore = defineStore(
       getUserInfo,
       getProfileInfo,
       updateUserInfo,
+      updateAvatar,
     };
   },
   { persist: true }

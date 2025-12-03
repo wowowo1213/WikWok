@@ -86,7 +86,7 @@
     <div v-else class="font-bold mt-[81px] lg:ml-[210px] ml-[65px] mr-20 w-full">
       <div class="flex justify-center items-center mt-20">
         <h1
-          class="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-green-500 to-purple-700 font-bold md:text-[50px] lg:text-[60px] xl:text-[80px]"
+          class="bg-clip-text text-transparent bg-linear-to-r from-blue-500 via-green-500 to-purple-700 font-bold md:text-[50px] lg:text-[60px] xl:text-[80px]"
         >
           {{ errorMessage }}
         </h1>

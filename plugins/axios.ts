@@ -39,18 +39,22 @@ axiosInstance.interceptors.response.use(
         userStore.resetUserStore();
         router.push('/');
         generalStore.isLoginOpen = true;
-        return Promise.reject(error);
+        Promise.reject(error);
+        return;
 
       case 503:
         alert('服务器暂时不可用');
-        return Promise.reject(error);
+        Promise.reject(error);
+        return;
 
       case 500:
         alert('服务器内部出错啦');
-        return Promise.reject(error);
+        Promise.reject(error);
+        return;
 
       default:
-        return Promise.reject(error);
+        Promise.reject(error);
+        return;
     }
   }
 );

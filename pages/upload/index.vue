@@ -9,7 +9,7 @@
   </div>
 
   <UploadLayout>
-    <div class="w-full mt-[80px] mb-[40px] bg-white shadow-lg rounded-md py-6 md:px-10 px-4">
+    <div class="w-full mt-20 mb-10 bg-white shadow-lg rounded-md py-6 md:px-10 px-4">
       <div>
         <div class="text-[23px] font-semibold">上传视频</div>
         <div class="text-gray-400 mt-1">在您的账号中上传一个视频</div>
@@ -60,7 +60,7 @@
             class="absolute -bottom-12 flex items-center justify-between z-50 rounded-xl border w-full p-2 border-gray-300"
           >
             <div class="flex items-center truncate">
-              <Icon name="clarity:success-standard-line" size="16" class="min-w-[16px]" />
+              <Icon name="clarity:success-standard-line" size="16" class="min-w-4" />
               <div class="text-[11px] pl-1 mr-1 truncate text-ellipsis">
                 {{ fileData?.name }}
               </div>

@@ -7,15 +7,18 @@
   >
     <div
       v-if="!isLoaded"
-      class="absolute flex items-center justify-center top-0 left-0 aspect-[3/4] w-full object-cover rounded-md bg-black"
+      class="absolute flex items-center justify-center top-0 left-0 aspect-3/4 w-full object-cover rounded-md bg-black"
     >
       <Icon class="animate-spin ml-1 text-white" name="eos-icons:bubble-loading" size="100" />
     </div>
     <div>
-      <video ref="video" muted loop class="aspect-[3/4] object-cover rounded-md" :src="videoSrc" />
+      <video ref="video" muted loop class="aspect-3/4 object-cover rounded-md" :src="videoSrc" />
     </div>
     <div class="px-1">
-      <div class="text-gray-700 text-[15px] pt-1 break-words">{{ props.video.caption }}</div>
+      <div class="text-gray-700 text-[15px] pt-2 wrap-break-word">
+        {{ props.video.filename || '默认视频名称' }}
+      </div>
+      <div class="text-gray-700 text-[15px] pt-1 text-ellipsis">{{ props.video.caption }}</div>
       <div class="flex items-center -ml-1 text-gray-600 font-bold text-xs">
         <Icon name="gg:loadbar-sound" size="20" />
         3%
