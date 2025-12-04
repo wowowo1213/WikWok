@@ -16,7 +16,7 @@
 
 ### 后端
 
-- **框架**: Next.js
+- **框架**: Nest.js
 - **语言**: TypeScript
 - **数据库**: MongoDB
 - **安全**:
@@ -49,7 +49,7 @@
   - 支持修改头像（使用 `vue-advanced-cropper` 实现裁剪）
   - 支持修改昵称和个人简介
 - **数据同步**：
-  - `App.vue` 挂载后自动通过 `currentUserId` 获取最新用户数据
+  - `App.vue` 挂载后自动获取最新用户数据
   - 使用 Pinia 管理全局状态
 
 ### 4. 视频上传与管理
@@ -62,6 +62,8 @@
   - 返回可访问的 URL 路径 (`http://localhost:5000/uploads/videos/xxx.mp4`)
 
 ### 5. loading 动画
+
+简单制作了一些 loading 的全局动画
 
 ### 6. 安全机制
 
@@ -87,6 +89,11 @@ cd WikWok-api
 
 # 安装依赖
 npm install
+
+# 配置env文件中的环境变量
+# 在nodejs中使用 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))" 随机生成一个 JWT_SECRET 和 SESSION_SECRET
+JWT_SECRET=
+SESSION_SECRET=
 
 # 启动开发服务器 (默认端口 5000)
 npm run start:dev
@@ -116,9 +123,9 @@ WikWok/
 │   ├── AuthOverlay.vue               # 登录/注册界面
 │   ├── EditProfileOverlay.vue        # 编辑个人信息界面
 │   ├── Login.vue                     # 登录表单
-│   ├── MainView.vue                  # 主页的'为你推荐'组件
+│   ├── MainView.vue                  # 主页
 │   ├── MenuItem.vue                  # 侧边栏的菜单组件
-│   ├── MenuItemFollow.vue            # 侧边栏的菜单之后内容的组件
+│   ├── MenuItemFollow.vue            # 侧边栏中的推荐用户和关注用户
 │   ├── Register.vue                  # 注册表单
 │   ├── SideNavMain.vue               # 侧边栏
 │   ├── TextInput.vue                 # 输入框组件
@@ -130,18 +137,20 @@ WikWok/
 │   ├── video/                        # 视频详情界面
 │   │   └── [id].vue
 │   ├── profile/                      # 用户主页
-│   │   └── [id].vue                  # 动态用户页
+│   │   └── [id].vue                  #
 │   ├── upload/                       # 上传视频界面
 │   │   └── index.vue
 │   └── index.vue                     # 首页
 ├── plugins/                          # 插件
 │   ├── axios.ts
 │   └── store.ts
+├── public/                           # 公共资源或插件
+│   └── workers/                      # Web Worker插件
 ├── stores/                           # Pinia 状态管理
-│   ├── general.ts                    # 设置响应拦截器/通用方法
+│   ├── general.ts                    # 通用方法
 │   └── user.ts                       # 用户状态
-├── types/                            # TypeScript 类型定义
-│   └── app-load-state                # 用户类型
+├── utils/                            # Pinia 状态管理
+│   └── upload.ts                     # 插件
 └── app.vue
 ```
 
@@ -159,13 +168,13 @@ WikWok-api/
 │   │   ├── auth.service.ts
 │   │   └── jwt.strategy.ts           # JWT的设置
 │   ├── user/
-│   │   ├── user.controller.ts        #
+│   │   ├── user.controller.ts        # 获取/更新用户信息接口
 │   │   ├── user.module.ts
 │   │   ├── user.schema.ts
-│   │   ├── user.service.ts           #
-│   │   └── user.dto.ts               #
-│   ├── app.module.ts                 #
-│   └── main.ts                       #
-├── uploads/                          # 视频上传文件夹
+│   │   ├── user.service.ts
+│   │   └── user.dto.ts               # 更新用户信息数据类型
+│   ├── app.module.ts
+│   └── main.ts                       # 配置跨域和开启csrf的cookie验证
+├── uploads/                          # 视频/用户头像上传文件夹
 └── .env                              # 环境变量(设置JWT_SECRET、SESSION_SECRET)
 ```

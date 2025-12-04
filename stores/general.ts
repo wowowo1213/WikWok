@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import type { UserData } from './user';
-import { renderSlot } from 'vue';
 
 export const useGeneralStore = defineStore(
   'general',
