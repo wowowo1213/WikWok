@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, FilterQuery } from 'mongoose';
 import { User } from './user.schema';
 import { UpdateUserDto } from './userinfo.dto';
 import { RegisterUserDto, LoginUserDto } from 'src/auth/auth.dto';
@@ -74,7 +74,7 @@ export class UserService {
   async getUserInfo(userId: string) {
     const user = await this.userModel
       .findOne({ _id: userId })
-      .select('username bio avatarUrl followers followings videos')
+      .select('username bio avatarUrl followers followings videos followingUsers')
       .populate({
         path: 'videos',
         model: 'Video',
@@ -106,8 +106,7 @@ export class UserService {
   }
 
   async updateUserInfo(updateDto: UpdateUserDto) {
-    const { userId, username, bio, image, height, width, top, left, followers, followings } =
-      updateDto;
+    const { userId, username, bio, image, height, width, top, left } = updateDto;
 
     let avatarUrl;
     if (image) {
@@ -141,10 +140,83 @@ export class UserService {
 
     const updatedUser = await this.userModel.findOneAndUpdate(
       { _id: userId },
-      { username, bio, avatarUrl, followers, followings },
+      { username, bio, avatarUrl },
       { new: true }
     );
 
     if (!updatedUser) throw new BadRequestException('用户更新失败');
+  }
+
+  async getSuggestedUsers(userId: string | undefined) {
+    const query: FilterQuery<any> = { _id: { $ne: userId } };
+
+    if (userId) {
+      const currentUser = await this.userModel.findById(userId).select('followingUsers').lean();
+
+      const followingIds = currentUser?.followingUsers || [];
+      if (followingIds.length > 0) {
+        query._id.$nin = followingIds;
+      }
+    }
+
+    const suggestedUsers = await this.userModel
+      .find(query)
+      .select('username bio avatarUrl followers followings')
+      .limit(10)
+      .lean();
+
+    return suggestedUsers.map(user => ({
+      userId: user._id,
+      username: user.username,
+      bio: user.bio,
+      avatarUrl: user.avatarUrl,
+      followers: user.followers,
+      followings: user.followings,
+      isFollowing: false,
+    }));
+  }
+
+  async getFollowingUsers(userId: string) {
+    const currentUser = await this.userModel.findById(userId).populate({
+      path: 'followingUsers',
+      model: 'User',
+      select: 'username bio avatarUrl followers followings',
+    });
+
+    if (!currentUser) throw new BadRequestException('用户不存在');
+
+    return currentUser.followingUsers.map(user => ({
+      userId: user._id,
+      username: user.username,
+      bio: user.bio,
+      avatarUrl: user.avatarUrl,
+      followers: user.followers,
+      followings: user.followings,
+      isFollowing: true,
+    }));
+  }
+
+  async followUser(currentUserId: string, targetUserId: string) {
+    if (currentUserId === targetUserId) {
+      throw new BadRequestException('不能关注自己');
+    }
+
+    await this.userModel.findByIdAndUpdate(currentUserId, {
+      $addToSet: { followingUsers: targetUserId },
+    });
+
+    await this.userModel.findByIdAndUpdate(targetUserId, {
+      $inc: { followers: 1 },
+    });
+  }
+
+  async unfollowUser(currentUserId: string, targetUserId: string) {
+    await this.userModel.findByIdAndUpdate(currentUserId, {
+      $pull: { followingUsers: targetUserId },
+    });
+
+    await this.userModel.findByIdAndUpdate(targetUserId, {
+      $inc: { followers: -1 },
+    });
   }
 }

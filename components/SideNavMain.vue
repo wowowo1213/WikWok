@@ -13,43 +13,39 @@
 
       <div class="border-b border-gray-600 mt-2" />
 
-      <div class="lg:block hidden text-xs text-gray-600 font-semibold px-2 pt-4 pb-2">
-        Suggested accounts
-      </div>
+      <div class="lg:block hidden text-xs text-gray-600 font-semibold px-2 pt-4 pb-2">推荐账户</div>
 
       <div class="lg:hidden block pt-3" />
 
-      <div class="cursor-pointer">
-        <MenuItemFollow />
+      <div v-for="suggestedUser in $generalStore.suggestedUsers" :key="suggestedUser.userId">
+        <div @click="isLoggedIn(suggestedUser)" class="cursor-pointer">
+          <MenuItemFollow :userData="suggestedUser" />
+        </div>
       </div>
 
-      <button class="lg:block hidden text-[#F02C56] pt-1.5 pl-2 text-[13px]">See all</button>
+      <button class="lg:block hidden text-[#F02C56] pt-1.5 pl-2 text-[13px] cursor-pointer">
+        查看更多
+      </button>
 
       <div class="border-b border-gray-600 mt-2" />
 
       <div class="lg:block hidden text-xs text-gray-600 font-semibold pt-4 pb-2 px-2">
-        Following accounts
+        已关注账户
       </div>
 
       <div class="lg:hidden block pt-3" />
 
-      <div class="cursor-pointer">
-        <MenuItemFollow />
+      <div v-for="followingUser in $generalStore.followingUsers" :key="followingUser.userId">
+        <div @click="isLoggedIn(followingUser)" class="cursor-pointer">
+          <MenuItemFollow :userData="followingUser" />
+        </div>
       </div>
 
-      <button class="lg:block hidden text-[#F02C56] pt-1.5 pl-2 text-[13px]">See more</button>
+      <button class="lg:block hidden text-[#F02C56] pt-1.5 pl-2 text-[13px] cursor-pointer">
+        查看更多
+      </button>
 
       <div class="lg:block hidden border-b border-gray-600 mt-2" />
-
-      <div class="lg:block hidden text-[11px] text-gray-500">
-        <div class="pt-4 px-2">About Newsroom TikTok Shop Contact Careers ByteDance</div>
-        <div class="pt-4 px-2">
-          TikTok for Good Advertise Developers Transparency TikTok Rewards TikTok Browse TikTok
-          Embeds
-        </div>
-        <div class="pt-4 px-2">Help Safety Terms Privacy Creator Portal Community Guidelines</div>
-        <div class="pt-4 px-2">© 2025 TikTok</div>
-      </div>
 
       <div class="pb-14"></div>
     </div>
@@ -57,5 +53,17 @@
 </template>
 
 <script setup lang="ts">
+import type { UserData } from '~/stores/user';
+
+const { $generalStore, $userStore } = useNuxtApp();
 const route = useRoute();
+const router = useRouter();
+
+const isLoggedIn = (userInfo: UserData) => {
+  if (!$userStore.userData.userId) {
+    $generalStore.isLoginOpen = true;
+    return;
+  }
+  router.push(`/profile/${userInfo.userId}`);
+};
 </script>

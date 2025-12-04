@@ -1,15 +1,17 @@
 import { defineStore } from 'pinia';
+import type { UserData } from './user';
+import { renderSlot } from 'vue';
 
 export const useGeneralStore = defineStore(
   'general',
   () => {
-    const { $axios } = useNuxtApp();
+    const { $axios, $userStore } = useNuxtApp();
 
     const isLoginOpen = ref(false);
     const isEditProfileOpen = ref(false);
     const isBackUrl = ref('/');
-    const suggested = ref([]);
-    const following = ref([]);
+    const suggestedUsers = ref<null | Array<UserData>>(null);
+    const followingUsers = ref<null | Array<UserData>>(null);
 
     async function getCsrfToken() {
       let res = await $axios.get('/auth/csrf-token');
@@ -28,12 +30,25 @@ export const useGeneralStore = defineStore(
       isBackUrl.value = url;
     }
 
-    // 这边得修改一下
-    function updateSideMenuImage(array, userData) {
-      for (let i = 0; i < array.length; i++) {
-        const res = array[i];
-        if (res.id == userData.id) {
-          res.image = userData.avatarUrl;
+    async function getSuggestedUsers() {
+      const res = await $axios.get('/user/get-suggested-users', {
+        params: { userId: $userStore.userData.userId },
+      });
+      return res.data.data;
+    }
+
+    async function getFollowingUsers() {
+      const res = await $axios.get('/user/get-following-users', {
+        params: { userId: $userStore.userData.userId },
+      });
+      return res.data.data;
+    }
+
+    function updateSideMenuImage(users: Array<UserData>, userData: UserData) {
+      for (let i = 0; i < users.length; i++) {
+        const user = users[i];
+        if (user?.userId == userData.userId) {
+          user.avatarUrl = userData.avatarUrl;
         }
       }
     }
@@ -42,11 +57,13 @@ export const useGeneralStore = defineStore(
       isLoginOpen,
       isEditProfileOpen,
       isBackUrl,
-      suggested,
-      following,
+      suggestedUsers,
+      followingUsers,
       getCsrfToken,
       bodySwitch,
       setBackUrl,
+      getSuggestedUsers,
+      getFollowingUsers,
       updateSideMenuImage,
     };
   },

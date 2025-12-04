@@ -10,7 +10,7 @@ interface Video {
   updatedAt: string;
 }
 
-interface UserData {
+export interface UserData {
   userId: string;
   username: string;
   bio: string;
@@ -119,9 +119,16 @@ export const useUserStore = defineStore(
       profileData.value = res?.data?.data;
     }
 
-    // 这边还可以更新关注数和粉丝数
     async function updateUserInfo(formData: FormData) {
       await $axios.post('/user/update-userinfo', formData);
+    }
+
+    async function followUser(targetUserId: string) {
+      await $axios.post('/user/follow-user', { userId: userData.value.userId, targetUserId });
+    }
+
+    async function unfollowUser(targetUserId: string) {
+      await $axios.post('/user/unfollow-user', { userId: userData.value.userId, targetUserId });
     }
 
     return {
@@ -139,6 +146,8 @@ export const useUserStore = defineStore(
       getUserInfo,
       getProfileInfo,
       updateUserInfo,
+      followUser,
+      unfollowUser,
     };
   },
   { persist: true }

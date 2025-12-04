@@ -17,7 +17,11 @@ onMounted(async () => {
 
   try {
     await $generalStore.getCsrfToken();
-    if ($userStore.userData.userId) await $userStore.getUserInfo($userStore.userData.userId);
+    await $generalStore.getSuggestedUsers();
+    if ($userStore.userData.userId) {
+      await $userStore.getUserInfo($userStore.userData.userId);
+      await $generalStore.getFollowingUsers();
+    }
   } catch (error) {
     console.log(error);
   }

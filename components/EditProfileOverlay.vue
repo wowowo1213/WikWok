@@ -233,8 +233,12 @@ const updateUserinfo = async () => {
   await $userStore.getUserInfo($userStore.userData.userId);
   await $userStore.getProfileInfo($userStore.userData.userId);
 
-  // $generalStore.updateSideMenuImage($generalStore.suggested, $userStore.userData);
-  // $generalStore.updateSideMenuImage($generalStore.following, $userStore.userData);
+  if ($generalStore.suggestedUsers) {
+    $generalStore.updateSideMenuImage($generalStore.suggestedUsers, $userStore.userData);
+  }
+  if ($generalStore.followingUsers) {
+    $generalStore.updateSideMenuImage($generalStore.followingUsers, $userStore.userData);
+  }
 
   croppedImage.value = null;
   avatarData = { imageFile: undefined, coordinates: undefined };

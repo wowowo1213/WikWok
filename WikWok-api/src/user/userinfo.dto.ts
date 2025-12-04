@@ -61,10 +61,4 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   left?: string;
-
-  @IsOptional()
-  followers?: number;
-
-  @IsOptional()
-  followings?: number;
 }

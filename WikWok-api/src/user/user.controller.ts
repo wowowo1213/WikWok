@@ -8,6 +8,7 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
@@ -67,6 +68,58 @@ export class UserController {
       };
     } catch (error) {
       throw new BadRequestException(error.message || '更新用户信息失败');
+    }
+  }
+
+  @Get('get-suggested-users')
+  async getSuggestedUsers(@Query('userId') userId?: string) {
+    try {
+      const suggestedUsers = await this.userService.getSuggestedUsers(userId);
+      return {
+        result: { suggestedUsers },
+        message: '获取推荐用户成功',
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message || '获取推荐用户失败');
+    }
+  }
+
+  @Get('get-following-users')
+  async getFollowingUsers(@Query('userId') userId: string) {
+    try {
+      const followingUsers = await this.userService.getFollowingUsers(userId);
+      return {
+        result: { followingUsers },
+        message: '获取已关注用户成功',
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message || '获取已关注用户失败');
+    }
+  }
+
+  @Post('follow-user')
+  async followUser(@Body() followDto: { userId; targetUserId }) {
+    const { userId, targetUserId } = followDto;
+    try {
+      await this.userService.followUser(userId, targetUserId);
+      return {
+        message: '关注成功',
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message || '关注失败');
+    }
+  }
+
+  @Post('unfollow-user')
+  async unfollowUser(@Body() unfollowDto: { userId; targetUserId }) {
+    const { userId, targetUserId } = unfollowDto;
+    try {
+      await this.userService.unfollowUser(userId, targetUserId);
+      return {
+        message: '取消关注成功',
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message || '取消关注失败');
     }
   }
 }

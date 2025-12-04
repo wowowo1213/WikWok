@@ -27,6 +27,9 @@ export class User extends Document {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Video' }], default: [] })
   videos: Types.ObjectId[] | Video[];
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
+  followingUsers: Types.ObjectId[] | User[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
