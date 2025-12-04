@@ -34,7 +34,7 @@
 
             <button
               v-else
-              class="flex item-center rounded-md p-1.5 text-[15px] text-white font-semibold bg-[#F02C56] hover:bg-red-700 cursor-pointer"
+              class="flex item-center rounded-md py-1.5 px-4 text-[15px] text-white font-semibold bg-[#F02C56] hover:bg-red-700 cursor-pointer"
             >
               关注
             </button>

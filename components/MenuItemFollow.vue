@@ -1,6 +1,10 @@
 <template>
   <div class="flex items-center hover:bg-gray-700 rounded-md w-full py-1.5 px-2">
-    <img class="rounded-full" width="35" :src="imgSrc" />
+    <img
+      class="rounded-full"
+      width="35"
+      :src="`http://localhost:5000${props.userData.avatarUrl}`"
+    />
     <div class="lg:pl-2.5 lg:block hidden">
       <div class="flex items-center">
         <div class="font-bold text-[14px]">用户昵称</div>
@@ -21,6 +25,4 @@
 
 <script setup lang="ts">
 const props = defineProps(['userData']);
-
-const imgSrc = computed(() => `http://localhost:5000${props.userData.avatarUrl}`);
 </script>

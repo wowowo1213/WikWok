@@ -1,12 +1,12 @@
 <template>
   <div id="MainView" class="flex border-b py-6">
-    <div class="cursor-pointer">
+    <NuxtLink :to="`profile/${props.video.user.userId}`" class="cursor-pointer">
       <img
         class="rounded-full max-h-[60px]"
         width="60"
         :src="`http://localhost:5000${props.video.user.avatarUrl}`"
       />
-    </div>
+    </NuxtLink>
 
     <div class="pl-3 w-full px-4">
       <div class="flex items-center justify-between">

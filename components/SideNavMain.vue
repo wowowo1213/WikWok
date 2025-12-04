@@ -20,13 +20,15 @@
         sizeString="27"
         @click="$generalStore.setActiveItem('following')"
       />
+
       <MenuItem
         iconName="Live"
         :colorString="$generalStore.activeItem === 'live' ? '#F02C56' : '#000000'"
         sizeString="27"
         @click="$generalStore.setActiveItem('live')"
       />
-      <NuxtLink :to="`/profile/${$userStore.userData.userId}`">
+
+      <NuxtLink v-if="$userStore.userData.userId" :to="`/profile/${$userStore.userData.userId}`">
         <MenuItem
           iconName="Userinfo"
           :colorString="$generalStore.activeItem === 'userInfo' ? '#F02C56' : '#000000'"
@@ -34,6 +36,15 @@
           @click="$generalStore.setActiveItem('userInfo')"
         />
       </NuxtLink>
+
+      <div v-else class="disabled-link">
+        <MenuItem
+          iconName="Userinfo"
+          colorString="#CCCCCC"
+          sizeString="27"
+          @click="$generalStore.isLoginOpen = true"
+        />
+      </div>
 
       <div class="border-b border-gray-600 mt-2" />
 
