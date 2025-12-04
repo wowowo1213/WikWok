@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
-interface Video {
-  id: string;
+export interface Video {
+  videoId: string;
   videoUrl: string;
   caption: string;
   likes: number;

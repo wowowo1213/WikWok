@@ -19,7 +19,8 @@ let name = ref('');
 const iconNames = {
   'For You': 'mdi:home',
   Following: 'ci:group',
-  LIVE: 'mdi:video-outline',
+  Live: 'mdi:video-outline',
+  Userinfo: 'material-symbols:account-box-sharp',
 };
 
 type iconKey = keyof typeof iconNames;
@@ -33,7 +34,8 @@ for (const key in iconNames) {
 const TAB_NAMES = {
   'For You': '为您推荐',
   Following: '你的关注',
-  LIVE: '生活',
+  Live: '生活',
+  Userinfo: '个人信息',
 } as const;
 
 type TabKey = keyof typeof TAB_NAMES;

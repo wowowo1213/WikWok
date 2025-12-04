@@ -122,4 +122,17 @@ export class UserController {
       throw new BadRequestException(error.message || '取消关注失败');
     }
   }
+
+  @Get('get-recommended-videos')
+  async getRecommendedVideos(@Query('userId') userId?: string) {
+    try {
+      const recommendedVideos = await this.userService.getRecommendedVideos(userId);
+      return {
+        result: { videos: recommendedVideos },
+        message: '获取推荐视频成功',
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message || '获取推荐视频失败');
+    }
+  }
 }

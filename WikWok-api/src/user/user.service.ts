@@ -1,7 +1,8 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, FilterQuery } from 'mongoose';
+import { Model, FilterQuery, Types, PipelineStage } from 'mongoose';
 import { User } from './user.schema';
+import { Video } from 'src/upload/video.model';
 import { UpdateUserDto } from './userinfo.dto';
 import { RegisterUserDto, LoginUserDto } from 'src/auth/auth.dto';
 import * as bcrypt from 'bcrypt';
@@ -11,7 +12,10 @@ import sharp from 'sharp';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Video.name) private videoModel: Model<Video>
+  ) {}
 
   async registerUser(registerUserDto: RegisterUserDto) {
     const defaultAvatarPath = join(process.cwd(), 'public/images/default-avatar.webp');
@@ -218,5 +222,56 @@ export class UserService {
     await this.userModel.findByIdAndUpdate(targetUserId, {
       $inc: { followers: -1 },
     });
+  }
+
+  async getRecommendedVideos(userId?: string) {
+    let followingUserIds: Types.ObjectId[] | User[] = [];
+    if (userId) {
+      const user = await this.userModel.findById(userId).select('followingUsers').lean();
+      if (user) {
+        followingUserIds = user.followingUsers;
+      }
+    }
+
+    const baseQuery = {};
+
+    const pipeline: PipelineStage[] = [{ $match: baseQuery }];
+
+    if (followingUserIds?.length > 0) {
+      pipeline.push(
+        { $match: { userId: { $in: followingUserIds } } },
+        { $sort: { likes: -1 } },
+        { $limit: 10 }
+      );
+    } else {
+      pipeline.push({ $sort: { likes: -1 } }, { $limit: 10 });
+    }
+
+    pipeline.push(
+      { $lookup: { from: 'users', localField: 'userId', foreignField: '_id', as: 'userInfo' } },
+      { $unwind: '$userInfo' },
+      {
+        $project: {
+          videoId: '$_id',
+          _id: 0,
+          videoUrl: 1,
+          filename: 1,
+          caption: 1,
+          updatedAt: 1,
+          likes: 1,
+          views: 1,
+          user: {
+            userId: '$userInfo._id',
+            username: '$userInfo.username',
+            avatarUrl: '$userInfo.avatarUrl',
+          },
+          isFollowing:
+            followingUserIds?.length > 0 ? { $in: ['$userId', followingUserIds] } : undefined,
+        },
+      }
+    );
+
+    const videos = await this.videoModel.aggregate(pipeline);
+    return videos;
   }
 }

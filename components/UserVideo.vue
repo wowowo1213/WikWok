@@ -16,13 +16,13 @@
     </div>
     <div class="px-1">
       <div class="text-gray-700 text-[15px] pt-2 wrap-break-word">
-        {{ props.video.filename || '默认视频名称' }}
+        {{ props.video.filename }}
       </div>
-      <div class="text-gray-700 text-[15px] pt-1 text-ellipsis">{{ props.video.caption }}</div>
-      <div class="flex items-center -ml-1 text-gray-600 font-bold text-xs">
-        <Icon name="gg:loadbar-sound" size="20" />
-        3%
-        <Icon class="ml-1" name="tabler:alert-circle" size="16" />
+      <div class="text-gray-700 text-[15px] pt-1 text-ellipsis overflow-hidden whitespace-nowrap">
+        视频简介：{{ props.video.caption }}
+      </div>
+      <div class="text-gray-700 text-[12px] pt-1 text-ellipsis overflow-hidden whitespace-nowrap">
+        更新时间：{{ updatedTime }}
       </div>
     </div>
   </div>
@@ -40,6 +40,8 @@ let video = ref<HTMLVideoElement | null>(null);
 const videoSrc = computed(() => `http://localhost:5000${props.video.videoUrl}`);
 
 let isLoaded = ref(false);
+
+const updatedTime = props.video.updatedAt.split('.')[0].split('T').join(' ');
 
 onMounted(() => {
   if (!video.value) return;
@@ -65,7 +67,7 @@ const onLoadedData = () => {
 const dispalyVideo = () => {
   $generalStore.setBackUrl('/profile/' + route.params.id);
   setTimeout(() => {
-    router.push(`/video/${props.video.id}`);
+    router.push(`/video/${props.video.videoId}`);
   }, 300);
 };
 

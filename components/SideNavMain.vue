@@ -6,10 +6,34 @@
   >
     <div class="lg:w-full w-[55px]">
       <NuxtLink to="/">
-        <MenuItem iconName="For You" colorString="#F02C56" sizeString="30" />
+        <MenuItem
+          iconName="For You"
+          :colorString="$generalStore.activeItem === 'forYou' ? '#F02C56' : '#000000'"
+          sizeString="30"
+          @click="$generalStore.setActiveItem('forYou')"
+        />
       </NuxtLink>
-      <MenuItem iconName="Following" colorString="#000000" sizeString="27" />
-      <MenuItem iconName="LIVE" colorString="#000000" sizeString="27" />
+
+      <MenuItem
+        iconName="Following"
+        :colorString="$generalStore.activeItem === 'following' ? '#F02C56' : '#000000'"
+        sizeString="27"
+        @click="$generalStore.setActiveItem('following')"
+      />
+      <MenuItem
+        iconName="Live"
+        :colorString="$generalStore.activeItem === 'live' ? '#F02C56' : '#000000'"
+        sizeString="27"
+        @click="$generalStore.setActiveItem('live')"
+      />
+      <NuxtLink :to="`/profile/${$userStore.userData.userId}`">
+        <MenuItem
+          iconName="Userinfo"
+          :colorString="$generalStore.activeItem === 'userInfo' ? '#F02C56' : '#000000'"
+          sizeString="27"
+          @click="$generalStore.setActiveItem('userInfo')"
+        />
+      </NuxtLink>
 
       <div class="border-b border-gray-600 mt-2" />
 

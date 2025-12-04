@@ -77,7 +77,7 @@
       <div
         class="mt-4 grid 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-3"
       >
-        <div v-for="video in $userStore.profileData.videos" :key="video.id">
+        <div v-for="video in $userStore.profileData.videos" :key="video.videoId">
           <UserVideo :video="video" />
         </div>
       </div>
@@ -117,6 +117,7 @@ const formatNumber = (num: number) => {
 
 onMounted(async () => {
   try {
+    $generalStore.setActiveItem('userInfo');
     isLoading.value = true;
     errorMessage.value = '';
 

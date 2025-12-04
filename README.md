@@ -137,7 +137,7 @@ WikWok/
 │   ├── video/                        # 视频详情界面
 │   │   └── [id].vue
 │   ├── profile/                      # 用户主页
-│   │   └── [id].vue                  #
+│   │   └── [id].vue
 │   ├── upload/                       # 上传视频界面
 │   │   └── index.vue
 │   └── index.vue                     # 首页
