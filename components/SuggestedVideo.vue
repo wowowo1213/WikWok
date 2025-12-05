@@ -1,20 +1,21 @@
 <template>
-  <div :id="`MainView-${video.videoId}`" class="flex border-b py-6">
-    <NuxtLink :to="`profile/${video.user.userId}`" class="cursor-pointer">
+  <div :id="`SuggestedVideo-${video.videoId}`" class="flex border-b py-6">
+    <div
+      :to="`profile/${video.user.userId}`"
+      class="cursor-pointer"
+      @click="isLoggedIn(video.user.userId)"
+    >
       <img
         class="rounded-full max-h-[60px]"
         width="60"
         :src="`http://localhost:5000${video.user.avatarUrl}`"
       />
-    </NuxtLink>
+    </div>
 
     <div class="pl-3 w-full px-4">
       <div class="flex items-center justify-between">
-        <button>
-          <span class="font-bold hover:underline cursor-pointer">用户昵称 </span>
-          <span class="text-[13px] text-light text-gray-500 pl-1 cursor-pointer">
-            {{ video.user.username }}
-          </span>
+        <button @click="isLoggedIn(video.user.userId)">
+          <span class="font-bold hover:underline cursor-pointer">{{ video.user.username }}</span>
         </button>
 
         <button
@@ -35,6 +36,7 @@
 
       <div class="mt-1 flex">
         <div
+          @click="displayVideo(video)"
           class="relative min-h-[480px] max-h-[580px] w-full md:max-w-[260px] flex items-center bg-black rounded-xl cursor-pointer"
         >
           <video
@@ -94,7 +96,7 @@
 </template>
 
 <script setup lang="ts">
-import type { SuggestedVideo } from '~/stores/general';
+import type { SelectedVideo, SuggestedVideo } from '~/stores/general';
 
 const { $generalStore, $userStore } = useNuxtApp();
 const router = useRouter();
@@ -106,12 +108,12 @@ const props = defineProps<{
 const { video } = toRefs(props);
 const videoRef = ref<HTMLVideoElement | null>(null);
 let observer: IntersectionObserver | null = null;
-let mainViewElement: HTMLElement | null = null;
+let suggestedVideoElement: HTMLElement | null = null;
 
 onMounted(() => {
-  mainViewElement = document.getElementById(`MainView-${video.value.videoId}`);
+  suggestedVideoElement = document.getElementById(`SuggestedVideo-${video.value.videoId}`);
 
-  if (!mainViewElement || !videoRef.value) {
+  if (!suggestedVideoElement || !videoRef.value) {
     console.warn('MainView组件不存在或者其中的video元素不存在');
     return;
   }
@@ -125,7 +127,7 @@ onMounted(() => {
     { threshold: 0.7 }
   );
 
-  observer.observe(mainViewElement);
+  observer.observe(suggestedVideoElement);
 });
 
 onBeforeUnmount(() => {
@@ -136,12 +138,31 @@ onBeforeUnmount(() => {
     videoRef.value = null;
   }
 
-  if (observer && mainViewElement) {
-    observer.unobserve(mainViewElement);
+  if (observer && suggestedVideoElement) {
+    observer.unobserve(suggestedVideoElement);
     observer.disconnect();
     observer = null;
   }
 
-  mainViewElement = null;
+  suggestedVideoElement = null;
 });
+
+const isLoggedIn = (userId: string) => {
+  if (!$userStore.userData.userId) {
+    $generalStore.isLoginOpen = true;
+    return;
+  }
+  router.push(`/profile/${userId}`);
+};
+
+const displayVideo = (video: SelectedVideo) => {
+  if (!$userStore.userData.userId) {
+    $generalStore.isLoginOpen = true;
+    return;
+  }
+
+  $generalStore.setBackUrl('/');
+  $generalStore.selectedVideo = video;
+  router.push(`/video/${video.videoId}`);
+};
 </script>

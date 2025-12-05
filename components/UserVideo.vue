@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-const { $generalStore } = useNuxtApp();
+const { $userStore, $generalStore } = useNuxtApp();
 
 const route = useRoute();
 const router = useRouter();
@@ -66,9 +66,15 @@ const onLoadedData = () => {
 
 const dispalyVideo = () => {
   $generalStore.setBackUrl('/profile/' + route.params.id);
-  setTimeout(() => {
-    router.push(`/video/${props.video.videoId}`);
-  }, 300);
+  $generalStore.selectedVideo = {
+    ...props.video,
+    user: {
+      userId: $userStore.profileData.userId,
+      avatarUrl: $userStore.profileData.avatarUrl,
+      username: $userStore.profileData.username,
+    },
+  };
+  router.push(`/video/${props.video.videoId}`);
 };
 
 const isHover = (bool: boolean) => {

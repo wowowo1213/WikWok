@@ -5,6 +5,7 @@
   >
     <div class="lg:w-[calc(100%-540px)] h-full relative">
       <NuxtLink
+        :to="$generalStore.backUrl"
         class="absolute flex z-20 m-5 rounded-full bg-gray-700 p-1.5 hover:bg-gray-800 cursor-pointer"
       >
         <Icon name="material-symbols:close" color="#FFFFFF" size="27" />
@@ -34,12 +35,6 @@
         src="~/assets/images/tiktok-logo-small.png"
       />
 
-      <video
-        v-if="true"
-        class="absolute object-cover w-full my-auto z-[-1] h-screen"
-        src="../../public/test.mp4"
-      />
-
       <div
         v-if="!isLoaded"
         class="flex items-center justify-center bg-black bg-opacity-70 h-screen lg:min-w-[480px]"
@@ -48,30 +43,38 @@
       </div>
       <div class="bg-black bg-opacity-70 lg:min-w-[480px]">
         <video
-          v-if="true"
-          ref="video"
+          v-if="$generalStore.selectedVideo"
+          ref="videoRef"
           loop
           muted
           class="h-screen mx-auto"
-          src="../../public/test.mp4"
+          :src="`http://localhost:5000${$generalStore.selectedVideo.videoUrl}`"
         />
       </div>
     </div>
 
-    <div id="InfoSection" v-if="true" class="lg:max-w-[550px] relative w-full h-full bg-white">
+    <div
+      id="InfoSection"
+      v-if="$generalStore.selectedVideo"
+      class="lg:max-w-[550px] relative w-full h-full bg-white"
+    >
       <div class="py-7" />
 
       <div class="flex items-center justify-between px-8">
         <div class="flex items-center">
-          <NuxtLink :href="`/profile/id`">
-            <img class="rounded-full lg:mx-0 mx-auto" width="40" src="~/assets/images/logo.jpg" />
+          <NuxtLink :to="`/profile/${$generalStore.selectedVideo.user.userId}`">
+            <img
+              class="rounded-full lg:mx-0 mx-auto"
+              width="40"
+              :src="`http://localhost:5000${$generalStore.selectedVideo.user.avatarUrl}`"
+            />
           </NuxtLink>
           <div class="ml-3 pt-0.5">
-            <div class="text-[17px] font-semibold">User name</div>
-            <div class="text-[13px] -mt-5 font-light">
-              User name
-              <span class="relative -top-[2px] text-[30px] pr-0.5">.</span>
-              <span class="font-medium">Date here</span>
+            <div class="text-[17px] font-semibold">
+              {{ $generalStore.selectedVideo.user.username }}
+            </div>
+            <div class="font-medium">
+              {{ $generalStore.selectedVideo.updatedAt.split('.')[0]?.split('T').join(' ') }}
             </div>
           </div>
         </div>
@@ -85,7 +88,7 @@
         />
       </div>
 
-      <div class="px-8 mt-4 text-sm">This is the post text</div>
+      <div class="px-8 mt-4 text-sm">{{ $generalStore.selectedVideo.caption }}</div>
 
       <div class="px-8 mt-4 text-sm font-bold">
         <Icon name="mdi:music" size="17" />
@@ -181,34 +184,35 @@
 </template>
 
 <script setup lang="ts">
+const { $generalStore } = useNuxtApp();
 const route = useRoute();
 const router = useRouter();
 
-let video = ref<HTMLVideoElement | null>(null);
+let videoRef = ref<HTMLVideoElement | null>(null);
 let isLoaded = ref(false);
 let comment = ref(null);
 let inputFocused = ref(false);
 
 onMounted(() => {
-  if (!video.value) return;
-  if (video.value.readyState >= 3) {
+  if (!videoRef.value) return;
+  if (videoRef.value.readyState >= 3) {
     isLoaded.value = true;
     return;
   }
-  video.value?.addEventListener('loadeddata', onLoadedData);
+  videoRef.value.addEventListener('loadeddata', onLoadedData);
 });
 
 onBeforeUnmount(() => {
-  if (!video.value) return;
-  video.value.removeEventListener('loadeddata', onLoadedData);
-  video.value.pause();
-  video.value.currentTime = 0;
-  video.value.src = '';
+  if (!videoRef.value) return;
+  videoRef.value.removeEventListener('loadeddata', onLoadedData);
+  videoRef.value.pause();
+  videoRef.value.currentTime = 0;
+  videoRef.value.src = '';
 });
 
 const onLoadedData = () => {
-  if (!video.value) return;
+  if (!videoRef.value) return;
   isLoaded.value = true;
-  video.value.play();
+  videoRef.value.play();
 };
 </script>

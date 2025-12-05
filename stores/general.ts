@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia';
 import type { Video, UserData } from './user';
 
+export interface SelectedVideo extends Video {
+  user: { userId: string; username: string; avatarUrl: string };
+}
+
 export interface SuggestedVideo extends Video {
-  username: string;
-  avatarUrl: string;
   user: { userId: string; username: string; avatarUrl: string };
   isFollowing: null | boolean;
 }
@@ -17,7 +19,8 @@ export const useGeneralStore = defineStore(
     const isLoginOpen = ref(false);
     const isEditProfileOpen = ref(false);
     const activeItem = ref('forYou');
-    const isBackUrl = ref('/');
+    const backUrl = ref('/');
+    const selectedVideo = ref<null | SelectedVideo>(null);
     const suggestedVideos = ref<null | Array<SuggestedVideo>>(null);
     const suggestedUsers = ref<null | Array<UserData>>(null);
     const followingUsers = ref<null | Array<UserData>>(null);
@@ -40,7 +43,7 @@ export const useGeneralStore = defineStore(
     }
 
     function setBackUrl(url: string) {
-      isBackUrl.value = url;
+      backUrl.value = url;
     }
 
     async function getSuggestedUsers() {
@@ -80,7 +83,8 @@ export const useGeneralStore = defineStore(
       isLoginOpen,
       isEditProfileOpen,
       activeItem,
-      isBackUrl,
+      backUrl,
+      selectedVideo,
       suggestedVideos,
       suggestedUsers,
       followingUsers,
