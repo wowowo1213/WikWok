@@ -30,14 +30,13 @@
 
 ### 1. 响应式布局
 
-- 使用 TailwindCSS 实现多端适配
-- 不同屏幕尺寸下动态调整布局：
+- 使用 TailwindCSS 实现多端适配，不同屏幕尺寸下动态调整布局：
   - 移动端：隐藏侧边栏，简化导航
   - 桌面端：完整展示侧边栏和推荐视频列表
+- 使用 IntersactionObserver 进行动态观察来决定视频是否播放
 
 ### 2. 搜索框交互
 
-- 模仿 TikTok 官方搜索框样式
 - 使用 TailwindCSS 的 `group` 和 `peer` 实现交互效果:鼠标悬停或输入框聚焦时，右侧搜索图标高亮
 
 ### 3. 用户信息动态更新
@@ -48,9 +47,6 @@
 - **编辑功能**：
   - 支持修改头像（使用 `vue-advanced-cropper` 实现裁剪）
   - 支持修改昵称和个人简介
-- **数据同步**：
-  - `App.vue` 挂载后自动获取最新用户数据
-  - 使用 Pinia 管理全局状态
 
 ### 4. 视频上传与管理
 
@@ -91,7 +87,7 @@ cd WikWok-api
 npm install
 
 # 配置env文件中的环境变量
-# 在nodejs中使用 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))" 随机生成一个 JWT_SECRET 和 SESSION_SECRET
+# 在nodejs中使用 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))" 随机生成一个 JWT_SECRET 和 SESSION_SECRET，运行两次
 JWT_SECRET=
 SESSION_SECRET=
 
@@ -166,7 +162,9 @@ WikWok-api/
 │   │   ├── auth.dto.ts               # 注册/登录用户信息数据类型
 │   │   ├── auth.module.ts
 │   │   ├── auth.service.ts
-│   │   └── jwt.strategy.ts           # JWT的设置
+│   │   └── jwt.strategy.ts           # JWT认证的设置
+│   ├── common/                       # 全局过滤器、响应处理器、日志处理、csrf中间件设置
+│   ├── upload/                       # 上传视频接口
 │   ├── user/
 │   │   ├── user.controller.ts        # 获取/更新用户信息接口
 │   │   ├── user.module.ts

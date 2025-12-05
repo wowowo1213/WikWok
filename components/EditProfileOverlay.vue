@@ -234,10 +234,10 @@ const updateUserinfo = async () => {
   await $userStore.getProfileInfo($userStore.userData.userId);
 
   if ($generalStore.suggestedUsers) {
-    $generalStore.updateSideMenuImage($generalStore.suggestedUsers, $userStore.userData);
+    $generalStore.updateSideMenuItemFollow($generalStore.suggestedUsers, $userStore.userData);
   }
   if ($generalStore.followingUsers) {
-    $generalStore.updateSideMenuImage($generalStore.followingUsers, $userStore.userData);
+    $generalStore.updateSideMenuItemFollow($generalStore.followingUsers, $userStore.userData);
   }
 
   croppedImage.value = null;

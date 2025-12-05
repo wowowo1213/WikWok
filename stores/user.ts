@@ -4,6 +4,7 @@ import { ref, computed } from 'vue';
 export interface Video {
   videoId: string;
   videoUrl: string;
+  filename: string;
   caption: string;
   likes: number;
   views: number;

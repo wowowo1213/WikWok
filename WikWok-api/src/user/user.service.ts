@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, FilterQuery, Types, PipelineStage } from 'mongoose';
+import { Model, FilterQuery, Types, PipelineStage, isValidObjectId } from 'mongoose';
 import { User } from './user.schema';
 import { Video } from 'src/upload/video.model';
 import { UpdateUserDto } from './userinfo.dto';
@@ -152,15 +152,19 @@ export class UserService {
   }
 
   async getSuggestedUsers(userId: string | undefined) {
-    const query: FilterQuery<any> = { _id: { $ne: userId } };
+    const query: FilterQuery<any> = {};
 
-    if (userId) {
+    if (userId && isValidObjectId(userId)) {
+      query._id = { $ne: userId };
+
       const currentUser = await this.userModel.findById(userId).select('followingUsers').lean();
 
       const followingIds = currentUser?.followingUsers || [];
       if (followingIds.length > 0) {
         query._id.$nin = followingIds;
       }
+    } else {
+      query._id = { $ne: null };
     }
 
     const suggestedUsers = await this.userModel
@@ -224,7 +228,7 @@ export class UserService {
     });
   }
 
-  async getRecommendedVideos(userId?: string) {
+  async getSuggestedVideos(userId?: string) {
     let followingUserIds: Types.ObjectId[] | User[] = [];
     if (userId) {
       const user = await this.userModel.findById(userId).select('followingUsers').lean();

@@ -40,6 +40,8 @@ const login = async () => {
   try {
     await $userStore.login(phoneNumber.value, password.value);
     await $userStore.getUserInfo($userStore.userData.userId);
+    await $generalStore.getSuggestedUsers();
+    await $generalStore.getFollowingUsers();
     $generalStore.isLoginOpen = false;
   } catch (error) {
     errors.value = error instanceof Array ? error[0] : error;

@@ -17,11 +17,10 @@ onMounted(async () => {
 
   try {
     await $generalStore.getCsrfToken();
-    // 这个有点问题？？？未登录时
-    // await $generalStore.getSuggestedUsers();
+    await $generalStore.getSuggestedUsers();
     if ($userStore.userData.userId) {
       await $userStore.getUserInfo($userStore.userData.userId);
-      // await $generalStore.getFollowingUsers();
+      await $generalStore.getFollowingUsers();
     }
   } catch (error) {
     console.log(error);

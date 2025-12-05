@@ -16,7 +16,7 @@ const { $generalStore } = useNuxtApp();
 onMounted(async () => {
   try {
     $generalStore.setActiveItem('forYou');
-    await $generalStore.getRecommendedVideos();
+    await $generalStore.getSuggestedVideos();
   } catch (error) {
     console.log(error);
   }

@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia';
 import type { Video, UserData } from './user';
 
-interface SuggestedVideos extends Video {
+export interface SuggestedVideo extends Video {
   username: string;
   avatarUrl: string;
+  user: { userId: string; username: string; avatarUrl: string };
+  isFollowing: null | boolean;
 }
 
 export const useGeneralStore = defineStore(
@@ -16,7 +18,7 @@ export const useGeneralStore = defineStore(
     const isEditProfileOpen = ref(false);
     const activeItem = ref('forYou');
     const isBackUrl = ref('/');
-    const suggestedVideos = ref<null | Array<SuggestedVideos>>(null);
+    const suggestedVideos = ref<null | Array<SuggestedVideo>>(null);
     const suggestedUsers = ref<null | Array<UserData>>(null);
     const followingUsers = ref<null | Array<UserData>>(null);
 
@@ -42,27 +44,30 @@ export const useGeneralStore = defineStore(
     }
 
     async function getSuggestedUsers() {
-      const res = await $axios.get('/user/get-suggested-users', {
+      suggestedUsers.value = null;
+      const res = await $axios.get('/user-public/get-suggested-users', {
         params: { userId: userStore.userData.userId },
       });
-      return res.data.data;
+      suggestedUsers.value = res.data.data.users;
     }
 
     async function getFollowingUsers() {
+      followingUsers.value = null;
       const res = await $axios.get('/user/get-following-users', {
         params: { userId: userStore.userData.userId },
       });
-      return res.data.data;
+      followingUsers.value = res.data.data.users;
     }
 
-    async function getRecommendedVideos() {
-      const res = await $axios.get('/user/get-recommended-videos', {
+    async function getSuggestedVideos() {
+      suggestedVideos.value = null;
+      const res = await $axios.get('/user-public/get-suggested-videos', {
         params: { userId: userStore.userData.userId },
       });
       suggestedVideos.value = res.data.data.videos;
     }
 
-    function updateSideMenuImage(users: Array<UserData>, userData: UserData) {
+    function updateSideMenuItemFollow(users: Array<UserData>, userData: UserData) {
       for (let i = 0; i < users.length; i++) {
         const user = users[i];
         if (user?.userId == userData.userId) {
@@ -85,8 +90,8 @@ export const useGeneralStore = defineStore(
       setBackUrl,
       getSuggestedUsers,
       getFollowingUsers,
-      getRecommendedVideos,
-      updateSideMenuImage,
+      getSuggestedVideos,
+      updateSideMenuItemFollow,
     };
   },
   {

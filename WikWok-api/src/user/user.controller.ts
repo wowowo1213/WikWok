@@ -8,7 +8,6 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
-  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
@@ -71,25 +70,12 @@ export class UserController {
     }
   }
 
-  @Get('get-suggested-users')
-  async getSuggestedUsers(@Query('userId') userId?: string) {
-    try {
-      const suggestedUsers = await this.userService.getSuggestedUsers(userId);
-      return {
-        result: { suggestedUsers },
-        message: '获取推荐用户成功',
-      };
-    } catch (error) {
-      throw new BadRequestException(error.message || '获取推荐用户失败');
-    }
-  }
-
   @Get('get-following-users')
   async getFollowingUsers(@Query('userId') userId: string) {
     try {
       const followingUsers = await this.userService.getFollowingUsers(userId);
       return {
-        result: { followingUsers },
+        result: { users: followingUsers },
         message: '获取已关注用户成功',
       };
     } catch (error) {
@@ -122,13 +108,31 @@ export class UserController {
       throw new BadRequestException(error.message || '取消关注失败');
     }
   }
+}
 
-  @Get('get-recommended-videos')
-  async getRecommendedVideos(@Query('userId') userId?: string) {
+@Controller('user-public')
+export class UserPublicController {
+  constructor(private readonly userService: UserService) {}
+
+  @Get('get-suggested-users')
+  async getSuggestedUsers(@Query('userId') userId?: string) {
     try {
-      const recommendedVideos = await this.userService.getRecommendedVideos(userId);
+      const suggestedUsers = await this.userService.getSuggestedUsers(userId);
       return {
-        result: { videos: recommendedVideos },
+        result: { users: suggestedUsers },
+        message: '获取推荐用户成功',
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message || '获取推荐用户失败');
+    }
+  }
+
+  @Get('get-suggested-videos')
+  async getSuggestededVideos(@Query('userId') userId?: string) {
+    try {
+      const suggestedVideos = await this.userService.getSuggestedVideos(userId);
+      return {
+        result: { videos: suggestedVideos },
         message: '获取推荐视频成功',
       };
     } catch (error) {
