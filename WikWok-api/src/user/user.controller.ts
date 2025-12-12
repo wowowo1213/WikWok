@@ -27,15 +27,7 @@ export class UserController {
       const user = await this.userService.getUserInfo(userId);
 
       return {
-        result: {
-          userId: user.userId,
-          username: user.username,
-          bio: user.bio,
-          avatarUrl: user.avatarUrl,
-          followers: user.followers,
-          followings: user.followings,
-          videos: user.videos,
-        },
+        result: user,
         message: '获取用户信息成功',
       };
     } catch (error) {
@@ -106,6 +98,79 @@ export class UserController {
       };
     } catch (error) {
       throw new BadRequestException(error.message || '取消关注失败');
+    }
+  }
+
+  @Post(':id/like')
+  @UseGuards(JwtAuthGuard)
+  async likeVideo(@Req() req, @Param('id') videoId: string) {
+    const userId = req.user.userId;
+    return this.videoService.likeVideo(userId, videoId);
+  }
+
+  @Post(':id/unlike')
+  @UseGuards(JwtAuthGuard)
+  async unlikeVideo(@Req() req, @Param('id') videoId: string) {
+    const userId = req.user.userId;
+    return this.videoService.unlikeVideo(userId, videoId);
+  }
+
+  @Post(':id/comment')
+  @UseGuards(JwtAuthGuard)
+  async addComment(@Req() req, @Param('id') videoId: string, @Body() body: { text: string }) {
+    const userId = req.user.userId;
+    return this.videoService.addComment(userId, videoId, body.text);
+  }
+
+  @Post(':videoId/comment/:commentId/delete')
+  @UseGuards(JwtAuthGuard)
+  async deleteComment(
+    @Req() req,
+    @Param('videoId') videoId: string,
+    @Param('commentId') commentId: string
+  ) {
+    const userId = req.user.userId;
+    return this.videoService.deleteComment(userId, videoId, commentId);
+  }
+
+  @Get('get-video-detail')
+  async getVideoDetail(@Query('videoId') videoId: string) {
+    try {
+      const video = await this.videoService.getVideoById(videoId);
+      if (!video) throw new BadRequestException('视频不存在');
+
+      // 转换格式以匹配前端期望
+      const formattedVideo = {
+        videoId: video._id.toString(),
+        videoUrl: video.videoUrl,
+        filename: video.filename,
+        caption: video.caption,
+        likes: video.likes.length,
+        views: video.views,
+        updatedAt: video.updatedAt.toISOString(),
+        isFollowing: null, // 如果需要可以计算
+        user: {
+          userId: video.userId._id.toString(),
+          username: video.userId.username,
+          avatarUrl: video.userId.avatarUrl,
+        },
+        comments: video.comments.map(comment => ({
+          id: comment._id.toString(),
+          text: comment.text,
+          user: {
+            userId: comment.user._id.toString(),
+            username: comment.user.username,
+            avatarUrl: comment.user.avatarUrl,
+          },
+        })),
+      };
+
+      return {
+        result: formattedVideo,
+        message: '获取视频详情成功',
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message || '获取视频详情失败');
     }
   }
 }

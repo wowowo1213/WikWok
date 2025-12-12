@@ -1,25 +1,27 @@
 <template>
-  <div :id="`SuggestedVideo-${video.videoId}`" class="flex border-b py-6">
+  <div :id="`SuggestedVideo-${props.video.videoId}`" class="flex border-b py-6">
     <div
-      :to="`profile/${video.user.userId}`"
+      :to="`profile/${props.video.user.userId}`"
       class="cursor-pointer"
-      @click="isLoggedIn(video.user.userId)"
+      @click="isLoggedIn(props.video.user.userId)"
     >
       <img
         class="rounded-full max-h-[60px]"
         width="60"
-        :src="`http://localhost:5000${video.user.avatarUrl}`"
+        :src="`http://localhost:5000${props.video.user.avatarUrl}`"
       />
     </div>
 
     <div class="pl-3 w-full px-4">
       <div class="flex items-center justify-between">
-        <button @click="isLoggedIn(video.user.userId)">
-          <span class="font-bold hover:underline cursor-pointer">{{ video.user.username }}</span>
+        <button @click="isLoggedIn(props.video.user.userId)">
+          <span class="font-bold hover:underline cursor-pointer">{{
+            props.video.user.username
+          }}</span>
         </button>
 
         <button
-          v-if="!video.isFollowing && video.user.userId !== $userStore.userData.userId"
+          v-if="!props.video.isFollowing && props.video.user.userId !== $userStore.userData.userId"
           class="border text-[15px] px-[21px] py-0.5 border-[#F02C56] text-[#F02C56] hover:bg-[#ffeef2] font-semibold rounded-md cursor-pointer"
         >
           关注
@@ -30,13 +32,13 @@
       <div class="text-[14px] text-gray-500 pb-0.5">#fun #cool #SuperAwesome</div>
       <div class="text-[14px] pb-0.5 flex items-center font-semibold">
         <Icon name="mdi:music" size="17" />
-        <div class="px-1">{{ video.filename }}</div>
+        <div class="px-1">{{ props.video.filename }}</div>
         <Icon name="mdi:heart" size="20" />
       </div>
 
       <div class="mt-1 flex">
         <div
-          @click="displayVideo(video)"
+          @click="displayVideo(props.video)"
           class="relative min-h-[480px] max-h-[580px] w-full md:max-w-[260px] flex items-center bg-black rounded-xl cursor-pointer"
         >
           <video
@@ -44,7 +46,7 @@
             loop
             muted
             class="rounded-xl object-cover h-full"
-            :src="`http://localhost:5000${video.videoUrl}`"
+            :src="`http://localhost:5000${props.video.videoUrl}`"
           />
           <img
             class="absolute -right-4 bottom-100 md:bottom-14 round"
@@ -60,7 +62,7 @@
               >
                 <Icon name="mdi:heart" class="text-white group-hover:text-red-600" size="25" />
               </button>
-              <span class="text-xs text-gray-800 font-semibold">{{ video.likes }}</span>
+              <span class="text-xs text-gray-800 font-semibold">{{ props.video.likes }}</span>
             </div>
 
             <div class="pb-2 text-center">
@@ -96,22 +98,18 @@
 </template>
 
 <script setup lang="ts">
-import type { SelectedVideo, SuggestedVideo } from '~/stores/general';
+import type { Video } from '~/stores/user';
 
 const { $generalStore, $userStore } = useNuxtApp();
 const router = useRouter();
 
-const props = defineProps<{
-  video: SuggestedVideo;
-}>();
-
-const { video } = toRefs(props);
+const props = defineProps(['video']);
 const videoRef = ref<HTMLVideoElement | null>(null);
 let observer: IntersectionObserver | null = null;
 let suggestedVideoElement: HTMLElement | null = null;
 
 onMounted(() => {
-  suggestedVideoElement = document.getElementById(`SuggestedVideo-${video.value.videoId}`);
+  suggestedVideoElement = document.getElementById(`SuggestedVideo-${props.video.videoId}`);
 
   if (!suggestedVideoElement || !videoRef.value) {
     console.warn('MainView组件不存在或者其中的video元素不存在');
@@ -155,7 +153,7 @@ const isLoggedIn = (userId: string) => {
   router.push(`/profile/${userId}`);
 };
 
-const displayVideo = (video: SelectedVideo) => {
+const displayVideo = (video: Video) => {
   if (!$userStore.userData.userId) {
     $generalStore.isLoginOpen = true;
     return;

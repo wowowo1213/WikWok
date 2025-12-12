@@ -14,7 +14,7 @@
       <div class="flex">
         <img
           class="rounded-full size-18 lg:size-24 mr-2 object-cover bg-white"
-          :src="imgSrc"
+          :src="`http://localhost:5000${$userStore.profileData.avatarUrl}`"
           alt="用户头像"
         />
 
@@ -103,8 +103,6 @@ const route = useRoute();
 
 let isLoading = ref(false);
 let errorMessage = ref('');
-
-const imgSrc = computed(() => `http://localhost:5000${$userStore.profileData.avatarUrl}`);
 
 const formatNumber = (num: number) => {
   if (num >= 1000000) {

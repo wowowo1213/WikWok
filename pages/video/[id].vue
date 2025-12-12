@@ -3,7 +3,7 @@
     id="VideoPage"
     class="fixed lg:flex justify-between z-50 top-0 left-0 w-full h-full bg-black lg:overflow-hidden overflow-auto"
   >
-    <div class="lg:w-[calc(100%-540px)] h-full relative">
+    <div v-if="$generalStore.selectedVideo" class="lg:w-[calc(100%-540px)] h-full relative">
       <NuxtLink
         :to="$generalStore.backUrl"
         class="absolute flex z-20 m-5 rounded-full bg-gray-700 p-1.5 hover:bg-gray-800 cursor-pointer"
@@ -11,7 +11,7 @@
         <Icon name="material-symbols:close" color="#FFFFFF" size="27" />
       </NuxtLink>
 
-      <div>
+      <div v-if="$generalStore.videoIds.length > 0">
         <button
           :disabled="!isLoaded"
           @click="loopThroughVideosUp()"
@@ -30,7 +30,7 @@
       </div>
 
       <img
-        class="absolute top-[18px] left-[70px] rounded-full lg:mx-0 mx-auto"
+        class="absolute top-[18px] left-[70px] rounded-full"
         width="45"
         src="~/assets/images/tiktok-logo-small.png"
       />
@@ -41,6 +41,7 @@
       >
         <Icon class="animate-spin ml-1 text-white" name="eos-icons:bubble-loading" size="100" />
       </div>
+
       <div class="bg-black bg-opacity-70 lg:min-w-[480px]">
         <video
           v-if="$generalStore.selectedVideo"
@@ -81,7 +82,7 @@
         </div>
 
         <Icon
-          v-if="true"
+          v-if="$generalStore.selectedVideo.user.userId === $userStore.userData.userId"
           @click="deleteVideo()"
           class="cursor-pointer"
           name="material-symbols:delete-outline-sharp"
@@ -89,17 +90,17 @@
         />
       </div>
 
-      <div class="px-8 mt-4 text-sm">{{ $generalStore.selectedVideo.caption }}</div>
+      <div class="px-8 mt-4 font-bold">标题：{{ $generalStore.selectedVideo.filename }}</div>
 
-      <div class="px-8 mt-4 text-sm font-bold">
-        <Icon name="mdi:music" size="17" />
-        original sound - {{ $generalStore.selectedVideo.filename }}
-      </div>
+      <div class="px-8 mt-4 text-sm">简介：{{ $generalStore.selectedVideo.caption }}</div>
 
       <div class="flex items-center px-8 mt-8">
         <div class="pb-4 text-center flex items-center">
-          <button class="flex rounded-full bg-gray-200 p-2 cursor-pointer">
-            <Icon name="mdi:heart" size="25" />
+          <button
+            @click="isLiked ? unlikeVideo() : likeVideo()"
+            class="flex rounded-full bg-gray-200 p-2 cursor-pointer"
+          >
+            <Icon name="mdi:heart" size="25" :color="isLiked ? '#F02C56' : ''" />
           </button>
           <span class="text-xs pl-2 pr-4 text-gray-800 font-semibold">
             {{ $generalStore.selectedVideo.likes }}
@@ -119,31 +120,38 @@
         class="bg-[#F8F8F8] z-0 w-full h-[calc(100%-273px)] border-t-2 overflow-auto"
       >
         <div class="pt-2" />
-        <div v-if="false" class="text-center mt-6 text-xl text-gray-500">没有评论捏...</div>
-        <div v-else class="flex items-center justify-between px-8 mt-4">
+        <div
+          v-if="$generalStore.selectedVideo.comments.length <= 0"
+          class="text-center mt-6 text-xl text-gray-500"
+        >
+          没有评论捏...
+        </div>
+        <div
+          v-else
+          v-for="comment in $generalStore.selectedVideo.comments"
+          :key="comment.id"
+          class="flex items-center justify-between px-8 mt-4"
+        >
           <div class="flex items-center relative w-full">
-            <NuxtLink :to="`/`">
+            <NuxtLink :to="`/profile/${comment.user.userId}`">
               <img
                 class="absolute top-0 rounded-full lg:mx-0 mx-auto"
                 width="40"
-                src="~/assets/images/logo.jpg"
+                :src="`http://localhost:5000${comment.user.avatarUrl}`"
               />
             </NuxtLink>
             <div class="ml-14 pt-0.5 w-full">
               <div class="text-[18px] font-semibold flex items-center justify-between">
-                User name
+                {{ comment.user.username }}
                 <Icon
-                  v-if="true"
-                  @click="deleteComment()"
+                  v-if="$userStore.userData.userId === comment.user.userId"
+                  @click="deleteComment($generalStore.selectedVideo.videoId, comment.id)"
                   class="cursor-pointer"
                   name="material-symbols:delete-outline-sharp"
                   size="25"
                 />
               </div>
-              <div class="text-[15px] font-light">
-                comment text comment text comment text comment text comment text comment text
-                comment text
-              </div>
+              <div class="text-[15px] font-light">"{{ comment.text }}"</div>
             </div>
           </div>
         </div>
@@ -153,7 +161,7 @@
 
       <div
         id="CreateComment"
-        v-if="true"
+        v-if="$userStore.userData.userId"
         class="absolute flex items-center justify-between bottom-0 bg-white h-[85px] lg:max-w-[550px] w-full py-5 px-8 border-t-2"
       >
         <div
@@ -161,7 +169,7 @@
           class="bg-[#F1F1F2] flex items-center rounded-lg w-full lg:max-w-[420px]"
         >
           <input
-            v-model="comment"
+            v-model="commentText"
             @focus="inputFocused = true"
             @blur="inputFocused = false"
             class="bg-[#F1F1F2] text-[14px] focus:outline-none w-full lg:max-w-[420px] p-2 rounded-lg"
@@ -170,10 +178,10 @@
           />
         </div>
         <button
-          :disabled="!comment"
+          :disabled="!commentText"
           @click="addComment()"
           :class="
-            comment
+            commentText
               ? 'text-[#F02C56] cursor-pointer hover:bg-gray-100'
               : 'text-gray-400 cursor-not-allowed'
           "
@@ -187,16 +195,35 @@
 </template>
 
 <script setup lang="ts">
-const { $generalStore } = useNuxtApp();
+import type { Video } from '~/stores/user';
+import { AxiosError } from 'axios';
+
+const { $userStore, $generalStore } = useNuxtApp();
 const route = useRoute();
 const router = useRouter();
 
 let videoRef = ref<HTMLVideoElement | null>(null);
 let isLoaded = ref(false);
-let comment = ref(null);
+let commentText = ref('');
 let inputFocused = ref(false);
 
-onMounted(() => {
+const videoId = computed(() => route.params.id as string);
+
+const isLiked = computed(() => {
+  if (!$generalStore.selectedVideo || !$userStore.userData?.userId) return false;
+  // 这边记得后端返回前端的likes是一个用户id数组
+  return $generalStore.selectedVideo.likes.some(userId => userId === $userStore.userData.userId);
+});
+
+onMounted(async () => {
+  try {
+    await $generalStore.getVideosById(videoId.value);
+  } catch (error) {
+    console.log('视频播放界面出错:' + error);
+    const axiosError = error as AxiosError;
+    if (axiosError && axiosError.response?.status === 400) router.push('/');
+  }
+
   if (!videoRef.value) return;
   if (videoRef.value.readyState >= 3) {
     isLoaded.value = true;
@@ -217,5 +244,102 @@ const onLoadedData = () => {
   if (!videoRef.value) return;
   isLoaded.value = true;
   videoRef.value.play();
+};
+
+const loopThroughVideosUp = () => {
+  let isBreak = false;
+  const currentIndex = $generalStore.videoIds.findIndex(id => id === route.params.id);
+
+  for (let i = currentIndex - 1; i >= 0; i--) {
+    const id = $generalStore.videoIds[i];
+    if (!id) continue;
+    router.push(`/video/${id}`);
+    isBreak = true;
+    return;
+  }
+
+  if (!isBreak && $generalStore.videoIds.length > 0) {
+    router.push(`/video/${$generalStore.videoIds[$generalStore.videoIds.length - 1]}`);
+  }
+};
+
+const loopThroughVideosDown = () => {
+  let isBreak = false;
+  const currentIndex = $generalStore.videoIds.findIndex(id => id === route.params.id);
+
+  for (let i = currentIndex + 1; i < $generalStore.videoIds.length; i++) {
+    const id = $generalStore.videoIds[i];
+    if (!id) continue;
+    router.push(`/video/${id}`);
+    isBreak = true;
+    return;
+  }
+
+  if (!isBreak && $generalStore.videoIds.length > 0) {
+    router.push(`/video/${$generalStore.videoIds[0]}`);
+  }
+};
+
+const deleteVideo = async () => {
+  let res = confirm('确定删除该视频么?');
+  try {
+    if (!res || !$generalStore.selectedVideo) return;
+    await $userStore.deletePost($generalStore.selectedVideo.videoId);
+    await $userStore.getUserInfo($userStore.userData.userId);
+    await $userStore.getProfileInfo($userStore.userData.userId);
+    router.push(`/profile/${$userStore.userData.userId}`);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const likeVideo = async () => {
+  try {
+    if (!$generalStore.selectedVideo || !$userStore.userData?.userId) return;
+    await $generalStore.likeVideo($generalStore.selectedVideo.videoId);
+    $generalStore.selectedVideo.likes.push($userStore.userData.userId);
+  } catch (error) {
+    console.error('点赞失败:', error);
+  }
+};
+
+const unlikeVideo = async () => {
+  try {
+    if (!$generalStore.selectedVideo || !$userStore.userData?.userId) return;
+    await $generalStore.unlikeVideo($generalStore.selectedVideo.videoId);
+    $generalStore.selectedVideo.likes = $generalStore.selectedVideo.likes.filter(
+      userId => userId !== $userStore.userData.userId
+    );
+  } catch (error) {
+    console.error('取消点赞失败:', error);
+  }
+};
+
+const addComment = async () => {
+  if (!commentText.value.trim() || !$generalStore.selectedVideo) return;
+
+  try {
+    const newComment = await $generalStore.addComment(
+      $generalStore.selectedVideo.videoId,
+      commentText.value
+    );
+    $generalStore.selectedVideo.comments.unshift(newComment);
+    commentText.value = '';
+  } catch (error) {
+    console.error('添加评论失败:', error);
+  }
+};
+
+const deleteComment = async (videoId: string, commentId: string) => {
+  if (!$generalStore.selectedVideo) return;
+
+  try {
+    await $generalStore.deleteComment(videoId, commentId);
+    $generalStore.selectedVideo.comments = $generalStore.selectedVideo.comments.filter(
+      (comment: { id: string }) => comment.id !== commentId
+    );
+  } catch (error) {
+    console.error('删除评论失败:', error);
+  }
 };
 </script>

@@ -12,7 +12,13 @@
       <Icon class="animate-spin ml-1 text-white" name="eos-icons:bubble-loading" size="100" />
     </div>
     <div>
-      <video ref="video" muted loop class="aspect-3/4 object-cover rounded-md" :src="videoSrc" />
+      <video
+        ref="videoRef"
+        muted
+        loop
+        class="aspect-3/4 object-cover rounded-md"
+        :src="`http://localhost:5000${props.video.videoUrl}`"
+      />
     </div>
     <div class="px-1">
       <div class="text-gray-700 text-[15px] pt-2 wrap-break-word">
@@ -36,28 +42,27 @@ const router = useRouter();
 
 const props = defineProps(['video']);
 
-let video = ref<HTMLVideoElement | null>(null);
-const videoSrc = computed(() => `http://localhost:5000${props.video.videoUrl}`);
+let videoRef = ref<HTMLVideoElement | null>(null);
 
 let isLoaded = ref(false);
 
 const updatedTime = props.video.updatedAt.split('.')[0].split('T').join(' ');
 
 onMounted(() => {
-  if (!video.value) return;
-  if (video.value.readyState >= 3) {
+  if (!videoRef.value) return;
+  if (videoRef.value.readyState >= 3) {
     isLoaded.value = true;
     return;
   }
-  video.value?.addEventListener('loadeddata', onLoadedData);
+  videoRef.value?.addEventListener('loadeddata', onLoadedData);
 });
 
 onBeforeUnmount(() => {
-  if (!video.value) return;
-  video.value.removeEventListener('loadeddata', onLoadedData);
-  video.value.pause();
-  video.value.currentTime = 0;
-  video.value.src = '';
+  if (!videoRef.value) return;
+  videoRef.value.removeEventListener('loadeddata', onLoadedData);
+  videoRef.value.pause();
+  videoRef.value.currentTime = 0;
+  videoRef.value.src = '';
 });
 
 const onLoadedData = () => {
@@ -66,19 +71,12 @@ const onLoadedData = () => {
 
 const dispalyVideo = () => {
   $generalStore.setBackUrl('/profile/' + route.params.id);
-  $generalStore.selectedVideo = {
-    ...props.video,
-    user: {
-      userId: $userStore.profileData.userId,
-      avatarUrl: $userStore.profileData.avatarUrl,
-      username: $userStore.profileData.username,
-    },
-  };
+  $generalStore.selectedVideo = props.video;
   router.push(`/video/${props.video.videoId}`);
 };
 
 const isHover = (bool: boolean) => {
-  if (!video.value) return;
-  bool ? video.value.play() : video.value.pause();
+  if (!videoRef.value) return;
+  bool ? videoRef.value.play() : videoRef.value.pause();
 };
 </script>

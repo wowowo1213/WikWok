@@ -1,14 +1,5 @@
 import { defineStore } from 'pinia';
-import type { Video, UserData } from './user';
-
-export interface SelectedVideo extends Video {
-  user: { userId: string; username: string; avatarUrl: string };
-}
-
-export interface SuggestedVideo extends Video {
-  user: { userId: string; username: string; avatarUrl: string };
-  isFollowing: null | boolean;
-}
+import type { Video, UserData, Comment } from './user';
 
 export const useGeneralStore = defineStore(
   'general',
@@ -20,10 +11,11 @@ export const useGeneralStore = defineStore(
     const isEditProfileOpen = ref(false);
     const activeItem = ref('forYou');
     const backUrl = ref('/');
-    const selectedVideo = ref<null | SelectedVideo>(null);
-    const suggestedVideos = ref<null | Array<SuggestedVideo>>(null);
+    const selectedVideo = ref<null | Video>(null);
+    const suggestedVideos = ref<null | Array<Video>>(null);
     const suggestedUsers = ref<null | Array<UserData>>(null);
     const followingUsers = ref<null | Array<UserData>>(null);
+    const videoIds = ref([]);
 
     async function getCsrfToken() {
       let res = await $axios.get('/auth/csrf-token');
@@ -79,6 +71,47 @@ export const useGeneralStore = defineStore(
       }
     }
 
+    async function getVideosById(videoId: string) {
+      const res = await $axios.get('/user/get-video-detail', {
+        params: { videoId },
+      });
+      selectedVideo.value = res.data.data;
+      return selectedVideo.value;
+    }
+
+    async function likeVideo(videoId: string) {
+      const res = await $axios.post(`/video/${videoId}/like`);
+      if (selectedVideo.value && selectedVideo.value.videoId === videoId) {
+        selectedVideo.value = res.data.data;
+      }
+      return res.data.data;
+    }
+
+    async function unlikeVideo(videoId: string) {
+      const res = await $axios.post(`/video/${videoId}/unlike`);
+      if (selectedVideo.value && selectedVideo.value.videoId === videoId) {
+        selectedVideo.value = res.data.data;
+      }
+      return res.data.data;
+    }
+
+    async function addComment(videoId: string, text: string) {
+      const res = await $axios.post(`/video/${videoId}/comment`, { text });
+      if (selectedVideo.value && selectedVideo.value.videoId === videoId) {
+        selectedVideo.value.comments.push(res.data.data);
+      }
+      return res.data.data;
+    }
+
+    async function deleteComment(videoId: string, commentId: string) {
+      await $axios.post(`/video/${videoId}/comment/${commentId}/delete`);
+      if (selectedVideo.value && selectedVideo.value.videoId === videoId) {
+        selectedVideo.value.comments = selectedVideo.value.comments.filter(
+          (c: Comment) => c.id !== commentId
+        );
+      }
+    }
+
     return {
       isLoginOpen,
       isEditProfileOpen,
@@ -88,6 +121,7 @@ export const useGeneralStore = defineStore(
       suggestedVideos,
       suggestedUsers,
       followingUsers,
+      videoIds,
       getCsrfToken,
       setActiveItem,
       bodySwitch,
@@ -96,6 +130,11 @@ export const useGeneralStore = defineStore(
       getFollowingUsers,
       getSuggestedVideos,
       updateSideMenuItemFollow,
+      getVideosById,
+      likeVideo,
+      unlikeVideo,
+      addComment,
+      deleteComment,
     };
   },
   {

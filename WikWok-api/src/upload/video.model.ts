@@ -18,11 +18,14 @@ export class Video extends Document {
   @Prop({ default: '' })
   filename: string;
 
-  @Prop({ default: 0 })
-  likes: number;
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
+  likes: Types.ObjectId[];
 
-  @Prop({ default: 0 })
-  views: number;
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
+  views: Types.ObjectId[];
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Comment' }], default: [] })
+  comments: Types.ObjectId[];
 }
 
 export const VideoSchema = SchemaFactory.createForClass(Video);

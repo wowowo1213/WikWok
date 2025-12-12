@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, FilterQuery, Types, PipelineStage, isValidObjectId } from 'mongoose';
 import { User } from './user.schema';
 import { Video } from 'src/upload/video.model';
+import { Comment } from 'src/upload/comment.model';
 import { UpdateUserDto } from './userinfo.dto';
 import { RegisterUserDto, LoginUserDto } from 'src/auth/auth.dto';
 import * as bcrypt from 'bcrypt';
@@ -14,7 +15,8 @@ import sharp from 'sharp';
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(Video.name) private videoModel: Model<Video>
+    @InjectModel(Video.name) private videoModel: Model<Video>,
+    @InjectModel(Comment.name) private commentModel: Model<Comment>
   ) {}
 
   async registerUser(registerUserDto: RegisterUserDto) {
@@ -82,20 +84,32 @@ export class UserService {
       .populate({
         path: 'videos',
         model: 'Video',
-        select: '_id videoUrl caption filename likes views updatedAt',
+        select: '_id videoUrl caption filename likes views updatedAt userId',
         options: { sort: { updatedAt: -1 } },
+        populate: {
+          path: 'userId',
+          model: 'User',
+          select: '_id username avatarUrl',
+        },
       });
 
     if (!user) throw new BadRequestException('用户不存在');
 
     const videos = user.videos.map(video => ({
-      videoId: video._id,
+      videoId: video._id.toString(),
       videoUrl: video.videoUrl,
       caption: video.caption,
       filename: video.filename,
       likes: video.likes,
       views: video.views,
-      updatedAt: video.updatedAt,
+      updatedAt: video.updatedAt.toISOString(),
+      isFollowing: null,
+      user: {
+        userId: video.userId._id.toString(),
+        username: video.userId.username,
+        avatarUrl: video.userId.avatarUrl,
+      },
+      comments: [],
     }));
 
     return {
@@ -232,9 +246,7 @@ export class UserService {
     let followingUserIds: Types.ObjectId[] | User[] = [];
     if (userId) {
       const user = await this.userModel.findById(userId).select('followingUsers').lean();
-      if (user) {
-        followingUserIds = user.followingUsers;
-      }
+      if (user) followingUserIds = user.followingUsers;
     }
 
     const baseQuery = {};
@@ -259,23 +271,130 @@ export class UserService {
           videoId: '$_id',
           _id: 0,
           videoUrl: 1,
-          filename: 1,
           caption: 1,
-          updatedAt: 1,
+          filename: 1,
           likes: 1,
           views: 1,
+          updatedAt: 1,
+          isFollowing: { $in: ['$userId', followingUserIds] },
           user: {
             userId: '$userInfo._id',
             username: '$userInfo.username',
             avatarUrl: '$userInfo.avatarUrl',
           },
-          isFollowing:
-            followingUserIds?.length > 0 ? { $in: ['$userId', followingUserIds] } : undefined,
+          comments: { $ifNull: ['$comments', []] },
         },
       }
     );
 
     const videos = await this.videoModel.aggregate(pipeline);
-    return videos;
+
+    return videos.map(video => ({
+      videoId: video.videoId.toString(),
+      videoUrl: video.videoUrl,
+      caption: video.caption,
+      filename: video.filename,
+      likes: video.likes,
+      views: video.views,
+      updatedAt: video.updatedAt.toISOString(),
+      isFollowing: userId ? video.isFollowing : false,
+      user: {
+        userId: video.user.userId.toString(),
+        username: video.user.username,
+        avatarUrl: video.user.avatarUrl,
+      },
+      comments: [],
+    }));
+  }
+
+  async likeVideo(userId: string, videoId: string) {
+    const video = await this.videoModel.findById(videoId);
+    if (!video) throw new BadRequestException('视频不存在');
+
+    const hasLiked = video.likes.some(id => id.toString() === userId);
+    if (hasLiked) throw new BadRequestException('已经点赞过');
+
+    video.likes.push(new Types.ObjectId(userId));
+    await video.save();
+
+    return this.getVideoById(videoId);
+  }
+
+  async unlikeVideo(userId: string, videoId: string) {
+    const video = await this.videoModel.findById(videoId);
+    if (!video) throw new BadRequestException('视频不存在');
+
+    video.likes = video.likes.filter(id => id.toString() !== userId);
+    await video.save();
+
+    return this.getVideoById(videoId);
+  }
+
+  async addComment(userId: string, videoId: string, text: string) {
+    const [video, user] = await Promise.all([
+      this.videoModel.findById(videoId),
+      this.userModel.findById(userId).select('username avatarUrl'),
+    ]);
+
+    if (!video) throw new BadRequestException('视频不存在');
+    if (!user) throw new BadRequestException('用户不存在');
+
+    const newComment = new this.commentModel({
+      user: userId,
+      video: videoId,
+      text,
+    });
+
+    await newComment.save();
+
+    video.comments.push(newComment._id);
+    await video.save();
+
+    return {
+      id: newComment._id.toString(),
+      text: newComment.text,
+      user: {
+        userId: user._id.toString(),
+        username: user.username,
+        avatarUrl: user.avatarUrl,
+      },
+    };
+  }
+
+  async deleteComment(userId: string, videoId: string, commentId: string) {
+    const [comment, video] = await Promise.all([
+      this.commentModel.findById(commentId),
+      this.videoModel.findById(videoId),
+    ]);
+
+    if (!comment) throw new BadRequestException('评论不存在');
+    if (!video) throw new BadRequestException('视频不存在');
+
+    if (comment.video.toString() !== videoId) throw new BadRequestException('评论不属于该视频');
+
+    if (comment.user.toString() !== userId && video.userId.toString() !== userId)
+      throw new BadRequestException('没有权限删除评论');
+
+    await comment.deleteOne();
+
+    video.comments = video.comments.filter(id => id.toString() !== commentId);
+    await video.save();
+
+    return { success: true };
+  }
+
+  private async getVideoById(videoId: string) {
+    return this.videoModel
+      .findById(videoId)
+      .populate('userId', 'username avatarUrl')
+      .populate({
+        path: 'comments',
+        populate: {
+          path: 'user',
+          select: 'username avatarUrl',
+        },
+      })
+      .select('-__v')
+      .lean();
   }
 }

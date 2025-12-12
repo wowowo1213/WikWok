@@ -1,5 +1,5 @@
 <template>
-  <div class="w-[100%] relative flex justify-center">
+  <div class="w-full relative flex justify-center">
     <div
       class="absolute top-24 z-100 mx-auto bg-red-600 opacity-70 text-white px-14 py-3 rounded-full font-bold"
       :class="errorType ? 'visible' : 'invisible'"

@@ -79,6 +79,8 @@
 
 ### 后端启动
 
+后端文件的使用需要到官网下载 MongoDB
+
 ```bash
 # 进入后端目录
 cd WikWok-api
@@ -86,12 +88,12 @@ cd WikWok-api
 # 安装依赖
 npm install
 
-# 配置env文件中的环境变量
+# 配置.env文件
 # 在nodejs中使用 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))" 随机生成一个 JWT_SECRET 和 SESSION_SECRET，运行两次
 JWT_SECRET=
 SESSION_SECRET=
 
-# 启动开发服务器 (默认端口 5000)
+# 启动开发服务器 (默认端口 5000)(最好放在5000的端口号，不然前端视频的src需要改变端口号)
 npm run start:dev
 ```
 

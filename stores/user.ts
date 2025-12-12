@@ -1,14 +1,27 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
+interface Comment {
+  user: {
+    userId: string;
+    username: string;
+    avatarUrl: string;
+  };
+  id: string;
+  text: string;
+}
+
 export interface Video {
   videoId: string;
   videoUrl: string;
   filename: string;
   caption: string;
-  likes: number;
-  views: number;
+  likes: string[];
+  views: string[];
   updatedAt: string;
+  isFollowing: null | boolean;
+  user: { userId: string; username: string; avatarUrl: string };
+  comments: Comment[];
 }
 
 export interface UserData {
@@ -47,10 +60,10 @@ export const useUserStore = defineStore(
     });
 
     const totalLikes = (userDataRef: Ref<UserData>) =>
-      computed(() => userDataRef.value.videos.reduce((sum, video) => sum + video.likes, 0));
+      computed(() => userDataRef.value.videos.reduce((sum, video) => sum + video.likes.length, 0));
 
     const totalViews = (userDataRef: Ref<UserData>) =>
-      computed(() => userDataRef.value.videos.reduce((sum, video) => sum + video.views, 0));
+      computed(() => userDataRef.value.videos.reduce((sum, video) => sum + video.views.length, 0));
 
     const resetUserData = () => {
       userData.value = {
