@@ -11,7 +11,7 @@
         <Icon name="material-symbols:close" color="#FFFFFF" size="27" />
       </NuxtLink>
 
-      <div v-if="true">
+      <div>
         <button
           :disabled="!isLoaded"
           @click="loopThroughVideosUp()"
@@ -47,6 +47,7 @@
           ref="videoRef"
           loop
           muted
+          controls
           class="h-screen mx-auto"
           :src="`http://localhost:5000${$generalStore.selectedVideo.videoUrl}`"
         />
@@ -92,7 +93,7 @@
 
       <div class="px-8 mt-4 text-sm font-bold">
         <Icon name="mdi:music" size="17" />
-        original sound - User name
+        original sound - {{ $generalStore.selectedVideo.filename }}
       </div>
 
       <div class="flex items-center px-8 mt-8">
@@ -100,7 +101,9 @@
           <button class="flex rounded-full bg-gray-200 p-2 cursor-pointer">
             <Icon name="mdi:heart" size="25" />
           </button>
-          <span class="text-xs pl-2 pr-4 text-gray-800 font-semibold"> 123 </span>
+          <span class="text-xs pl-2 pr-4 text-gray-800 font-semibold">
+            {{ $generalStore.selectedVideo.likes }}
+          </span>
         </div>
 
         <div class="pb-4 text-center flex items-center">

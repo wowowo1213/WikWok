@@ -2,7 +2,7 @@ import { axiosInstance } from '~/plugins/axios';
 import type { AxiosProgressEvent } from 'axios';
 import Worker from '~/public/workers/uploadFileHashWorker.js?worker';
 
-async function getFileChunks(file: File) {
+function getFileChunks(file: File) {
   const chunkSize = 10 * 1024 * 1024;
   const chunks = [];
   let start = 0;
