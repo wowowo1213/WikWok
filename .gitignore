@@ -23,4 +23,6 @@ logs
 .env.*
 !.env.example
 
-WikWok-api/uploads/*
+WikWok-api/uploads/avatars/*
+WikWok-api/uploads/temp/*
+WikWok-api/uploads/videos/*
