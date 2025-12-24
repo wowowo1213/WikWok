@@ -75,24 +75,18 @@ export const useGeneralStore = defineStore(
       const res = await $axios.get('/user/get-video-detail', {
         params: { videoId },
       });
+
       selectedVideo.value = res.data.data;
-      return selectedVideo.value;
     }
 
     async function likeVideo(videoId: string) {
-      const res = await $axios.post(`/video/${videoId}/like`);
-      if (selectedVideo.value && selectedVideo.value.videoId === videoId) {
-        selectedVideo.value = res.data.data;
-      }
-      return res.data.data;
+      const res = await $axios.post(`/user/${videoId}/like`);
+      selectedVideo.value = res.data.data;
     }
 
     async function unlikeVideo(videoId: string) {
-      const res = await $axios.post(`/video/${videoId}/unlike`);
-      if (selectedVideo.value && selectedVideo.value.videoId === videoId) {
-        selectedVideo.value = res.data.data;
-      }
-      return res.data.data;
+      const res = await $axios.post(`/user/${videoId}/unlike`);
+      selectedVideo.value = res.data.data;
     }
 
     async function addComment(videoId: string, text: string) {

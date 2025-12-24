@@ -69,8 +69,6 @@ export class UploadService {
       caption,
       filename,
       fileHash,
-      views: views || 0,
-      likes: likes || 0,
     });
 
     const savedVideo = await newVideo.save();

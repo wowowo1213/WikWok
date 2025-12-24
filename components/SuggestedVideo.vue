@@ -58,11 +58,18 @@
           <div class="absolute bottom-0 -ml-12 opacity-70 md:ml-2 md:opacity-100">
             <div class="pb-2 text-center">
               <button
+                @click="isLiked ? unlikeVideo() : likeVideo()"
                 class="rounded-full bg-gray-600 hover:bg-gray-700 cursor-pointer p-2 flex group"
               >
-                <Icon name="mdi:heart" class="text-white group-hover:text-red-600" size="25" />
+                <Icon
+                  name="mdi:heart"
+                  size="25"
+                  :class="['group-hover:text-red-600', isLiked ? 'text-red-600' : 'text-white']"
+                />
               </button>
-              <span class="text-xs text-gray-800 font-semibold">{{ props.video.likes }}</span>
+              <span class="text-xs text-gray-800 font-semibold">
+                {{ props.video.likes.length }}
+              </span>
             </div>
 
             <div class="pb-2 text-center">
@@ -107,6 +114,8 @@ const props = defineProps(['video']);
 const videoRef = ref<HTMLVideoElement | null>(null);
 let observer: IntersectionObserver | null = null;
 let suggestedVideoElement: HTMLElement | null = null;
+// ??????
+const isLiked = computed(() => props.video.likes.includes($userStore.userData.userId));
 
 onMounted(() => {
   suggestedVideoElement = document.getElementById(`SuggestedVideo-${props.video.videoId}`);
@@ -162,5 +171,23 @@ const displayVideo = (video: Video) => {
   $generalStore.setBackUrl('/');
   $generalStore.selectedVideo = video;
   router.push(`/video/${video.videoId}`);
+};
+
+const likeVideo = async () => {
+  try {
+    if (!$generalStore.selectedVideo || !$userStore.userData?.userId) return;
+    await $generalStore.likeVideo($generalStore.selectedVideo.videoId);
+  } catch (error) {
+    console.error('点赞失败:', error);
+  }
+};
+
+const unlikeVideo = async () => {
+  try {
+    if (!$generalStore.selectedVideo || !$userStore.userData?.userId) return;
+    await $generalStore.unlikeVideo($generalStore.selectedVideo.videoId);
+  } catch (error) {
+    console.error('取消点赞失败:', error);
+  }
 };
 </script>

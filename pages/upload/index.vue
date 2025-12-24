@@ -200,9 +200,8 @@ const uploadVideo = async () => {
 
   try {
     let res = await uploadVideoUtil(fileData.value, caption.value);
-    if (res.statusCode === 200) router.push('/profile/' + $userStore.userData.userId);
+    if (res.status === 200) router.push('/profile/' + $userStore.userData.userId);
   } catch (error: string | Array<string>) {
-    // 这边error为Array<string>怎么设置errors好呢
     errors.value = error;
   } finally {
     isUploading.value = false;

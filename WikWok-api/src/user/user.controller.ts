@@ -5,6 +5,8 @@ import {
   Query,
   Body,
   BadRequestException,
+  Req,
+  Param,
   UseGuards,
   UseInterceptors,
   UploadedFile,
@@ -105,21 +107,31 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async likeVideo(@Req() req, @Param('id') videoId: string) {
     const userId = req.user.userId;
-    return this.videoService.likeVideo(userId, videoId);
+    await this.userService.likeVideo(userId, videoId);
+    const res = await this.getVideoDetail(videoId);
+    return {
+      result: res.result,
+      message: '点赞成功',
+    };
   }
 
   @Post(':id/unlike')
   @UseGuards(JwtAuthGuard)
   async unlikeVideo(@Req() req, @Param('id') videoId: string) {
     const userId = req.user.userId;
-    return this.videoService.unlikeVideo(userId, videoId);
+    await this.userService.unlikeVideo(userId, videoId);
+    const res = await this.getVideoDetail(videoId);
+    return {
+      result: res.result,
+      message: '取消点赞成功',
+    };
   }
 
   @Post(':id/comment')
   @UseGuards(JwtAuthGuard)
   async addComment(@Req() req, @Param('id') videoId: string, @Body() body: { text: string }) {
     const userId = req.user.userId;
-    return this.videoService.addComment(userId, videoId, body.text);
+    return this.userService.addComment(userId, videoId, body.text);
   }
 
   @Post(':videoId/comment/:commentId/delete')
@@ -130,35 +142,36 @@ export class UserController {
     @Param('commentId') commentId: string
   ) {
     const userId = req.user.userId;
-    return this.videoService.deleteComment(userId, videoId, commentId);
+    return this.userService.deleteComment(userId, videoId, commentId);
   }
 
   @Get('get-video-detail')
   async getVideoDetail(@Query('videoId') videoId: string) {
     try {
-      const video = await this.videoService.getVideoById(videoId);
+      const video = await this.userService.getVideoById(videoId);
       if (!video) throw new BadRequestException('视频不存在');
 
-      // 转换格式以匹配前端期望
+      const user = {
+        userId: video.userId._id,
+        username: video.userId.username as unknown,
+        avatarUrl: video.userId.avatarUrl,
+      };
+
       const formattedVideo = {
-        videoId: video._id.toString(),
+        videoId: video._id,
         videoUrl: video.videoUrl,
         filename: video.filename,
         caption: video.caption,
-        likes: video.likes.length,
+        likes: video.likes,
         views: video.views,
-        updatedAt: video.updatedAt.toISOString(),
+        updatedAt: video.updatedAt,
         isFollowing: null, // 如果需要可以计算
-        user: {
-          userId: video.userId._id.toString(),
-          username: video.userId.username,
-          avatarUrl: video.userId.avatarUrl,
-        },
+        user,
         comments: video.comments.map(comment => ({
-          id: comment._id.toString(),
+          id: comment._id,
           text: comment.text,
           user: {
-            userId: comment.user._id.toString(),
+            userId: comment.user._id,
             username: comment.user.username,
             avatarUrl: comment.user.avatarUrl,
           },

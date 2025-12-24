@@ -316,8 +316,6 @@ export class UserService {
 
     video.likes.push(new Types.ObjectId(userId));
     await video.save();
-
-    return this.getVideoById(videoId);
   }
 
   async unlikeVideo(userId: string, videoId: string) {
@@ -326,8 +324,6 @@ export class UserService {
 
     video.likes = video.likes.filter(id => id.toString() !== userId);
     await video.save();
-
-    return this.getVideoById(videoId);
   }
 
   async addComment(userId: string, videoId: string, text: string) {
@@ -383,8 +379,8 @@ export class UserService {
     return { success: true };
   }
 
-  private async getVideoById(videoId: string) {
-    return this.videoModel
+  async getVideoById(videoId: string) {
+    const video = await this.videoModel
       .findById(videoId)
       .populate('userId', 'username avatarUrl')
       .populate({
@@ -396,5 +392,48 @@ export class UserService {
       })
       .select('-__v')
       .lean();
+
+    const populatedVideo = video as unknown as {
+      _id: string;
+      videoUrl: string;
+      filename: string;
+      caption: string;
+      likes: string[];
+      views: string[];
+      createdAt: Date;
+      updatedAt: Date;
+      userId: {
+        _id: string;
+        username: string;
+        avatarUrl: string;
+      };
+      comments: Array<{
+        _id: string;
+        text: string;
+        user: {
+          _id: string;
+          username: string;
+          avatarUrl: string;
+        };
+      }>;
+    };
+
+    return {
+      ...populatedVideo,
+      userId: populatedVideo.userId || {
+        _id: '',
+        username: '匿名用户',
+        avatarUrl: '/default-avatar.jpg',
+      },
+      comments:
+        populatedVideo.comments?.map(comment => ({
+          ...comment,
+          user: comment.user || {
+            _id: '',
+            username: '匿名用户',
+            avatarUrl: '/default-avatar.jpg',
+          },
+        })) || [],
+    };
   }
 }

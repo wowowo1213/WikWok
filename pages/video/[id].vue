@@ -100,10 +100,15 @@
             @click="isLiked ? unlikeVideo() : likeVideo()"
             class="flex rounded-full bg-gray-200 p-2 cursor-pointer"
           >
-            <Icon name="mdi:heart" size="25" :color="isLiked ? '#F02C56' : ''" />
+            <Icon
+              name="mdi:heart"
+              size="25"
+              class="group-hover:text-red-600"
+              :class="isLiked ? 'text-red-600' : ''"
+            />
           </button>
           <span class="text-xs pl-2 pr-4 text-gray-800 font-semibold">
-            {{ $generalStore.selectedVideo.likes }}
+            {{ $generalStore.selectedVideo.likes.length }}
           </span>
         </div>
 
@@ -111,7 +116,9 @@
           <div class="flex rounded-full bg-gray-200 p-2 cursor-pointer">
             <Icon name="bx:bxs-message-rounded-dots" size="25" />
           </div>
-          <span class="text-xs pl-2 text-gray-800 font-semibold">43</span>
+          <span class="text-xs pl-2 text-gray-800 font-semibold">
+            {{ $generalStore.selectedVideo.comments.length }}
+          </span>
         </div>
       </div>
 
@@ -195,7 +202,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Video } from '~/stores/user';
 import { AxiosError } from 'axios';
 
 const { $userStore, $generalStore } = useNuxtApp();
@@ -211,7 +217,7 @@ const videoId = computed(() => route.params.id as string);
 
 const isLiked = computed(() => {
   if (!$generalStore.selectedVideo || !$userStore.userData?.userId) return false;
-  // 这边记得后端返回前端的likes是一个用户id数组
+  if ($generalStore.selectedVideo.likes.length === 0) return false;
   return $generalStore.selectedVideo.likes.some(userId => userId === $userStore.userData.userId);
 });
 
@@ -284,7 +290,7 @@ const deleteVideo = async () => {
   let res = confirm('确定删除该视频么?');
   try {
     if (!res || !$generalStore.selectedVideo) return;
-    await $userStore.deletePost($generalStore.selectedVideo.videoId);
+    // await $userStore.deleteVideo($generalStore.selectedVideo.videoId);
     await $userStore.getUserInfo($userStore.userData.userId);
     await $userStore.getProfileInfo($userStore.userData.userId);
     router.push(`/profile/${$userStore.userData.userId}`);
@@ -297,7 +303,6 @@ const likeVideo = async () => {
   try {
     if (!$generalStore.selectedVideo || !$userStore.userData?.userId) return;
     await $generalStore.likeVideo($generalStore.selectedVideo.videoId);
-    $generalStore.selectedVideo.likes.push($userStore.userData.userId);
   } catch (error) {
     console.error('点赞失败:', error);
   }
@@ -307,9 +312,6 @@ const unlikeVideo = async () => {
   try {
     if (!$generalStore.selectedVideo || !$userStore.userData?.userId) return;
     await $generalStore.unlikeVideo($generalStore.selectedVideo.videoId);
-    $generalStore.selectedVideo.likes = $generalStore.selectedVideo.likes.filter(
-      userId => userId !== $userStore.userData.userId
-    );
   } catch (error) {
     console.error('取消点赞失败:', error);
   }

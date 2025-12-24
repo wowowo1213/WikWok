@@ -36,16 +36,14 @@ export class UploadController {
       fileHash: string;
       filename: string;
       caption: string;
-      views?: number;
-      likes?: number;
     }
   ) {
-    const { userId, fileHash, filename, caption, views, likes } = body;
+    const { userId, fileHash, filename, caption } = body;
 
     if (!userId || !fileHash || !filename || !caption)
       throw new BadRequestException('submit-meta接口缺少必要参数');
 
-    return this.uploadService.submitMeta(userId, fileHash, filename, caption, views, likes);
+    return this.uploadService.submitMeta(userId, fileHash, filename, caption);
   }
 
   @Post('upload-chunk')

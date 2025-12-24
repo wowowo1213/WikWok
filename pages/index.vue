@@ -17,6 +17,7 @@ onMounted(async () => {
   try {
     $generalStore.setActiveItem('forYou');
     await $generalStore.getSuggestedVideos();
+    await $generalStore.getSuggestedUsers();
   } catch (error) {
     console.log(error);
   }
