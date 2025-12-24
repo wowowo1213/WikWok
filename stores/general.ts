@@ -59,7 +59,8 @@ export const useGeneralStore = defineStore(
       const res = await $axios.get('/user-public/get-suggested-videos', {
         params: { userId: userStore.userData.userId },
       });
-      suggestedVideos.value = res.data.data.videos;
+      console.log(res);
+      suggestedVideos.value = res.data.data;
     }
 
     function updateSideMenuItemFollow(users: Array<UserData>, userData: UserData) {
@@ -79,6 +80,10 @@ export const useGeneralStore = defineStore(
       selectedVideo.value = res.data.data;
     }
 
+    async function deleteVideo(videoId: string) {
+      await $axios.post(`user/${videoId}/video/delete`);
+    }
+
     async function likeVideo(videoId: string) {
       const res = await $axios.post(`/user/${videoId}/like`);
       selectedVideo.value = res.data.data;
@@ -90,16 +95,13 @@ export const useGeneralStore = defineStore(
     }
 
     async function addComment(videoId: string, text: string) {
-      const res = await $axios.post(`/video/${videoId}/comment`, { text });
-      if (selectedVideo.value && selectedVideo.value.videoId === videoId) {
-        selectedVideo.value.comments.push(res.data.data);
-      }
-      return res.data.data;
+      const res = await $axios.post(`/user/${videoId}/comment`, { text });
+      selectedVideo.value?.comments.unshift(res.data.data);
     }
 
     async function deleteComment(videoId: string, commentId: string) {
-      await $axios.post(`/video/${videoId}/comment/${commentId}/delete`);
-      if (selectedVideo.value && selectedVideo.value.videoId === videoId) {
+      await $axios.post(`/user/${videoId}/comment/${commentId}/delete`);
+      if (selectedVideo.value) {
         selectedVideo.value.comments = selectedVideo.value.comments.filter(
           (c: Comment) => c.id !== commentId
         );
@@ -125,6 +127,7 @@ export const useGeneralStore = defineStore(
       getSuggestedVideos,
       updateSideMenuItemFollow,
       getVideosById,
+      deleteVideo,
       likeVideo,
       unlikeVideo,
       addComment,

@@ -68,7 +68,7 @@
                 />
               </button>
               <span class="text-xs text-gray-800 font-semibold">
-                {{ props.video.likes.length }}
+                {{ likes }}
               </span>
             </div>
 
@@ -82,7 +82,7 @@
                   size="25"
                 />
               </button>
-              <span class="text-xs text-gray-800 font-semibold">评论数</span>
+              <span class="text-xs text-gray-800 font-semibold">{{ comments }}</span>
             </div>
 
             <div class="text-center">
@@ -111,13 +111,19 @@ const { $generalStore, $userStore } = useNuxtApp();
 const router = useRouter();
 
 const props = defineProps(['video']);
+const emit = defineEmits(['update-likes']);
 const videoRef = ref<HTMLVideoElement | null>(null);
 let observer: IntersectionObserver | null = null;
 let suggestedVideoElement: HTMLElement | null = null;
-// ??????
-const isLiked = computed(() => props.video.likes.includes($userStore.userData.userId));
+const isLiked = ref(false);
+const likes = ref(0);
+const comments = ref(0);
 
 onMounted(() => {
+  if (props.video.likes.includes($userStore.userData.userId)) isLiked.value = true;
+  likes.value = props.video.likes.length;
+  comments.value = props.video.comments.length;
+
   suggestedVideoElement = document.getElementById(`SuggestedVideo-${props.video.videoId}`);
 
   if (!suggestedVideoElement || !videoRef.value) {
@@ -175,8 +181,13 @@ const displayVideo = (video: Video) => {
 
 const likeVideo = async () => {
   try {
-    if (!$generalStore.selectedVideo || !$userStore.userData?.userId) return;
-    await $generalStore.likeVideo($generalStore.selectedVideo.videoId);
+    if (!$userStore?.userData?.userId) {
+      $generalStore.isLoginOpen = true;
+      return;
+    }
+    await $generalStore.likeVideo(props.video.videoId);
+    likes.value++;
+    isLiked.value = true;
   } catch (error) {
     console.error('点赞失败:', error);
   }
@@ -184,8 +195,13 @@ const likeVideo = async () => {
 
 const unlikeVideo = async () => {
   try {
-    if (!$generalStore.selectedVideo || !$userStore.userData?.userId) return;
-    await $generalStore.unlikeVideo($generalStore.selectedVideo.videoId);
+    if (!$userStore?.userData?.userId) {
+      $generalStore.isLoginOpen = true;
+      return;
+    }
+    await $generalStore.unlikeVideo(props.video.videoId);
+    likes.value--;
+    isLiked.value = false;
   } catch (error) {
     console.error('取消点赞失败:', error);
   }

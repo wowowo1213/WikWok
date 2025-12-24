@@ -128,7 +128,7 @@
       >
         <div class="pt-2" />
         <div
-          v-if="$generalStore.selectedVideo.comments.length <= 0"
+          v-if="$generalStore.selectedVideo.comments.length === 0"
           class="text-center mt-6 text-xl text-gray-500"
         >
           没有评论捏...
@@ -139,16 +139,18 @@
           :key="comment.id"
           class="flex items-center justify-between px-8 mt-4"
         >
-          <div class="flex items-center relative w-full">
+          <div
+            class="flex items-center relative w-full border border-gray-500 rounded-lg p-3 hover:border-gray-300 duration-200"
+          >
             <NuxtLink :to="`/profile/${comment.user.userId}`">
               <img
-                class="absolute top-0 rounded-full lg:mx-0 mx-auto"
-                width="40"
+                class="rounded-full"
+                width="60"
                 :src="`http://localhost:5000${comment.user.avatarUrl}`"
               />
             </NuxtLink>
-            <div class="ml-14 pt-0.5 w-full">
-              <div class="text-[18px] font-semibold flex items-center justify-between">
+            <div class="ml-6 pt-0.5 w-full">
+              <div class="text-[15px] font-semibold flex items-center justify-between">
                 {{ comment.user.username }}
                 <Icon
                   v-if="$userStore.userData.userId === comment.user.userId"
@@ -213,7 +215,7 @@ let isLoaded = ref(false);
 let commentText = ref('');
 let inputFocused = ref(false);
 
-const videoId = computed(() => route.params.id as string);
+const videoId = ref('');
 
 const isLiked = computed(() => {
   if (!$generalStore.selectedVideo || !$userStore.userData?.userId) return false;
@@ -223,6 +225,7 @@ const isLiked = computed(() => {
 
 onMounted(async () => {
   try {
+    videoId.value = route.params.id as string;
     await $generalStore.getVideosById(videoId.value);
   } catch (error) {
     console.log('视频播放界面出错:' + error);
@@ -287,10 +290,10 @@ const loopThroughVideosDown = () => {
 };
 
 const deleteVideo = async () => {
-  let res = confirm('确定删除该视频么?');
+  const res = confirm('确定删除该视频么?');
+  if (!res || !$generalStore.selectedVideo) return;
   try {
-    if (!res || !$generalStore.selectedVideo) return;
-    // await $userStore.deleteVideo($generalStore.selectedVideo.videoId);
+    await $generalStore.deleteVideo($generalStore.selectedVideo.videoId);
     await $userStore.getUserInfo($userStore.userData.userId);
     await $userStore.getProfileInfo($userStore.userData.userId);
     router.push(`/profile/${$userStore.userData.userId}`);
@@ -321,11 +324,7 @@ const addComment = async () => {
   if (!commentText.value.trim() || !$generalStore.selectedVideo) return;
 
   try {
-    const newComment = await $generalStore.addComment(
-      $generalStore.selectedVideo.videoId,
-      commentText.value
-    );
-    $generalStore.selectedVideo.comments.unshift(newComment);
+    await $generalStore.addComment($generalStore.selectedVideo.videoId, commentText.value);
     commentText.value = '';
   } catch (error) {
     console.error('添加评论失败:', error);
@@ -333,13 +332,12 @@ const addComment = async () => {
 };
 
 const deleteComment = async (videoId: string, commentId: string) => {
-  if (!$generalStore.selectedVideo) return;
+  const res = confirm('确定删除该视频么?');
+
+  if (!res || !$generalStore.selectedVideo) return;
 
   try {
     await $generalStore.deleteComment(videoId, commentId);
-    $generalStore.selectedVideo.comments = $generalStore.selectedVideo.comments.filter(
-      (comment: { id: string }) => comment.id !== commentId
-    );
   } catch (error) {
     console.error('删除评论失败:', error);
   }

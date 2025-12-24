@@ -104,7 +104,6 @@ export class UserController {
   }
 
   @Post(':id/like')
-  @UseGuards(JwtAuthGuard)
   async likeVideo(@Req() req, @Param('id') videoId: string) {
     const userId = req.user.userId;
     await this.userService.likeVideo(userId, videoId);
@@ -116,7 +115,6 @@ export class UserController {
   }
 
   @Post(':id/unlike')
-  @UseGuards(JwtAuthGuard)
   async unlikeVideo(@Req() req, @Param('id') videoId: string) {
     const userId = req.user.userId;
     await this.userService.unlikeVideo(userId, videoId);
@@ -128,21 +126,26 @@ export class UserController {
   }
 
   @Post(':id/comment')
-  @UseGuards(JwtAuthGuard)
   async addComment(@Req() req, @Param('id') videoId: string, @Body() body: { text: string }) {
     const userId = req.user.userId;
-    return this.userService.addComment(userId, videoId, body.text);
+    const res = await this.userService.addComment(userId, videoId, body.text);
+    return {
+      result: res,
+      message: '新增评论成功',
+    };
   }
 
   @Post(':videoId/comment/:commentId/delete')
-  @UseGuards(JwtAuthGuard)
   async deleteComment(
     @Req() req,
     @Param('videoId') videoId: string,
     @Param('commentId') commentId: string
   ) {
     const userId = req.user.userId;
-    return this.userService.deleteComment(userId, videoId, commentId);
+    const res = await this.userService.deleteComment(userId, videoId, commentId);
+    return {
+      message: '删除评论成功',
+    };
   }
 
   @Get('get-video-detail')
@@ -186,6 +189,15 @@ export class UserController {
       throw new BadRequestException(error.message || '获取视频详情失败');
     }
   }
+
+  @Post(':videoId/video/delete')
+  async deleteVideo(@Req() req, @Param('videoId') videoId: string) {
+    const userId = req.user.userId;
+    await this.userService.deleteVideo(userId, videoId);
+    return {
+      message: '删除视频成功',
+    };
+  }
 }
 
 @Controller('user-public')
@@ -210,7 +222,7 @@ export class UserPublicController {
     try {
       const suggestedVideos = await this.userService.getSuggestedVideos(userId);
       return {
-        result: { videos: suggestedVideos },
+        result: suggestedVideos,
         message: '获取推荐视频成功',
       };
     } catch (error) {

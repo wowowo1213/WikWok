@@ -122,11 +122,13 @@ const isLoggedIn = () => {
   $userStore.userData.userId ? router.push('/upload') : ($generalStore.isLoginOpen = true);
 };
 
-const logout = () => {
+const logout = async () => {
   try {
     showMenu.value = false;
     $userStore.resetUserStore();
     router.push('/');
+    await $generalStore.getSuggestedVideos();
+    await $generalStore.getSuggestedUsers();
   } catch (error) {
     console.log(error);
   }

@@ -243,10 +243,10 @@ export class UserService {
   }
 
   async getSuggestedVideos(userId?: string) {
-    let followingUserIds: Types.ObjectId[] | User[] = [];
+    let followingUserIds: Types.ObjectId[] = [];
     if (userId) {
       const user = await this.userModel.findById(userId).select('followingUsers').lean();
-      if (user) followingUserIds = user.followingUsers;
+      if (user) followingUserIds = user.followingUsers.map(id => new Types.ObjectId(id));
     }
 
     const baseQuery = {};
@@ -264,8 +264,61 @@ export class UserService {
     }
 
     pipeline.push(
-      { $lookup: { from: 'users', localField: 'userId', foreignField: '_id', as: 'userInfo' } },
+      {
+        $project: {
+          _id: 1,
+          videoUrl: 1,
+          caption: 1,
+          filename: 1,
+          likes: 1,
+          views: 1,
+          updatedAt: 1,
+          userId: 1,
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'userInfo',
+        },
+      },
       { $unwind: '$userInfo' },
+      {
+        $lookup: {
+          from: 'comments',
+          let: { videoId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$video', '$$videoId'] },
+              },
+            },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'user',
+                foreignField: '_id',
+                as: 'userInfo',
+              },
+            },
+            { $unwind: { path: '$userInfo', preserveNullAndEmptyArrays: true } },
+            {
+              $project: {
+                _id: 1,
+                text: 1,
+                user: {
+                  _id: '$userInfo._id',
+                  username: { $ifNull: ['$userInfo.username', '匿名用户'] },
+                  avatarUrl: { $ifNull: ['$userInfo.avatarUrl', '/default-avatar.jpg'] },
+                },
+              },
+            },
+          ],
+          as: 'comments',
+        },
+      },
       {
         $project: {
           videoId: '$_id',
@@ -282,7 +335,7 @@ export class UserService {
             username: '$userInfo.username',
             avatarUrl: '$userInfo.avatarUrl',
           },
-          comments: { $ifNull: ['$comments', []] },
+          comments: 1,
         },
       }
     );
@@ -303,7 +356,15 @@ export class UserService {
         username: video.user.username,
         avatarUrl: video.user.avatarUrl,
       },
-      comments: [],
+      comments: video.comments.map(comment => ({
+        id: comment._id.toString(),
+        text: comment.text,
+        user: {
+          userId: comment.user._id?.toString() || '',
+          username: comment.user.username,
+          avatarUrl: comment.user.avatarUrl,
+        },
+      })),
     }));
   }
 
@@ -343,14 +404,14 @@ export class UserService {
 
     await newComment.save();
 
-    video.comments.push(newComment._id);
+    video.comments.unshift(newComment._id);
     await video.save();
 
     return {
-      id: newComment._id.toString(),
+      id: newComment._id,
       text: newComment.text,
       user: {
-        userId: user._id.toString(),
+        userId: user._id,
         username: user.username,
         avatarUrl: user.avatarUrl,
       },
@@ -368,15 +429,12 @@ export class UserService {
 
     if (comment.video.toString() !== videoId) throw new BadRequestException('评论不属于该视频');
 
-    if (comment.user.toString() !== userId && video.userId.toString() !== userId)
-      throw new BadRequestException('没有权限删除评论');
+    if (comment.user.toString() !== userId) throw new BadRequestException('没有权限删除评论');
 
     await comment.deleteOne();
 
     video.comments = video.comments.filter(id => id.toString() !== commentId);
     await video.save();
-
-    return { success: true };
   }
 
   async getVideoById(videoId: string) {
@@ -435,5 +493,18 @@ export class UserService {
           },
         })) || [],
     };
+  }
+
+  async deleteVideo(userId: string, videoId: string) {
+    const video = await this.videoModel.findById(videoId);
+    if (!video) throw new BadRequestException('视频不存在');
+
+    if (video.userId.toString() !== userId) throw new BadRequestException('没有权限删除视频');
+
+    await this.commentModel.deleteMany({ video: videoId });
+
+    await this.userModel.updateOne({ _id: userId }, { $pull: { videos: videoId } });
+
+    await video.deleteOne();
   }
 }
