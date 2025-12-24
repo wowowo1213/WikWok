@@ -59,7 +59,6 @@ export const useGeneralStore = defineStore(
       const res = await $axios.get('/user-public/get-suggested-videos', {
         params: { userId: userStore.userData.userId },
       });
-      console.log(res);
       suggestedVideos.value = res.data.data;
     }
 

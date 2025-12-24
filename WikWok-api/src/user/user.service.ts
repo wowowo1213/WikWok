@@ -251,7 +251,18 @@ export class UserService {
 
     const baseQuery = {};
 
-    const pipeline: PipelineStage[] = [{ $match: baseQuery }];
+    const pipeline: PipelineStage[] = [
+      { $match: baseQuery },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'userInfo',
+        },
+      },
+      { $unwind: '$userInfo' },
+    ];
 
     if (followingUserIds?.length > 0) {
       pipeline.push(
@@ -263,38 +274,45 @@ export class UserService {
       pipeline.push({ $sort: { likes: -1 } }, { $limit: 10 });
     }
 
-    pipeline.push(
-      {
-        $project: {
-          _id: 1,
-          videoUrl: 1,
-          caption: 1,
-          filename: 1,
-          likes: 1,
-          views: 1,
-          updatedAt: 1,
-          userId: 1,
+    pipeline.push({
+      $project: {
+        videoId: '$_id',
+        _id: 0,
+        videoUrl: 1,
+        caption: 1,
+        filename: 1,
+        likes: 1,
+        views: 1,
+        updatedAt: 1,
+        commentIds: {
+          $ifNull: ['$comments', { $ifNull: ['$commentIds', []] }],
         },
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'userId',
-          foreignField: '_id',
-          as: 'userInfo',
+        user: {
+          userId: '$userInfo._id',
+          username: '$userInfo.username',
+          avatarUrl: '$userInfo.avatarUrl',
         },
+        isFollowing: userId ? { $in: ['$userId', followingUserIds] } : false,
       },
-      { $unwind: '$userInfo' },
-      {
-        $lookup: {
-          from: 'comments',
-          let: { videoId: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ['$video', '$$videoId'] },
-              },
-            },
+    });
+
+    const videos = await this.videoModel.aggregate(pipeline);
+
+    await Promise.all(
+      videos.map(async video => {
+        let commentIds = [];
+        try {
+          commentIds = Array.isArray(video.commentIds)
+            ? video.commentIds.map(id => new Types.ObjectId(id))
+            : [];
+        } catch (e) {
+          console.warn('Invalid comment IDs:', video.commentIds);
+          commentIds = [];
+        }
+
+        if (commentIds.length > 0) {
+          const commentsWithUser = await this.commentModel.aggregate([
+            { $match: { _id: { $in: commentIds } } },
             {
               $lookup: {
                 from: 'users',
@@ -310,57 +328,37 @@ export class UserService {
                 text: 1,
                 user: {
                   _id: '$userInfo._id',
-                  username: { $ifNull: ['$userInfo.username', '匿名用户'] },
-                  avatarUrl: { $ifNull: ['$userInfo.avatarUrl', '/default-avatar.jpg'] },
+                  username: '$userInfo.username',
+                  avatarUrl: '$userInfo.avatarUrl',
                 },
               },
             },
-          ],
-          as: 'comments',
-        },
-      },
-      {
-        $project: {
-          videoId: '$_id',
-          _id: 0,
-          videoUrl: 1,
-          caption: 1,
-          filename: 1,
-          likes: 1,
-          views: 1,
-          updatedAt: 1,
-          isFollowing: { $in: ['$userId', followingUserIds] },
-          user: {
-            userId: '$userInfo._id',
-            username: '$userInfo.username',
-            avatarUrl: '$userInfo.avatarUrl',
-          },
-          comments: 1,
-        },
-      }
+          ]);
+
+          video.comments = commentsWithUser;
+        } else {
+          video.comments = [];
+        }
+
+        delete video.commentIds;
+      })
     );
 
-    const videos = await this.videoModel.aggregate(pipeline);
-
     return videos.map(video => ({
-      videoId: video.videoId.toString(),
+      videoId: video.videoId,
       videoUrl: video.videoUrl,
       caption: video.caption,
       filename: video.filename,
       likes: video.likes,
       views: video.views,
       updatedAt: video.updatedAt.toISOString(),
-      isFollowing: userId ? video.isFollowing : false,
-      user: {
-        userId: video.user.userId.toString(),
-        username: video.user.username,
-        avatarUrl: video.user.avatarUrl,
-      },
+      isFollowing: video.isFollowing,
+      user: video.user,
       comments: video.comments.map(comment => ({
-        id: comment._id.toString(),
+        id: comment._id,
         text: comment.text,
         user: {
-          userId: comment.user._id?.toString() || '',
+          userId: comment.user._id,
           username: comment.user.username,
           avatarUrl: comment.user.avatarUrl,
         },

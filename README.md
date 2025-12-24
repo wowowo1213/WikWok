@@ -1,12 +1,12 @@
 # WikWok
 
-一个简易的仿制 TikTok 的视频播放网站，支持视频上传、用户信息编辑、响应式布局等功能。
+一个简易的仿制 TikTok 的视频播放网站，支持视频上传、用户信息注册/登录/编辑信息、关注/取消关注用户、点赞视频/取消点赞视频、新增评论/删除评论、响应式布局等功能。
 
 ## 技术栈
 
 ### 前端
 
-- **框架**: Nuxt.js (SSR) + Vue 3
+- **框架**: Nuxt.js + Vue 3
 - **语言**: TypeScript
 - **样式**: TailwindCSS
 - **状态管理**: Pinia
@@ -35,11 +35,7 @@
   - 桌面端：完整展示侧边栏和推荐视频列表
 - 使用 IntersactionObserver 进行动态观察来决定视频是否播放
 
-### 2. 搜索框交互
-
-- 使用 TailwindCSS 的 `group` 和 `peer` 实现交互效果:鼠标悬停或输入框聚焦时，右侧搜索图标高亮
-
-### 3. 用户信息动态更新
+### 2. 用户信息动态更新
 
 - **注册流程**：
   1. 提交表单后生成用户记录
@@ -48,7 +44,7 @@
   - 支持修改头像（使用 `vue-advanced-cropper` 实现裁剪）
   - 支持修改昵称和个人简介
 
-### 4. 视频上传与管理
+### 3. 视频上传与管理
 
 - **前端**：
   - 使用 `FormData` 上传视频文件
@@ -57,11 +53,7 @@
   - 解析上传数据并存储到本地 (`WikWok-api/uploads/videos/`)
   - 返回可访问的 URL 路径 (`http://localhost:5000/uploads/videos/xxx.mp4`)
 
-### 5. loading 动画
-
-简单制作了一些 loading 的全局动画
-
-### 6. 安全机制
+### 4. 安全机制
 
 - **CSRF 防护**：
   - 后端生成 cookie 并验证请求头 `x-csrf-token`
@@ -168,11 +160,11 @@ WikWok-api/
 │   ├── common/                       # 全局过滤器、响应处理器、日志处理、csrf中间件设置
 │   ├── upload/                       # 上传视频接口
 │   ├── user/
-│   │   ├── user.controller.ts        # 获取/更新用户信息接口
+│   │   ├── user.controller.ts        # 用户信息/视频信息/评论信息接口
 │   │   ├── user.module.ts
 │   │   ├── user.schema.ts
 │   │   ├── user.service.ts
-│   │   └── user.dto.ts               # 更新用户信息数据类型
+│   │   └── user.dto.ts               # 用户信息数据类型
 │   ├── app.module.ts
 │   └── main.ts                       # 配置跨域和开启csrf的cookie验证
 ├── uploads/                          # 视频/用户头像上传文件夹

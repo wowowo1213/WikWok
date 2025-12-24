@@ -156,7 +156,7 @@ export class UserController {
 
       const user = {
         userId: video.userId._id,
-        username: video.userId.username as unknown,
+        username: video.userId.username,
         avatarUrl: video.userId.avatarUrl,
       };
 
