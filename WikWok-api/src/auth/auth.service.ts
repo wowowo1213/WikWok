@@ -10,21 +10,49 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
-  async registerUser(registerUserDto: RegisterUserDto) {
-    const { user } = await this.userService.registerUser(registerUserDto);
-    const payload = { sub: user._id };
+  async generateTokens(userId: string, username: string) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(
+        { sub: userId, username },
+        {
+          secret: process.env.JWT_ACCESS_SECRET,
+          expiresIn: '30s', // 短有效期
+        }
+      ),
+      this.jwtService.signAsync(
+        { sub: userId, username },
+        {
+          secret: process.env.JWT_REFRESH_SECRET,
+          expiresIn: '7d', // 长有效期
+        }
+      ),
+    ]);
+
     return {
-      userId: user._id,
-      jwtToken: this.jwtService.sign(payload, { secret: process.env.JWT_SECRET }),
+      accessToken,
+      refreshToken,
     };
   }
 
-  async login(loginUsersDto: LoginUserDto) {
-    const { user } = await this.userService.loginUser(loginUsersDto);
-    const payload = { sub: user._id };
-    return {
-      userId: user._id,
-      jwtToken: this.jwtService.sign(payload, { secret: process.env.JWT_SECRET }),
-    };
+  async refreshTokens(userId: string, username: string) {
+    return this.generateTokens(userId, username);
+  }
+
+  async registerUser(registerUserDto: RegisterUserDto) {
+    const { user } = await this.userService.loginUser(registerUserDto);
+    const { accessToken, refreshToken } = await this.generateTokens(
+      user._id.toString(),
+      user.username
+    );
+    return { userId: user._id, accessToken, refreshToken };
+  }
+
+  async login(loginUserDto: LoginUserDto) {
+    const { user } = await this.userService.loginUser(loginUserDto);
+    const { accessToken, refreshToken } = await this.generateTokens(
+      user._id.toString(),
+      user.username
+    );
+    return { userId: user._id, accessToken, refreshToken };
   }
 }

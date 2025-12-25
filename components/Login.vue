@@ -42,6 +42,7 @@ const login = async () => {
     await $userStore.getUserInfo($userStore.userData.userId);
     await $generalStore.getSuggestedUsers();
     await $generalStore.getFollowingUsers();
+    await $generalStore.getSuggestedVideos();
     $generalStore.isLoginOpen = false;
   } catch (error) {
     errors.value = error instanceof Array ? error[0] : error;

@@ -93,9 +93,14 @@ export const useUserStore = defineStore(
       };
     };
 
+    const cleanToken = () => {
+      // 清除access token
+    };
+
     const resetUserStore = () => {
       resetUserData();
       resetProfileData();
+      cleanToken();
     };
 
     const saveJwtToken = (token: string) => {
@@ -114,8 +119,9 @@ export const useUserStore = defineStore(
         password,
         confirmPassword,
       });
-      userData.value.userId = res.data.data.userId;
-      saveJwtToken(res.data.data.jwtToken);
+      userData.value.userId = res.data.result.userId;
+      const accessToken = res.data.result.accessToken;
+      if (accessToken) saveJwtToken(accessToken);
     }
 
     async function login(phoneNumber: string, password: string) {
@@ -123,8 +129,9 @@ export const useUserStore = defineStore(
         phoneNumber,
         password,
       });
-      userData.value.userId = res.data.data.userId;
-      saveJwtToken(res.data.data.jwtToken);
+      userData.value.userId = res.data.result.userId;
+      const accessToken = res.data.result.accessToken;
+      if (accessToken) saveJwtToken(accessToken);
     }
 
     async function getUserInfo(userId: string) {

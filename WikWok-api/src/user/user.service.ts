@@ -292,7 +292,13 @@ export class UserService {
           username: '$userInfo.username',
           avatarUrl: '$userInfo.avatarUrl',
         },
-        isFollowing: userId ? { $in: ['$userId', followingUserIds] } : false,
+        isFollowing: {
+          $cond: {
+            if: userId,
+            then: { $in: ['$userId', followingUserIds] },
+            else: false,
+          },
+        },
       },
     });
 

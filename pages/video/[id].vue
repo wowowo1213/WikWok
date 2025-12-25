@@ -236,6 +236,7 @@ onMounted(async () => {
   if (!videoRef.value) return;
   if (videoRef.value.readyState >= 3) {
     isLoaded.value = true;
+    videoRef.value.play();
     return;
   }
   videoRef.value.addEventListener('loadeddata', onLoadedData);
@@ -332,7 +333,7 @@ const addComment = async () => {
 };
 
 const deleteComment = async (videoId: string, commentId: string) => {
-  const res = confirm('确定删除该视频么?');
+  const res = confirm('确定删除该评论么?');
 
   if (!res || !$generalStore.selectedVideo) return;
 
