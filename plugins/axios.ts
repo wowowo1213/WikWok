@@ -4,39 +4,19 @@ import { defineNuxtPlugin } from '#app';
 
 export const axiosInstance = axios.create({
   baseURL: 'http://localhost:5000',
+  timeout: 10000,
   withCredentials: true,
 });
 
 let isRefreshing = false;
 let subscribers: ((token: string) => void)[] = [];
 
-const saveJwtToken = (token: string) => {
-  localStorage.setItem('jwtToken', token);
-};
-
-const getJwtToken = () => {
-  return localStorage.getItem('jwtToken');
-};
-
-async function refreshAccessToken() {
-  try {
-    const res = await axiosInstance.post('/auth/refresh');
-    return res.data.accessToken;
-  } catch (error) {
-    const router = useRouter();
-    const userStore = useUserStore();
-    userStore.resetUserStore();
-    router.push('/');
-    throw error;
-  }
-}
-
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const csrfToken = sessionStorage.getItem('x-csrf-token');
     if (csrfToken) config.headers['x-csrf-token'] = csrfToken;
 
-    const accessToken = getJwtToken();
+    const accessToken = localStorage.getItem('jwtToken');
     if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
 
     return config;
@@ -66,8 +46,9 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const newAccessToken = await refreshAccessToken();
-        saveJwtToken(newAccessToken);
+        const res = await axiosInstance.post('/auth/refresh');
+        const newAccessToken = res.data.accessToken;
+        localStorage.setItem('jwtToken', newAccessToken);
 
         subscribers.forEach(cb => cb(newAccessToken));
         subscribers = [];

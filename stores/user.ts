@@ -93,19 +93,20 @@ export const useUserStore = defineStore(
       };
     };
 
-    const cleanToken = () => {
-      // 清除access token
-    };
+    async function cleanToken() {
+      localStorage.removeItem('jwtToken');
+      await $axios.post('/auth/logout');
+    }
 
-    const resetUserStore = () => {
+    function resetUserStore() {
       resetUserData();
       resetProfileData();
       cleanToken();
-    };
+    }
 
-    const saveJwtToken = (token: string) => {
+    function saveJwtToken(token: string) {
       localStorage.setItem('jwtToken', token);
-    };
+    }
 
     async function register(
       phoneNumber: string,

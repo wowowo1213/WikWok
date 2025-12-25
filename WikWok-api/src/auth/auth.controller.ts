@@ -17,7 +17,7 @@ import { RegisterUserDto, LoginUserDto } from './auth.dto';
 
 interface RequestWithUser extends Request {
   user?: {
-    sub: { userId: string };
+    sub: string;
     username: string;
   };
 }
@@ -41,7 +41,7 @@ export class AuthController {
     if (!req.user) throw new UnauthorizedException('User not found');
 
     const { sub, username } = req.user;
-    const tokens = await this.authService.generateTokens(sub.userId, username);
+    const tokens = await this.authService.generateTokens(sub, username);
 
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
@@ -56,7 +56,7 @@ export class AuthController {
   @Post('logout')
   async logout(@Res() res: Response) {
     res.clearCookie('refreshToken');
-    return res.sendStatus(200);
+    res.sendStatus(200);
   }
 
   @Post('register')

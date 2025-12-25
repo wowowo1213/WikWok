@@ -16,7 +16,7 @@ export class AuthService {
         { sub: userId, username },
         {
           secret: process.env.JWT_ACCESS_SECRET,
-          expiresIn: '30s', // 短有效期
+          expiresIn: '15min', // 短有效期
         }
       ),
       this.jwtService.signAsync(
