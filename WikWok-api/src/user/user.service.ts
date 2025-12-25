@@ -218,30 +218,6 @@ export class UserService {
     }));
   }
 
-  async followUser(currentUserId: string, targetUserId: string) {
-    if (currentUserId === targetUserId) {
-      throw new BadRequestException('不能关注自己');
-    }
-
-    await this.userModel.findByIdAndUpdate(currentUserId, {
-      $addToSet: { followingUsers: targetUserId },
-    });
-
-    await this.userModel.findByIdAndUpdate(targetUserId, {
-      $inc: { followers: 1 },
-    });
-  }
-
-  async unfollowUser(currentUserId: string, targetUserId: string) {
-    await this.userModel.findByIdAndUpdate(currentUserId, {
-      $pull: { followingUsers: targetUserId },
-    });
-
-    await this.userModel.findByIdAndUpdate(targetUserId, {
-      $inc: { followers: -1 },
-    });
-  }
-
   async getSuggestedVideos(userId?: string) {
     let followingUserIds: Types.ObjectId[] = [];
     if (userId) {

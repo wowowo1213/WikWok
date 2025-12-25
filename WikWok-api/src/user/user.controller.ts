@@ -77,32 +77,6 @@ export class UserController {
     }
   }
 
-  @Post('follow-user')
-  async followUser(@Body() followDto: { userId; targetUserId }) {
-    const { userId, targetUserId } = followDto;
-    try {
-      await this.userService.followUser(userId, targetUserId);
-      return {
-        message: '关注成功',
-      };
-    } catch (error) {
-      throw new BadRequestException(error.message || '关注失败');
-    }
-  }
-
-  @Post('unfollow-user')
-  async unfollowUser(@Body() unfollowDto: { userId; targetUserId }) {
-    const { userId, targetUserId } = unfollowDto;
-    try {
-      await this.userService.unfollowUser(userId, targetUserId);
-      return {
-        message: '取消关注成功',
-      };
-    } catch (error) {
-      throw new BadRequestException(error.message || '取消关注失败');
-    }
-  }
-
   @Post(':id/like')
   async likeVideo(@Req() req, @Param('id') videoId: string) {
     const userId = req.user.userId;

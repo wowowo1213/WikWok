@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-const { $userStore, $generalStore } = useNuxtApp();
+const { $generalStore } = useNuxtApp();
 
 const route = useRoute();
 const router = useRouter();

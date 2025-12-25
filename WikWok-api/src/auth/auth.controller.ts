@@ -64,6 +64,7 @@ export class AuthController {
     try {
       const { userId, accessToken, refreshToken } =
         await this.authService.registerUser(registerUserDto);
+      console.log(111);
 
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,

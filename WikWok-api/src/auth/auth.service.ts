@@ -39,7 +39,7 @@ export class AuthService {
   }
 
   async registerUser(registerUserDto: RegisterUserDto) {
-    const { user } = await this.userService.loginUser(registerUserDto);
+    const { user } = await this.userService.registerUser(registerUserDto);
     const { accessToken, refreshToken } = await this.generateTokens(
       user._id.toString(),
       user.username

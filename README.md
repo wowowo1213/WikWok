@@ -1,6 +1,6 @@
 # WikWok
 
-一个简易的仿制 TikTok 的视频播放网站，支持视频上传、用户信息注册/登录/编辑信息、关注/取消关注用户、点赞视频/取消点赞视频、新增评论/删除评论、响应式布局等功能。
+一个简易的视频播放网站，支持视频上传/删除、用户注册/登录/编辑信息、点赞视频/取消点赞视频、新增评论/删除评论、响应式布局等功能。
 
 ## 技术栈
 
@@ -21,6 +21,7 @@
 - **数据库**: MongoDB
 - **安全**:
   - CSRF 防护 (`csrf-csrf`)
+  - JWT 信息双 Token 认证
   - CORS 配置 (限制域名、方法、请求头)
 - **文件存储**: 本地存储 (支持大文件上传，限制 2GB)
 
@@ -35,14 +36,11 @@
   - 桌面端：完整展示侧边栏和推荐视频列表
 - 使用 IntersactionObserver 进行动态观察来决定视频是否播放
 
-### 2. 用户信息动态更新
+### 2. 用户信息
 
-- **注册流程**：
-  1. 提交表单后生成用户记录
-  2. 返回默认头像（通过服务端生成）
-- **编辑功能**：
-  - 支持修改头像（使用 `vue-advanced-cropper` 实现裁剪）
-  - 支持修改昵称和个人简介
+- 支持新用户注册
+- 支持修改头像（使用 `vue-advanced-cropper` 实现裁剪）
+- 支持修改昵称和个人简介
 
 ### 3. 视频上传与管理
 
@@ -59,11 +57,20 @@
   - 后端生成 cookie 并验证请求头 `x-csrf-token`
   - 前端在登录/注册前调用 `getCsrfToken()` 获取令牌，检验请求合法性
 - **JWT 防护**:
-  - 后端设置 JWT 防护，进行身份验证
+  - 后端设置 JWT 防护，进行身份验证，使用双 Token 实现无感刷新，优化用户体验
 - **CORS 配置**：
   - 限制允许的请求域名(`http://localhost:3000`)
   - 限制允许的 HTTP 方法 (`GET`, `POST`, `PUT`)
   - 允许携带 Cookie (`credentials: true`)
+
+### 5、axios 实现动态刷新 accessToken
+
+- 在请求拦截器中统一注入 Token
+- 在响应拦截器中通过 401 状态码结合 Promise 的链式调用实现 accessToken 的无感刷新
+
+### 6、支持新增评论，支持视频点赞等功能
+
+- 主要在后端实现操作数据库逻辑，前端主要负责展示
 
 ---
 
@@ -81,11 +88,13 @@ cd WikWok-api
 npm install
 
 # 配置.env文件
-# 在nodejs中使用 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))" 随机生成一个 JWT_SECRET 和 SESSION_SECRET，运行两次
-JWT_SECRET=
-SESSION_SECRET=
+# 在nodejs中使用 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))" 随机生成一个 JWT_SECRET 和 SESSION_SECRET，运行三次
+JWT_ACCESS_SECRET='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+JWT_REFRESH_SECRET='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+SESSION_SECRET='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+NODE_ENV='production'
 
-# 启动开发服务器 (默认端口 5000)(最好放在5000的端口号，不然前端视频的src需要改变端口号)
+# 启动开发服务器 (默认端口 5000)(最好放在5000的端口号，不然前端视频和用户头像的src需要改变端口号)
 npm run start:dev
 ```
 

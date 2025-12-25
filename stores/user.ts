@@ -149,14 +149,6 @@ export const useUserStore = defineStore(
       await $axios.post('/user/update-userinfo', formData);
     }
 
-    async function followUser(targetUserId: string) {
-      await $axios.post('/user/follow-user', { userId: userData.value.userId, targetUserId });
-    }
-
-    async function unfollowUser(targetUserId: string) {
-      await $axios.post('/user/unfollow-user', { userId: userData.value.userId, targetUserId });
-    }
-
     return {
       userData,
       profileData,
@@ -172,8 +164,6 @@ export const useUserStore = defineStore(
       getUserInfo,
       getProfileInfo,
       updateUserInfo,
-      followUser,
-      unfollowUser,
     };
   },
   { persist: true }
