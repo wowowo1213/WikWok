@@ -58,6 +58,7 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         userStore.resetUserStore();
         router.push('/');
+        alert('登录已过期');
         generalStore.isLoginOpen = true;
         return Promise.reject(refreshError);
       } finally {

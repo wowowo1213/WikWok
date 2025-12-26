@@ -35,14 +35,21 @@
         src="~/assets/images/tiktok-logo-small.png"
       />
 
+      <video
+        v-if="$generalStore.selectedVideo"
+        muted
+        class="absolute object-cover w-full my-auto z-[-1] h-screen"
+        :src="`http://localhost:5000${$generalStore.selectedVideo.videoUrl}`"
+      />
+
       <div
         v-if="!isLoaded"
-        class="flex items-center justify-center bg-black bg-opacity-70 h-screen lg:min-w-[480px]"
+        class="flex items-center justify-center bg-black/70 h-screen lg:min-w-[480px]"
       >
         <Icon class="animate-spin ml-1 text-white" name="eos-icons:bubble-loading" size="100" />
       </div>
 
-      <div class="bg-black bg-opacity-70 lg:min-w-[480px]">
+      <div class="bg-black/70 lg:min-w-[480px]">
         <video
           v-if="$generalStore.selectedVideo"
           ref="videoRef"
@@ -160,7 +167,7 @@
                   size="25"
                 />
               </div>
-              <div class="text-[15px] font-light">"{{ comment.text }}"</div>
+              <div class="text-[15px] font-light">{{ comment.text }}</div>
             </div>
           </div>
         </div>
@@ -209,6 +216,7 @@ import { AxiosError } from 'axios';
 const { $userStore, $generalStore } = useNuxtApp();
 const route = useRoute();
 const router = useRouter();
+definePageMeta({ middleware: 'auth' });
 
 let videoRef = ref<HTMLVideoElement | null>(null);
 let isLoaded = ref(false);
@@ -327,6 +335,8 @@ const addComment = async () => {
   try {
     await $generalStore.addComment($generalStore.selectedVideo.videoId, commentText.value);
     commentText.value = '';
+    const comments = document.getElementById('Comments');
+    if (comments) comments.scroll({ top: 0, behavior: 'smooth' });
   } catch (error) {
     console.error('添加评论失败:', error);
   }

@@ -6,7 +6,12 @@
     >
       <Icon class="animate-spin ml-1" name="mingcute:loading-line" size="100" />
     </div>
-    <div class="pt-[61px] w-full ml-[60px] lg:ml-[270px]">
+
+    <div
+      class="pt-[61px] w-full ml-[60px] lg:ml-[270px] h-[calc(100vh-61px)]"
+      data-simplebar
+      data-simplebar-auto-hide="false"
+    >
       <div v-for="video in $generalStore.suggestedVideos" :key="video.videoId">
         <SuggestedVideo :video="video" />
       </div>
@@ -16,6 +21,7 @@
 
 <script setup lang="ts">
 import MainLayout from '~/layouts/MainLayout.vue';
+import 'simplebar/dist/simplebar.min.css';
 
 const { $generalStore } = useNuxtApp();
 

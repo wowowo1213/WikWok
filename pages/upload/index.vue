@@ -131,6 +131,7 @@ import { uploadVideoUtil } from '~/utils/upload';
 
 const { $userStore } = useNuxtApp();
 const router = useRouter();
+definePageMeta({ middleware: 'auth' });
 
 const file = ref<HTMLInputElement | null>(null);
 const fileData = ref<File | null>(null);

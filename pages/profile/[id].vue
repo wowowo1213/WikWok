@@ -100,6 +100,7 @@ import MainLayout from '~/layouts/MainLayout.vue';
 const { $userStore, $generalStore } = useNuxtApp();
 
 const route = useRoute();
+definePageMeta({ middleware: 'auth' });
 
 let isLoading = ref(false);
 let errorMessage = ref('');
