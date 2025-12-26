@@ -1,9 +1,11 @@
 <template>
-  <NuxtLayout class="min-h-screen">
-    <NuxtPage />
-    <AuthOverlay v-if="isLoginOpen" />
-    <EditProfileOverlay v-if="isEditProfileOpen" />
-  </NuxtLayout>
+  <UApp>
+    <NuxtLayout class="min-h-screen">
+      <NuxtPage />
+      <AuthOverlay v-if="isLoginOpen" />
+      <EditProfileOverlay v-if="isEditProfileOpen" />
+    </NuxtLayout>
+  </UApp>
 </template>
 
 <script setup lang="ts">

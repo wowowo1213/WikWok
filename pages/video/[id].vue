@@ -134,12 +134,14 @@
         class="bg-[#F8F8F8] z-0 w-full h-[calc(100%-273px)] border-t-2 overflow-auto"
       >
         <div class="pt-2" />
+
         <div
           v-if="$generalStore.selectedVideo.comments.length === 0"
           class="text-center mt-6 text-xl text-gray-500"
         >
           没有评论捏...
         </div>
+
         <div
           v-else
           v-for="comment in $generalStore.selectedVideo.comments"

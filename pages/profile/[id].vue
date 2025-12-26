@@ -56,7 +56,7 @@
           <span class="text-gray-500 font-light text-[15px] pl-1.5 cursor-pointer">粉丝数</span>
         </div>
         <div class="mr-4">
-          <span class="font-bold">10K</span>
+          <span class="font-bold">{{ $userStore.profileTotalLikes }}</span>
           <span class="text-gray-500 font-light text-[15px] pl-1.5 cursor-pointer">总获赞数</span>
         </div>
       </div>
