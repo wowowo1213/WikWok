@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { RegisterUserDto, LoginUserDto } from './auth.dto';
@@ -11,6 +11,8 @@ export class AuthService {
   ) {}
 
   async generateTokens(userId: string, username: string) {
+    if (!userId || !username) throw new UnauthorizedException('Invalid user ID or username');
+
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         { sub: userId, username },

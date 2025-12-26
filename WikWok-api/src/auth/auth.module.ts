@@ -9,13 +9,7 @@ import { UserModule } from 'src/user/user.module';
 import { DoubleCsrfMiddleware } from 'src/common/middleware/double-csrf.middleware';
 
 @Module({
-  imports: [
-    PassportModule,
-    JwtModule.register({
-      signOptions: { expiresIn: '1h' },
-    }),
-    UserModule,
-  ],
+  imports: [PassportModule, JwtModule.register({}), UserModule],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, JwtRefreshStrategy, DoubleCsrfMiddleware],
   exports: [AuthService],

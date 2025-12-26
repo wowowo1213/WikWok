@@ -17,7 +17,7 @@ import { RegisterUserDto, LoginUserDto } from './auth.dto';
 
 interface RequestWithUser extends Request {
   user?: {
-    sub: string;
+    userId: string;
     username: string;
   };
 }
@@ -38,10 +38,11 @@ export class AuthController {
   @Post('refresh')
   @UseGuards(JwtRefreshGuard)
   async refresh(@Req() req: RequestWithUser, @Res() res: Response) {
-    if (!req.user) throw new UnauthorizedException('User not found');
+    if (!req.user?.userId || !req.user.username)
+      throw new UnauthorizedException('Invalid user data');
 
-    const { sub, username } = req.user;
-    const tokens = await this.authService.generateTokens(sub, username);
+    const { userId, username } = req.user;
+    const tokens = await this.authService.generateTokens(userId, username);
 
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
@@ -64,7 +65,6 @@ export class AuthController {
     try {
       const { userId, accessToken, refreshToken } =
         await this.authService.registerUser(registerUserDto);
-      console.log(111);
 
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
