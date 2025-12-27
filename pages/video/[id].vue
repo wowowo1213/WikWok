@@ -30,7 +30,7 @@
       </div>
 
       <img
-        class="absolute top-[18px] left-[70px] rounded-full"
+        class="absolute top-4.5 left-17.5 rounded-full"
         width="45"
         src="~/assets/images/tiktok-logo-small.png"
       />
@@ -44,12 +44,12 @@
 
       <div
         v-if="!isLoaded"
-        class="flex items-center justify-center bg-black/70 h-screen lg:min-w-[480px]"
+        class="flex items-center justify-center bg-black/70 h-screen lg:min-w-120"
       >
         <Icon class="animate-spin ml-1 text-white" name="eos-icons:bubble-loading" size="100" />
       </div>
 
-      <div class="bg-black/70 lg:min-w-[480px]">
+      <div class="bg-black/70 lg:min-w-120">
         <video
           v-if="$generalStore.selectedVideo"
           ref="videoRef"
@@ -65,7 +65,7 @@
     <div
       id="InfoSection"
       v-if="$generalStore.selectedVideo"
-      class="lg:max-w-[550px] relative w-full h-full bg-white"
+      class="lg:max-w-137.5 relative w-full h-full bg-white"
     >
       <div class="py-7" />
 
@@ -146,31 +146,27 @@
           v-else
           v-for="comment in $generalStore.selectedVideo.comments"
           :key="comment.id"
-          class="flex items-center justify-between px-8 mt-4"
+          class="flex items-center justify-between mx-4 mt-4 p-2 rounded-lg border border-gray-500 hover:border-gray-300 duration-200"
         >
-          <div
-            class="flex items-center relative w-full border border-gray-500 rounded-lg p-3 hover:border-gray-300 duration-200"
-          >
-            <NuxtLink :to="`/profile/${comment.user.userId}`">
-              <img
-                class="rounded-full"
-                width="60"
-                :src="`http://localhost:5000${comment.user.avatarUrl}`"
+          <NuxtLink :to="`/profile/${comment.user.userId}`">
+            <img
+              class="rounded-full"
+              width="60"
+              :src="`http://localhost:5000${comment.user.avatarUrl}`"
+            />
+          </NuxtLink>
+          <div class="ml-6 pt-0.5 w-full">
+            <div class="text-[15px] font-semibold flex items-center justify-between">
+              {{ comment.user.username }}
+              <Icon
+                v-if="$userStore.userData.userId === comment.user.userId"
+                @click="deleteComment($generalStore.selectedVideo.videoId, comment.id)"
+                class="cursor-pointer"
+                name="material-symbols:delete-outline-sharp"
+                size="25"
               />
-            </NuxtLink>
-            <div class="ml-6 pt-0.5 w-full">
-              <div class="text-[15px] font-semibold flex items-center justify-between">
-                {{ comment.user.username }}
-                <Icon
-                  v-if="$userStore.userData.userId === comment.user.userId"
-                  @click="deleteComment($generalStore.selectedVideo.videoId, comment.id)"
-                  class="cursor-pointer"
-                  name="material-symbols:delete-outline-sharp"
-                  size="25"
-                />
-              </div>
-              <div class="text-[15px] font-light">{{ comment.text }}</div>
             </div>
+            <div class="text-[15px] font-light">{{ comment.text }}</div>
           </div>
         </div>
 
@@ -180,17 +176,17 @@
       <div
         id="CreateComment"
         v-if="$userStore.userData.userId"
-        class="absolute flex items-center justify-between bottom-0 bg-white h-[85px] lg:max-w-[550px] w-full py-5 px-8 border-t-2"
+        class="absolute flex items-center justify-between bottom-0 bg-white h-21.25 lg:max-w-137.5 w-full py-5 px-8 border-t-2"
       >
         <div
           :class="inputFocused ? 'border-2 border-gray-400' : 'border-2 border-[#F1F1F2]'"
-          class="bg-[#F1F1F2] flex items-center rounded-lg w-full lg:max-w-[420px]"
+          class="bg-[#F1F1F2] flex items-center rounded-lg w-full lg:max-w-105"
         >
           <input
             v-model="commentText"
             @focus="inputFocused = true"
             @blur="inputFocused = false"
-            class="bg-[#F1F1F2] text-[14px] focus:outline-none w-full lg:max-w-[420px] p-2 rounded-lg"
+            class="bg-[#F1F1F2] text-[14px] focus:outline-none w-full lg:max-w-105 p-2 rounded-lg"
             type="text"
             placeholder="发布评论..."
           />
@@ -216,9 +212,13 @@
 import { AxiosError } from 'axios';
 
 const { $userStore, $generalStore } = useNuxtApp();
+
 const route = useRoute();
 const router = useRouter();
+
 definePageMeta({ middleware: 'auth' });
+
+const toast = useToast();
 
 let videoRef = ref<HTMLVideoElement | null>(null);
 let isLoaded = ref(false);
@@ -253,6 +253,8 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  toast.clear();
+
   if (!videoRef.value) return;
   videoRef.value.removeEventListener('loadeddata', onLoadedData);
   videoRef.value.pause();
@@ -301,16 +303,53 @@ const loopThroughVideosDown = () => {
 };
 
 const deleteVideo = async () => {
-  const res = confirm('确定删除该视频么?');
-  if (!res || !$generalStore.selectedVideo) return;
-  try {
-    await $generalStore.deleteVideo($generalStore.selectedVideo.videoId);
-    await $userStore.getUserInfo($userStore.userData.userId);
-    await $userStore.getProfileInfo($userStore.userData.userId);
-    router.push(`/profile/${$userStore.userData.userId}`);
-  } catch (error) {
-    console.log(error);
-  }
+  toast.clear();
+
+  const innerDeleteVideo = async () => {
+    if (!$generalStore.selectedVideo) return;
+    try {
+      await $generalStore.deleteVideo($generalStore.selectedVideo.videoId);
+      await $userStore.getUserInfo($userStore.userData.userId);
+      await $userStore.getProfileInfo($userStore.userData.userId);
+      router.push(`/profile/${$userStore.userData.userId}`);
+
+      toast.add({
+        title: '删除成功',
+        description: '视频已从列表中移除',
+        icon: 'i-heroicons-check-circle',
+        color: 'success',
+      });
+    } catch (error) {
+      console.log(error);
+
+      toast.add({
+        title: '删除失败',
+        description: '请稍后重试',
+        icon: 'i-heroicons-exclamation-circle',
+        color: 'error',
+      });
+    }
+  };
+
+  toast.add({
+    title: '确定删除该视频么？',
+    description: '此操作不可撤销',
+    icon: 'i-heroicons-exclamation-triangle',
+    color: 'warning',
+    duration: 0,
+    actions: [
+      {
+        label: '取消',
+        onClick: () => {},
+      },
+      {
+        label: '确认删除',
+        onClick: async () => {
+          await innerDeleteVideo();
+        },
+      },
+    ],
+  });
 };
 
 const likeVideo = async () => {
@@ -345,14 +384,49 @@ const addComment = async () => {
 };
 
 const deleteComment = async (videoId: string, commentId: string) => {
-  const res = confirm('确定删除该评论么?');
+  toast.clear();
 
-  if (!res || !$generalStore.selectedVideo) return;
+  const innerDeleteComment = async () => {
+    if (!$generalStore.selectedVideo) return;
+    try {
+      await $generalStore.deleteComment(videoId, commentId);
 
-  try {
-    await $generalStore.deleteComment(videoId, commentId);
-  } catch (error) {
-    console.error('删除评论失败:', error);
-  }
+      toast.add({
+        title: '删除成功',
+        description: '评论已删除',
+        icon: 'i-heroicons-check-circle',
+        color: 'success',
+      });
+    } catch (error) {
+      console.log(error);
+
+      toast.add({
+        title: '删除失败',
+        description: '请稍后重试',
+        icon: 'i-heroicons-exclamation-circle',
+        color: 'error',
+      });
+    }
+  };
+
+  toast.add({
+    title: '确定删除该评论么？',
+    description: '此操作不可撤销',
+    icon: 'i-heroicons-exclamation-triangle',
+    color: 'warning',
+    duration: 0,
+    actions: [
+      {
+        label: '取消',
+        onClick: () => {},
+      },
+      {
+        label: '确认删除',
+        onClick: async () => {
+          await innerDeleteComment();
+        },
+      },
+    ],
+  });
 };
 </script>

@@ -1,4 +1,3 @@
-import type { AxiosProgressEvent } from 'axios';
 import Worker from '~/assets/workers/uploadFileHashWorker.js?worker';
 
 const generalStore = useGeneralStore();
@@ -45,21 +44,6 @@ async function submitVideoMeta(data: {
   return await generalStore.submitVideoMeta(data);
 }
 
-function calculateProgress(
-  chunks: Blob[],
-  currentChunkIndex: number,
-  progressEvent: AxiosProgressEvent
-) {
-  const loadedSize =
-    chunks.slice(0, currentChunkIndex).reduce((sum, chunk) => sum + chunk.size, 0) +
-    progressEvent.loaded;
-
-  const totalSize = chunks.reduce((sum, chunk) => sum + chunk.size, 0);
-  const percent = Math.round((loadedSize / totalSize) * 100);
-
-  return { loadedSize, totalSize, percent };
-}
-
 export async function uploadVideoUtil(file: File, caption: string) {
   try {
     const fileHash = await calculateFileHash(file);
@@ -70,7 +54,8 @@ export async function uploadVideoUtil(file: File, caption: string) {
 
     const chunks = await getFileChunks(file);
     const MAX_CONCURRENCY = 4;
-    let promises: Promise<void>[] = [];
+    const promises = new Set<Promise<void>>();
+    let completed = 0;
 
     const uploadChunk = async (chunk: Blob, index: number) => {
       const formData = new FormData();
@@ -80,24 +65,26 @@ export async function uploadVideoUtil(file: File, caption: string) {
       formData.append('chunk', chunk);
       formData.append('chunkIndex', index.toString());
 
-      await $axios.post('/upload/upload-chunk', formData, {
-        onUploadProgress: progressEvent => {
-          const progress = calculateProgress(chunks, index, progressEvent);
-          console.log(`分片 ${index} 上传进度: ${progress.percent}%`);
-        },
-      });
+      await $axios.post('/upload/upload-chunk', formData);
     };
 
     for (let i = 0; i < chunks.length; i++) {
       if (uploadedChunks.includes(i)) continue;
 
-      if (promises.length === MAX_CONCURRENCY) await Promise.race(promises);
+      if (promises.size >= MAX_CONCURRENCY) await Promise.race(promises);
 
-      const task = uploadChunk(chunks[i] as Blob, i).finally(() => {
-        const index = promises.indexOf(task);
-        if (index !== -1) promises.splice(index, 1);
-      });
-      promises.push(task);
+      const task = uploadChunk(chunks[i] as Blob, i)
+        .then(res => {
+          completed++;
+          console.log(completed);
+          return res;
+        })
+        .catch(err => {
+          throw err;
+        })
+        .finally(() => promises.delete(task));
+
+      promises.add(task);
     }
 
     await Promise.all(promises);

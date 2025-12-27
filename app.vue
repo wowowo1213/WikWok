@@ -1,5 +1,5 @@
 <template>
-  <UApp>
+  <UApp :toaster="toaster">
     <NuxtLayout class="min-h-screen">
       <NuxtPage />
       <AuthOverlay v-if="isLoginOpen" />
@@ -11,6 +11,8 @@
 <script setup lang="ts">
 const { $userStore, $generalStore } = useNuxtApp();
 const { isLoginOpen, isEditProfileOpen } = storeToRefs($generalStore);
+
+const toaster = { position: 'top-center' as const, max: 3 };
 
 onMounted(async () => {
   $generalStore.bodySwitch(false);
