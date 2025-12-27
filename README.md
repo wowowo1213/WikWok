@@ -59,6 +59,7 @@
   - 前端在登录/注册前调用 `getCsrfToken()` 获取令牌，检验请求合法性
 - **JWT 防护**:
   - 后端设置 JWT 防护，进行身份验证，使用双 Token 实现无感刷新，优化用户体验
+  - 但是这边后端还需要检验 RefreshToken 的创建时间，使用数据库保存，不然每次重新创建的 RefreshToken 的过期时间也会重置
 - **CORS 配置**：
   - 限制允许的请求域名(`http://localhost:3000`)
   - 限制允许的 HTTP 方法 (`GET`, `POST`, `PUT`)

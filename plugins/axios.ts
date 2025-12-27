@@ -23,7 +23,7 @@ export default defineNuxtPlugin(NuxtApp => {
 
       return config;
     },
-    (error: any) => Promise.reject(error)
+    error => Promise.reject(error)
   );
 
   axiosInstance.interceptors.response.use(
@@ -36,48 +36,9 @@ export default defineNuxtPlugin(NuxtApp => {
       const generalStore = useGeneralStore();
 
       const toast = useToast();
-      const showErrorToast = throttle((options: any) => {
+      const showErrorToast = throttle(options => {
         toast.add(options);
       }, 500);
-
-      if (error.response?.status === 401 && !originalRequest._retry) {
-        if (isRefreshing) {
-          return new Promise(resolve => {
-            subscribers.push((token: string) => {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-              resolve(axiosInstance(originalRequest));
-            });
-          });
-        }
-
-        originalRequest._retry = true;
-        isRefreshing = true;
-
-        try {
-          const res = await axiosInstance.post('/auth/refresh');
-          const newAccessToken = res.data.accessToken;
-          localStorage.setItem('jwtToken', newAccessToken);
-
-          subscribers.forEach(cb => cb(newAccessToken));
-          subscribers = [];
-
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          return axiosInstance(originalRequest);
-        } catch (refreshError) {
-          userStore.resetUserStore();
-          router.push('/');
-          toast.add({
-            title: '登录已过期',
-            description: '请重新登录',
-            color: 'error',
-            icon: 'i-heroicons-exclamation-circle',
-          });
-          generalStore.isLoginOpen = true;
-          return Promise.reject(refreshError);
-        } finally {
-          isRefreshing = false;
-        }
-      }
 
       switch (error.response?.status) {
         case 400:
@@ -88,6 +49,46 @@ export default defineNuxtPlugin(NuxtApp => {
             icon: 'i-heroicons-exclamation-circle',
           });
           return Promise.reject(error.response.data.message);
+        case 401:
+          if (!originalRequest._retry) {
+            if (isRefreshing) {
+              return new Promise(resolve => {
+                subscribers.push((token: string) => {
+                  originalRequest.headers.Authorization = `Bearer ${token}`;
+                  resolve(axiosInstance(originalRequest));
+                });
+              });
+            }
+
+            originalRequest._retry = true;
+            isRefreshing = true;
+
+            try {
+              const res = await axiosInstance.post('/auth/refresh');
+              const newAccessToken = res.data.accessToken;
+              localStorage.setItem('jwtToken', newAccessToken);
+
+              subscribers.forEach(cb => cb(newAccessToken));
+              subscribers = [];
+
+              originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+              return axiosInstance(originalRequest);
+            } catch (refreshError) {
+              userStore.resetUserStore();
+              router.push('/');
+              toast.add({
+                title: '登录已过期',
+                description: '请重新登录',
+                color: 'error',
+                icon: 'i-heroicons-exclamation-circle',
+              });
+              generalStore.isLoginOpen = true;
+              return Promise.reject(refreshError);
+            } finally {
+              isRefreshing = false;
+            }
+          }
+          break;
         case 403:
           showErrorToast({
             title: '无权限',
