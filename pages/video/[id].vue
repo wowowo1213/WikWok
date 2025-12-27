@@ -132,6 +132,7 @@
       <div
         id="Comments"
         class="bg-[#F8F8F8] z-0 w-full h-[calc(100%-273px)] border-t-2 overflow-auto"
+        style="scrollbar-width: none"
       >
         <div class="pt-2" />
 

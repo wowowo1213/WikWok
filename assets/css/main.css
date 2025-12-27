@@ -1,2 +1,7 @@
 @import 'tailwindcss';
 @import '@nuxt/ui';
+
+html,
+body {
+  scrollbar-width: none;
+}

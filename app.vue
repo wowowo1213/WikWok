@@ -1,5 +1,5 @@
 <template>
-  <UApp :toaster="toaster">
+  <UApp :toaster="toaster" class="container">
     <NuxtLayout class="min-h-screen">
       <NuxtPage />
       <AuthOverlay v-if="isLoginOpen" />
