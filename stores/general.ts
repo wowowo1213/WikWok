@@ -5,6 +5,7 @@ export const useGeneralStore = defineStore(
   'general',
   () => {
     const { $axios } = useNuxtApp();
+
     const userStore = useUserStore();
 
     const isLoginOpen = ref(false);
@@ -57,7 +58,7 @@ export const useGeneralStore = defineStore(
     async function getSuggestedVideos() {
       suggestedVideos.value = null;
       const res = await $axios.get('/user-public/get-suggested-videos', {
-        params: { userId: userStore?.userData?.userId },
+        params: { userId: userStore.userData?.userId },
       });
       suggestedVideos.value = res.data.data;
     }
@@ -69,6 +70,19 @@ export const useGeneralStore = defineStore(
           user.avatarUrl = userData.avatarUrl;
         }
       }
+    }
+
+    async function submitVideoMeta(data: {
+      fileHash: string;
+      filename: string;
+      caption: string;
+      views?: number;
+      likes?: number;
+    }) {
+      return $axios.post('/upload/submit-meta', {
+        userId: userStore.userData.userId,
+        ...data,
+      });
     }
 
     async function getVideosById(videoId: string) {
@@ -125,6 +139,7 @@ export const useGeneralStore = defineStore(
       getFollowingUsers,
       getSuggestedVideos,
       updateSideMenuItemFollow,
+      submitVideoMeta,
       getVideosById,
       deleteVideo,
       likeVideo,

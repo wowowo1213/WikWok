@@ -1,6 +1,8 @@
-import { axiosInstance } from '~/plugins/axios';
 import type { AxiosProgressEvent } from 'axios';
-import Worker from '~/public/workers/uploadFileHashWorker.js?worker';
+import Worker from '~/assets/workers/uploadFileHashWorker.js?worker';
+
+const generalStore = useGeneralStore();
+const { $axios } = useNuxtApp();
 
 async function getFileChunks(file: File) {
   const chunkSize = 10 * 1024 * 1024;
@@ -40,10 +42,7 @@ async function submitVideoMeta(data: {
   views?: number;
   likes?: number;
 }) {
-  return axiosInstance.post('/upload/submit-meta', {
-    userId: useUserStore().userData.userId,
-    ...data,
-  });
+  return await generalStore.submitVideoMeta(data);
 }
 
 function calculateProgress(
@@ -64,7 +63,7 @@ function calculateProgress(
 export async function uploadVideoUtil(file: File, caption: string) {
   try {
     const fileHash = await calculateFileHash(file);
-    const res = await axiosInstance.get('/upload/upload-check', { params: { hash: fileHash } });
+    const res = await $axios.get('/upload/upload-check', { params: { hash: fileHash } });
     const { exist, uploadedChunks = [] } = res.data.data;
 
     if (exist) return submitVideoMeta({ fileHash, filename: file.name, caption });
@@ -81,7 +80,7 @@ export async function uploadVideoUtil(file: File, caption: string) {
       formData.append('chunk', chunk);
       formData.append('chunkIndex', index.toString());
 
-      await axiosInstance.post('/upload/upload-chunk', formData, {
+      await $axios.post('/upload/upload-chunk', formData, {
         onUploadProgress: progressEvent => {
           const progress = calculateProgress(chunks, index, progressEvent);
           console.log(`分片 ${index} 上传进度: ${progress.percent}%`);
@@ -103,7 +102,7 @@ export async function uploadVideoUtil(file: File, caption: string) {
 
     await Promise.all(promises);
 
-    const mergeRes = await axiosInstance.post('/upload/merge-chunks', {
+    const mergeRes = await $axios.post('/upload/merge-chunks', {
       userId: useUserStore().userData.userId,
       fileHash,
       filename: file.name,

@@ -8,7 +8,7 @@
     </div>
 
     <div
-      class="pt-[61px] w-full ml-[60px] lg:ml-[270px] h-[calc(100vh-61px)]"
+      class="pt-15.25 w-full ml-15 lg:ml-67.5 h-[calc(100vh-61px)]"
       data-simplebar
       data-simplebar-auto-hide="false"
     >

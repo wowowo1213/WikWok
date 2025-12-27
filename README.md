@@ -11,6 +11,7 @@
 - **样式**: TailwindCSS
 - **状态管理**: Pinia
 - **其他库**:
+  - `Nuxt-ui`
   - `vue-advanced-cropper` (头像裁剪)
   - `axios`
 
@@ -65,8 +66,10 @@
 
 ### 5、axios 实现动态刷新 accessToken
 
-- 在请求拦截器中统一注入 Token
-- 在响应拦截器中通过 401 状态码结合 Promise 的链式调用实现 accessToken 的无感刷新
+- 请求拦截器：统一注入 Authorization 头（Bearer Token）和 CSRF-TOKEN
+- 响应拦截器：捕获 401 状态码，自动触发 accessToken 刷新
+- 无感刷新：通过 Promise 队列避免重复刷新请求
+- 节流错误处理：统一处理错误提示，避免重复弹窗
 
 ### 6、支持新增评论，支持视频点赞等功能
 
@@ -118,6 +121,7 @@ npm run dev
 ```bash
 WikWok/
 ├── assets/                           # 静态资源 (图片/css 样式)
+│   └── worker/                       # WebWorker
 ├── components/                       # 可复用组件
 │   ├── AuthOverlay.vue               # 登录/注册界面
 │   ├── EditProfileOverlay.vue        # 编辑个人信息界面
@@ -143,8 +147,6 @@ WikWok/
 ├── plugins/                          # 插件
 │   ├── axios.ts
 │   └── store.ts
-├── public/                           # 公共资源或插件
-│   └── workers/                      # Web Worker插件
 ├── stores/                           # Pinia 状态管理
 │   ├── general.ts                    # 通用方法
 │   └── user.ts                       # 用户状态

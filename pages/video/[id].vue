@@ -6,7 +6,7 @@
     <div v-if="$generalStore.selectedVideo" class="lg:w-[calc(100%-540px)] h-full relative">
       <NuxtLink
         :to="$generalStore.backUrl"
-        class="absolute flex z-20 m-5 rounded-full bg-gray-700 p-1.5 hover:bg-gray-800 cursor-pointer"
+        class="absolute flex z-20 m-5 rounded-full bg-gray-800 p-1.5 hover:bg-gray-900 cursor-pointer"
       >
         <Icon name="material-symbols:close" color="#FFFFFF" size="27" />
       </NuxtLink>
@@ -15,7 +15,7 @@
         <button
           :disabled="!isLoaded"
           @click="loopThroughVideosUp()"
-          class="absolute z-20 right-4 top-4 flex items-center justify-center rounded-full bg-gray-700 p-1.5 hover:bg-gray-800 cursor-pointer"
+          class="absolute z-20 right-4 top-4 flex items-center justify-center rounded-full bg-gray-800 p-1.5 hover:bg-gray-900 cursor-pointer"
         >
           <Icon name="mdi:chevron-up" size="30" color="#FFFFFF" />
         </button>
@@ -23,7 +23,7 @@
         <button
           :disabled="!isLoaded"
           @click="loopThroughVideosDown()"
-          class="absolute z-20 right-4 top-20 flex items-center justify-center rounded-full bg-gray-700 p-1.5 hover:bg-gray-800 cursor-pointer"
+          class="absolute z-20 right-4 top-20 flex items-center justify-center rounded-full bg-gray-800 p-1.5 hover:bg-gray-900 cursor-pointer"
         >
           <Icon name="mdi:chevron-down" size="30" color="#FFFFFF" />
         </button>
