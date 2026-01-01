@@ -64,8 +64,8 @@ export default defineNuxtPlugin(NuxtApp => {
             isRefreshing = true;
 
             try {
-              const res = await axiosInstance.post('/auth/refresh');
-              const newAccessToken = res.data.accessToken;
+              const { data } = await axiosInstance.post('/auth/refresh');
+              const newAccessToken = data?.accessToken;
               localStorage.setItem('jwtToken', newAccessToken);
 
               subscribers.forEach(cb => cb(newAccessToken));
