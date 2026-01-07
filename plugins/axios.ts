@@ -51,6 +51,8 @@ export default defineNuxtPlugin(NuxtApp => {
           return Promise.reject(error.response.data.message);
         case 401:
           if (!originalRequest._retry) {
+            originalRequest._retry = true;
+
             if (isRefreshing) {
               return new Promise(resolve => {
                 subscribers.push((token: string) => {
@@ -60,7 +62,6 @@ export default defineNuxtPlugin(NuxtApp => {
               });
             }
 
-            originalRequest._retry = true;
             isRefreshing = true;
 
             try {
