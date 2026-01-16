@@ -92,10 +92,10 @@ cd WikWok-api
 npm install
 
 # 配置.env文件
-# 在nodejs中使用 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))" 随机生成一个 JWT_SECRET 和 SESSION_SECRET，运行三次
+# 在nodejs中使用 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))" 随机生成 JWT_ACCESS_SECRET/JWT_REFRESH_SECRET/CSRF_SESSION_SECRET，运行三次
 JWT_ACCESS_SECRET='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 JWT_REFRESH_SECRET='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-SESSION_SECRET='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+CSRF_SESSION_SECRET='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 NODE_ENV='production'
 
 # 启动开发服务器 (默认端口 5000)(最好放在5000的端口号，不然前端视频和用户头像的src需要改变端口号)

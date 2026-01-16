@@ -22,18 +22,19 @@ async function bootstrap() {
 
   app.enableCors({
     origin: ['http://localhost:3000'],
-    methods: 'GET,POST,PUT',
+    methods: 'GET,POST,PUT,OPTIONS',
     allowedHeaders: 'Content-Type, Authorization, x-csrf-token',
     credentials: true,
   });
 
+  // csrf-csrf的配置中需要将 req.session.csrfSecret 存入这个 session 中
   app.use(
     session({
-      secret: process.env.SESSION_SECRET!,
+      secret: process.env.CSRF_SESSION_SECRET!,
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: false, // 这边设置true使用https协议
+        secure: false, // 可设置为使用https传输
         httpOnly: true,
         sameSite: 'lax',
       },
