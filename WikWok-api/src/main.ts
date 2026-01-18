@@ -30,9 +30,10 @@ async function bootstrap() {
   // csrf-csrf的配置中需要将 req.session.csrfSecret 存入这个 session 中
   app.use(
     session({
-      secret: process.env.CSRF_SESSION_SECRET!,
+      secret: process.env.SESSION_SECRET!,
       resave: false,
       saveUninitialized: false,
+      name: 'wowowo_session',
       cookie: {
         secure: false, // 可设置为使用https传输
         httpOnly: true,

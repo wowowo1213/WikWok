@@ -57,12 +57,14 @@
 - **CSRF 防护**：
   - 后端生成 cookie 并验证请求头 `x-csrf-token`
   - 前端在登录/注册前调用 `getCsrfToken()` 获取令牌，检验请求合法性
+  - `cookie`跨域的时候设置了自动携带，在`axios`里面设置`credentials: true`
 - **JWT 防护**:
   - 后端设置 JWT 防护，进行身份验证，使用双 Token 实现无感刷新，优化用户体验
   - 但是这边后端还需要检验 RefreshToken 的创建时间，使用数据库保存，不然每次重新创建的 RefreshToken 的过期时间也会重置
+  - 但是这些都是后端的同学负责了，就暂时不修改了
 - **CORS 配置**：
   - 限制允许的请求域名(`http://localhost:3000`)
-  - 限制允许的 HTTP 方法 (`GET`, `POST`, `PUT`)
+  - 限制允许的 HTTP 方法 (`GET`, `POST`, `PUT`, `OPTIONS`)
   - 允许携带 Cookie (`credentials: true`)
 
 ### 5、axios 实现动态刷新 accessToken
@@ -92,10 +94,11 @@ cd WikWok-api
 npm install
 
 # 配置.env文件
-# 在nodejs中使用 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))" 随机生成 JWT_ACCESS_SECRET/JWT_REFRESH_SECRET/CSRF_SESSION_SECRET，运行三次
+# 在nodejs中使用 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))" 随机生成 JWT_ACCESS_SECRET/JWT_REFRESH_SECRET/SESSION_SECRET，运行三次
+# 也就是三个密钥
 JWT_ACCESS_SECRET='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 JWT_REFRESH_SECRET='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-CSRF_SESSION_SECRET='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+SESSION_SECRET='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 NODE_ENV='production'
 
 # 启动开发服务器 (默认端口 5000)(最好放在5000的端口号，不然前端视频和用户头像的src需要改变端口号)
