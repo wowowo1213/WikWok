@@ -12,11 +12,7 @@ declare module 'express-session' {
 @Injectable()
 export class DoubleCsrfMiddleware implements NestMiddleware {
   private readonly doubleCsrfProtection: (req: Request, res: Response, next: NextFunction) => void;
-  private readonly generateToken: (
-    req: Request,
-    res: Response,
-    options?: { overwrite?: boolean }
-  ) => string;
+  private readonly generateToken: (req: Request, res: Response) => string;
 
   constructor() {
     const config: DoubleCsrfConfigOptions = {
@@ -25,14 +21,13 @@ export class DoubleCsrfMiddleware implements NestMiddleware {
           req.session.csrfSecret = crypto.randomBytes(32).toString('hex');
         return req.session.csrfSecret;
       },
-      getSessionIdentifier: (req: Request) => req.sessionID,
+      getSessionIdentifier: (req: Request) => req.session.id,
       cookieName: 'wowowo_csrf_token',
       cookieOptions: {
         httpOnly: true,
         secure: false, // 这边可以设置true使用https协议，但是只使用http的话是不能设置这个的
         sameSite: 'lax',
         path: '/',
-        maxAge: 24 * 60 * 60 * 1000,
       },
       size: 32,
       ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
