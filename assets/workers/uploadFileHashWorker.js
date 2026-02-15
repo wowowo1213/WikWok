@@ -5,10 +5,12 @@ self.onmessage = e => {
   const spark = new SparkMD5.ArrayBuffer();
   const reader = new FileReader();
   let start = 0;
+  let end = Math.min(chunkSize, file.size);
 
   reader.onload = e => {
     spark.append(e.target?.result);
-    start += chunkSize;
+    start = end;
+    end = Math.min(start + chunkSize, file.size);
 
     if (start < file.size) {
       reader.readAsArrayBuffer(file.slice(start, start + chunkSize));
@@ -17,6 +19,5 @@ self.onmessage = e => {
     }
   };
 
-  const end = Math.min(start + chunkSize, file.size);
   reader.readAsArrayBuffer(file.slice(start, end));
 };
