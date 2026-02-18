@@ -208,7 +208,10 @@ const uploadVideo = async () => {
 
   try {
     let res = await $uploadUtil(fileData.value, caption.value);
-    if (res.status === 200) router.push('/profile/' + $userStore.userData.userId);
+    $generalStore.setPauseUploading(false);
+    if (res?.status === 200 || res?.statusCode === 200) {
+      router.push('/profile/' + $userStore.userData.userId);
+    }
   } catch (error: string | Array<string>) {
     errors.value = error;
   } finally {
