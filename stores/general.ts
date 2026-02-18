@@ -5,17 +5,10 @@ export const useGeneralStore = defineStore(
   'general',
   () => {
     const { $axios } = useNuxtApp();
-
     const userStore = useUserStore();
 
     const isLoginOpen = ref(false);
     const isEditProfileOpen = ref(false);
-    const activeItem = ref('forYou');
-    const backUrl = ref('/');
-    const selectedVideo = ref<null | Video>(null);
-    const suggestedVideos = ref<null | Array<Video>>(null);
-    const suggestedUsers = ref<null | Array<UserData>>(null);
-    const followingUsers = ref<null | Array<UserData>>(null);
     const videoIds = ref([]);
 
     async function getCsrfToken() {
@@ -23,6 +16,7 @@ export const useGeneralStore = defineStore(
       sessionStorage.setItem('x-csrf-token', res.data.csrfToken);
     }
 
+    const activeItem = ref('forYou');
     function setActiveItem(itemName: string) {
       activeItem.value = itemName;
     }
@@ -35,10 +29,12 @@ export const useGeneralStore = defineStore(
       document.body.style.overflow = 'visible';
     }
 
+    const backUrl = ref('/');
     function setBackUrl(url: string) {
       backUrl.value = url;
     }
 
+    const suggestedUsers = ref<null | Array<UserData>>(null);
     async function getSuggestedUsers() {
       suggestedUsers.value = null;
       const res = await $axios.get('/user-public/get-suggested-users', {
@@ -47,6 +43,7 @@ export const useGeneralStore = defineStore(
       suggestedUsers.value = res.data.data.users;
     }
 
+    const followingUsers = ref<null | Array<UserData>>(null);
     async function getFollowingUsers() {
       followingUsers.value = null;
       const res = await $axios.get('/user/get-following-users', {
@@ -55,6 +52,7 @@ export const useGeneralStore = defineStore(
       followingUsers.value = res.data.data.users;
     }
 
+    const suggestedVideos = ref<null | Array<Video>>(null);
     async function getSuggestedVideos() {
       suggestedVideos.value = null;
       const res = await $axios.get('/user-public/get-suggested-videos', {
@@ -85,11 +83,11 @@ export const useGeneralStore = defineStore(
       });
     }
 
+    const selectedVideo = ref<null | Video>(null);
     async function getVideosById(videoId: string) {
       const res = await $axios.get('/user/get-video-detail', {
         params: { videoId },
       });
-
       selectedVideo.value = res.data.data;
     }
 
@@ -121,6 +119,11 @@ export const useGeneralStore = defineStore(
       }
     }
 
+    const pauseUploading = ref(false);
+    const setPauseUploading = (state: boolean) => {
+      pauseUploading.value = state;
+    };
+
     return {
       isLoginOpen,
       isEditProfileOpen,
@@ -146,6 +149,8 @@ export const useGeneralStore = defineStore(
       unlikeVideo,
       addComment,
       deleteComment,
+      pauseUploading,
+      setPauseUploading,
     };
   },
   {

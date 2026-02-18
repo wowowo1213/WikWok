@@ -57,26 +57,42 @@ export async function uploadVideoUtil(file: File, caption: string) {
     const promises = new Set<Promise<void>>();
     let completed = 0;
 
-    const uploadChunk = async (chunk: Blob, index: number) => {
-      const formData = new FormData();
-      formData.append('hash', `${fileHash}-${index}`);
-      formData.append('filename', file.name);
-      formData.append('chunkCount', chunks.length.toString());
-      formData.append('chunk', chunk);
-      formData.append('chunkIndex', index.toString());
+    const uploadChunk = async (chunk: Blob, index: number, maxRetries: number = 3) => {
+      let lastError;
 
-      await $axios.post('/upload/upload-chunk', formData);
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        if (generalStore.pauseUploading) return;
+
+        try {
+          const formData = new FormData();
+          formData.append('hash', `${fileHash}-${index}`);
+          formData.append('filename', file.name);
+          formData.append('chunkCount', chunks.length.toString());
+          formData.append('chunk', chunk);
+          formData.append('chunkIndex', index.toString());
+
+          await $axios.post('/upload/upload-chunk', formData);
+          return;
+        } catch (error) {
+          lastError = error;
+          if (attempt < maxRetries) await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+      }
+
+      throw lastError;
     };
 
     for (let i = 0; i < chunks.length; i++) {
-      if (uploadedChunks.includes(i)) continue;
-
+      if (generalStore.pauseUploading) return;
+      if (uploadedChunks.includes(i)) {
+        completed++;
+        continue;
+      }
       if (promises.size >= MAX_CONCURRENCY) await Promise.race(promises);
 
       const task = uploadChunk(chunks[i] as Blob, i)
         .then(res => {
           completed++;
-          console.log(completed);
           return res;
         })
         .catch(err => {
@@ -99,6 +115,7 @@ export async function uploadVideoUtil(file: File, caption: string) {
 
     return mergeRes.data;
   } catch (error) {
+    console.warn('文件上传出错: ', error);
     return error;
   }
 }

@@ -3,9 +3,17 @@
 
   <div
     v-if="isUploading"
-    class="fixed flex items-center justify-center top-0 left-0 w-full h-screen bg-black/50 z-100 text-white"
+    class="fixed inset-0 flex items-center justify-center bg-black/50 z-100 text-white"
   >
-    <Icon class="animate-spin ml-1" name="mingcute:loading-line" size="100" />
+    <div class="flex flex-col">
+      <Icon class="animate-spin ml-1" name="mingcute:loading-line" size="100" />
+      <button
+        @click="cancelUpload"
+        class="mt-4 px-4 py-1.5 text-white text-[15px] bg-[#F02C56] rounded-sm hover:bg-red-700 cursor-pointer"
+      >
+        取消上传
+      </button>
+    </div>
   </div>
 
   <UploadLayout>
@@ -22,7 +30,7 @@
           for="fileInput"
           @drop.prevent="onDrop"
           @dragover.prevent=""
-          class="mx-auto mt-4 mb-6 flex flex-col items-center justify-center w-full max-w-[260px] h-[470px] text-center p-3 border-2 border-dashed border-gray-300 rounded-lg hover:bg-gray-100 cursor-pointer"
+          class="mx-auto mt-4 mb-6 flex flex-col items-center justify-center w-full max-w-65 h-117.5 text-center p-3 border-2 border-dashed border-gray-300 rounded-lg hover:bg-gray-100 cursor-pointer"
         >
           <Icon name="majesticons:cloud-upload" size="40" color="#b3b3b1" />
           <div class="mt-4 text-[17px]">选择视频上传</div>
@@ -39,7 +47,7 @@
 
         <div
           v-else
-          class="mx-auto mt-4 md:mb-12 mb-16 flex items-center justify-center w-full max-w-[260px] h-[550px] p-3 rounded-2xl cursor-pointer relative"
+          class="mx-auto mt-4 md:mb-12 mb-16 flex items-center justify-center w-full max-w-65 h-137.5 p-3 rounded-2xl cursor-pointer relative"
         >
           <div class="bg-white h-full w-full" />
           <img class="absolute z-20 pointer-events-none" src="~/assets/images/mobile-case.png" />
@@ -52,7 +60,7 @@
             autoplay
             loop
             muted
-            class="absolute rounded-xl object-cover z-10 p-[13px] w-full h-full"
+            class="absolute rounded-xl object-cover z-10 p-3.25 w-full h-full"
             :src="fileDisplay"
           />
 
@@ -65,7 +73,7 @@
                 {{ fileData?.name }}
               </div>
             </div>
-            <button class="w-[70px] text-[11px] font-bold cursor-pointer" @click="changeVideo">
+            <button class="w-17.5 text-[11px] font-bold cursor-pointer" @click="changeVideo">
               更换视频
             </button>
           </div>
@@ -82,7 +90,7 @@
                 您可快速将视频分割为多个片段，删除冗余内容，并将横版视频转换为竖版格式。
               </div>
             </div>
-            <div class="flex justify-end max-w-[130px] w-full h-full text-center my-auto">
+            <div class="flex justify-end max-w-32.5 w-full h-full text-center my-auto">
               <button
                 class="px-8 py-1.5 text-white text-[15px] bg-[#F02C56] rounded-sm hover:bg-red-700 cursor-pointer"
               >
@@ -129,7 +137,7 @@
 import UploadLayout from '~/layouts/UploadLayout.vue';
 import { uploadVideoUtil } from '~/utils/upload';
 
-const { $userStore } = useNuxtApp();
+const { $generalStore, $userStore } = useNuxtApp();
 const router = useRouter();
 definePageMeta({ middleware: 'auth' });
 
@@ -137,7 +145,6 @@ const file = ref<HTMLInputElement | null>(null);
 const fileData = ref<File | null>(null);
 const fileDisplay = ref<string | null>(null);
 const caption = ref('');
-const isUploading = ref(false);
 const errorType = ref<'caption' | 'file' | null>(null);
 const errors = ref<string | Array<string> | null>(null);
 
@@ -191,6 +198,7 @@ const discard = () => {
   errors.value = null;
 };
 
+const isUploading = ref(false);
 const uploadVideo = async () => {
   errors.value = null;
 
@@ -207,6 +215,11 @@ const uploadVideo = async () => {
   } finally {
     isUploading.value = false;
   }
+};
+
+const cancelUpload = () => {
+  $generalStore.setPauseUploading(true);
+  isUploading.value = false;
 };
 
 onUnmounted(() => {
