@@ -135,9 +135,8 @@
 
 <script setup lang="ts">
 import UploadLayout from '~/layouts/UploadLayout.vue';
-import { uploadVideoUtil } from '~/utils/upload';
 
-const { $generalStore, $userStore } = useNuxtApp();
+const { $generalStore, $userStore, $uploadUtil } = useNuxtApp();
 const router = useRouter();
 definePageMeta({ middleware: 'auth' });
 
@@ -208,7 +207,7 @@ const uploadVideo = async () => {
   isUploading.value = true;
 
   try {
-    let res = await uploadVideoUtil(fileData.value, caption.value);
+    let res = await $uploadUtil(fileData.value, caption.value);
     if (res.status === 200) router.push('/profile/' + $userStore.userData.userId);
   } catch (error: string | Array<string>) {
     errors.value = error;

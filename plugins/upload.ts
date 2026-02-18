@@ -1,8 +1,5 @@
 import Worker from '~/assets/workers/uploadFileHashWorker.js?worker';
 
-const generalStore = useGeneralStore();
-const { $axios } = useNuxtApp();
-
 async function getFileChunks(file: File) {
   const chunkSize = 10 * 1024 * 1024;
   const chunks = [];
@@ -34,23 +31,29 @@ async function calculateFileHash(file: File): Promise<string> {
   });
 }
 
-async function submitVideoMeta(data: {
-  fileHash: string;
-  filename: string;
-  caption: string;
-  views?: number;
-  likes?: number;
-}) {
-  return await generalStore.submitVideoMeta(data);
+async function submitVideoMeta(
+  data: {
+    fileHash: string;
+    filename: string;
+    caption: string;
+    views?: number;
+    likes?: number;
+  },
+  $generalStore: any
+) {
+  return await $generalStore.submitVideoMeta(data);
 }
-
-export async function uploadVideoUtil(file: File, caption: string) {
+async function uploadVideoUtil(
+  file: File,
+  caption: string,
+  { $axios, $generalStore }: { $axios: any; $generalStore: any }
+) {
   try {
     const fileHash = await calculateFileHash(file);
     const res = await $axios.get('/upload/upload-check', { params: { hash: fileHash } });
     const { exist, uploadedChunks = [] } = res.data.data;
 
-    if (exist) return submitVideoMeta({ fileHash, filename: file.name, caption });
+    if (exist) return submitVideoMeta({ fileHash, filename: file.name, caption }, $generalStore);
 
     const chunks = await getFileChunks(file);
     const MAX_CONCURRENCY = 4;
@@ -61,7 +64,7 @@ export async function uploadVideoUtil(file: File, caption: string) {
       let lastError;
 
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        if (generalStore.pauseUploading) return;
+        if ($generalStore.pauseUploading) return;
 
         try {
           const formData = new FormData();
@@ -83,7 +86,7 @@ export async function uploadVideoUtil(file: File, caption: string) {
     };
 
     for (let i = 0; i < chunks.length; i++) {
-      if (generalStore.pauseUploading) return;
+      if ($generalStore.pauseUploading) return;
       if (uploadedChunks.includes(i)) {
         completed++;
         continue;
@@ -119,3 +122,15 @@ export async function uploadVideoUtil(file: File, caption: string) {
     return error;
   }
 }
+
+export default defineNuxtPlugin(nuxtApp => {
+  return {
+    provide: {
+      uploadUtil: (file: File, caption: string) =>
+        uploadVideoUtil(file, caption, {
+          $axios: nuxtApp.$axios,
+          $generalStore: nuxtApp.$generalStore,
+        }),
+    },
+  };
+});
