@@ -60,8 +60,7 @@
   - `cookie`跨域的时候设置了自动携带，在`axios`里面设置`credentials: true`
 - **JWT 防护**:
   - 后端设置 JWT 防护，进行身份验证，使用双 Token 实现无感刷新，优化用户体验
-  - 但是这边后端还需要检验 RefreshToken 的创建时间，使用数据库保存，不然每次重新创建的 RefreshToken 的过期时间也会重置
-  - 但是这些都是后端的同学负责了，就暂时不修改了
+  - 前端在axios的响应拦截器中进行refresh的api的调用，同时避免同一请求同一时间多次请求/避免多个请求同时刷新accessToken/避免refresh请求的无限循环调用
 - **CORS 配置**：
   - 限制允许的请求域名(`http://localhost:3000`)
   - 限制允许的 HTTP 方法 (`GET`, `POST`, `PUT`, `OPTIONS`)
