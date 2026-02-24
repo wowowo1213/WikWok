@@ -50,7 +50,7 @@ export default defineNuxtPlugin(NuxtApp => {
           });
           return Promise.reject(error.response.data.message);
         case 401:
-          if (!originalRequest._retry) {
+          if (!originalRequest._retry && !originalRequest.url.includes('/auth/refresh')) {
             originalRequest._retry = true;
 
             if (isRefreshing) {

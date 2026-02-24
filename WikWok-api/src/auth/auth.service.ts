@@ -13,22 +13,24 @@ export class AuthService {
   async generateTokens(userId: string, username: string) {
     if (!userId || !username) throw new UnauthorizedException('Invalid user ID or username');
 
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(
-        { sub: userId, username },
-        {
-          secret: process.env.JWT_ACCESS_SECRET,
-          expiresIn: '15min', // 短有效期
-        }
-      ),
-      this.jwtService.signAsync(
-        { sub: userId, username },
-        {
-          secret: process.env.JWT_REFRESH_SECRET,
-          expiresIn: '7d', // 长有效期
-        }
-      ),
-    ]);
+    const accessToken = this.jwtService.sign(
+      {
+        userId,
+        username,
+      },
+      { secret: 'wowowoJwtAccessStrategy', expiresIn: '30min' }
+    );
+
+    const refreshToken = this.jwtService.sign(
+      {
+        userId,
+        username,
+      },
+      {
+        secret: 'wowowoJwtRefreshStrategy',
+        expiresIn: '7d',
+      }
+    );
 
     return {
       accessToken,
@@ -37,7 +39,14 @@ export class AuthService {
   }
 
   async refreshTokens(userId: string, username: string) {
-    return this.generateTokens(userId, username);
+    const accessToken = this.jwtService.sign(
+      {
+        userId,
+        username,
+      },
+      { secret: 'wowowoJwtAccessStrategy', expiresIn: '30min' }
+    );
+    return accessToken;
   }
 
   async registerUser(registerUserDto: RegisterUserDto) {

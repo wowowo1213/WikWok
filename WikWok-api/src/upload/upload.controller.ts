@@ -12,12 +12,12 @@ import {
 import { UploadService } from './upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAccessGuard } from 'src/auth/guards/jwt-access.guard';
 import * as fs from 'fs/promises';
 import { join } from 'path';
 
 @Controller('upload')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAccessGuard)
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 

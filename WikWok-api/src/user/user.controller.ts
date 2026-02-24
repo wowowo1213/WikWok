@@ -14,10 +14,10 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { UpdateUserInfoRequestDto, UpdateUserDto } from './userinfo.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAccessGuard } from 'src/auth/guards/jwt-access.guard';
 
 @Controller('user')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAccessGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

@@ -42,16 +42,9 @@ export class AuthController {
       throw new UnauthorizedException('Invalid user data');
 
     const { userId, username } = req.user;
-    const tokens = await this.authService.generateTokens(userId, username);
+    const accessToken = await this.authService.refreshTokens(userId, username);
 
-    res.cookie('refreshToken', tokens.refreshToken, {
-      httpOnly: true,
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      secure: process.env.NODE_ENV === 'production',
-    });
-
-    res.json({ accessToken: tokens.accessToken });
+    res.json({ accessToken });
   }
 
   @Post('logout')
